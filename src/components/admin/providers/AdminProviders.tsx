@@ -119,6 +119,7 @@ export function AdminProviders({ children }: AdminProvidersProps) {
             <RealtimeProvider>
               <PerformanceWrapper>
                 <RoleSyncMount />
+                <MenuCustomizationMount />
                 <UXMonitor>
                   {children}
                 </UXMonitor>
