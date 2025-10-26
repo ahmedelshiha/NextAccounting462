@@ -25,11 +25,13 @@ export function useMediaQuery(query: string) {
       mediaQueryList.addEventListener("change", listener)
       return () => mediaQueryList.removeEventListener("change", listener)
     } catch {
-      // Safari <14 support
-      // @ts-expect-error addListener legacy API
-      mediaQueryList.addListener(listener)
-      // @ts-expect-error removeListener legacy API
-      return () => mediaQueryList.removeListener(listener)
+      // Safari <14 support - fallback to legacy API
+      const addListener = (mediaQueryList as any).addListener?.bind(mediaQueryList)
+      const removeListener = (mediaQueryList as any).removeListener?.bind(mediaQueryList)
+      if (addListener && removeListener) {
+        addListener(listener)
+        return () => removeListener(listener)
+      }
     }
   }, [query])
 
