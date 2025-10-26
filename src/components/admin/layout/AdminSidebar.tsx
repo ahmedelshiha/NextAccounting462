@@ -59,7 +59,7 @@ interface AdminSidebarProps {
   onClose?: () => void
 }
 
-export default function AdminSidebar(props: AdminSidebarProps) {
+function AdminSidebar(props: AdminSidebarProps) {
   const { collapsed, isCollapsed: isCollapsedProp, isMobile = false, isOpen = false, onToggle, onClose } = props
   const pathname = usePathname()
   const { data: session } = useSession()
