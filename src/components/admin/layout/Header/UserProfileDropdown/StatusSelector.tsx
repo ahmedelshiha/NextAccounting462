@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react"
 import { useUserStatus } from "@/hooks/useUserStatus"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { Popover, PopoverTrigger, PopoverContent, usePopover } from "@/components/ui/popover"
 
 interface StatusSelectorProps {
   className?: string
