@@ -2,6 +2,8 @@
 
 import { useMemo, type Ref, memo, type ReactNode } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import { ChevronDown, User as UserIcon, Settings, HelpCircle, LogOut, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -19,6 +21,7 @@ import { StatusSelector } from "./UserProfileDropdown/StatusSelector"
 import type { UserMenuLink } from "./UserProfileDropdown/types"
 import { MENU_LINKS, HELP_LINKS } from "./UserProfileDropdown/constants"
 import { useUserStatus } from "@/hooks/useUserStatus"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 
 export interface UserProfileDropdownProps {
   className?: string
