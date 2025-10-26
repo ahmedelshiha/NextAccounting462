@@ -86,7 +86,7 @@ export function Navigation({ orgName = 'Accounting Firm', orgLogoUrl }: { orgNam
   }
 
   return (
-    <header className="bg-white shadow-sm border-b" role="banner">
+    <header className="bg-background shadow-sm border-b border-border" role="banner">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -100,7 +100,7 @@ export function Navigation({ orgName = 'Accounting Firm', orgLogoUrl }: { orgNam
                   <span className="text-white font-bold text-sm">{(orgName || 'A').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</span>
                 )}
               </div>
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-foreground">
                 {orgName}
               </span>
             </Link>
@@ -115,8 +115,8 @@ export function Navigation({ orgName = 'Accounting Firm', orgLogoUrl }: { orgNam
                 aria-current={isActive(item.href) ? 'page' : undefined}
                 className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                   isActive(item.href)
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950'
+                    : 'text-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:bg-muted dark:hover:bg-muted'
                 }`}
               >
                 {item.name}
