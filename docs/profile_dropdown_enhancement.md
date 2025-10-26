@@ -1124,139 +1124,249 @@ const baselineMetrics = {
 
 ---
 
-## PART 7: IMPLEMENTATION PLAN - UPDATED 5-WEEK TIMELINE
+## PART 7: IMPLEMENTATION PLAN - UPDATED 5-WEEK TIMELINE (190 HOURS)
 
-**Tasks:**
-1. ✅ Create new `ThemeSelector` component
+### Phase 1: Core Layout Refactor (Week 1 - 40 hours)
+
+**Mon-Tue (16 hours)**: ThemeSelector Component
+1. Create `ThemeSelector.tsx` component
    - Horizontal radio group layout
-   - Icon-only buttons
-   - Active state styling
+   - Icon-only buttons with sr-only labels
+   - Active state styling with shadow
+   - Error handling (theme change failures)
    - **File**: `src/components/admin/layout/Header/UserProfileDropdown/ThemeSelector.tsx`
+2. Create unit tests (8+ test cases from PART 5.3)
+3. Run axe accessibility audit
 
-2. ✅ Create new `StatusSelector` component
-   - Compact button with popover
-   - Nested status options
-   - Color-coded dots
+**Wed-Thu (16 hours)**: StatusSelector Component
+1. Create `StatusSelector.tsx` component
+   - Compact button with Radix UI Popover
+   - Nested status options with color dots
+   - Error handling (status change failures)
    - **File**: `src/components/admin/layout/Header/UserProfileDropdown/StatusSelector.tsx`
+2. Create unit tests (8+ test cases from PART 5.3)
+3. Run axe accessibility audit
 
-3. ✅ Refactor `UserProfileDropdown.tsx`
-   - Add section grouping
-   - Integrate new selectors
-   - Add menu icons
+**Fri (8 hours)**: UserProfileDropdown Refactor
+1. Update `UserProfileDropdown.tsx`
+   - Add MenuSection helper for section grouping
+   - Integrate ThemeSelector and StatusSelector
+   - Add lucide icons to all menu items
+   - Add keyboard shortcut indicators (⌘P, ⌘S, etc)
    - **File**: `src/components/admin/layout/Header/UserProfileDropdown.tsx`
+2. Update `UserInfo.tsx` component
+3. Create integration tests (5+ test cases from PART 5.3)
 
-4. ✅ Update `constants.ts`
-   - Add menu item icons
-   - Add keyboard shortcuts
-   - **File**: `src/components/admin/layout/Header/UserProfileDropdown/constants.ts`
-
-**Deliverables:**
-- ✅ Horizontal theme selector (80px height → 40px)
-- ✅ Compact status selector (120px height → 40px)
-- ✅ Section headers with separators
-- ✅ Icon system for all menu items
-
-**Testing:**
-- Unit tests for new components
-- Visual regression tests
-- Keyboard navigation tests
-- Screen reader tests
+**Week 1 Deliverables:**
+- ✅ Horizontal theme selector (40px height)
+- ✅ Compact status selector with popover (40px height)
+- ✅ Section headers with separators (3 sections)
+- ✅ Icon system (lucide-react for all items)
+- ✅ Error handling for theme/status changes
+- ✅ 30+ unit/integration tests passing
+- ✅ Zero accessibility violations
 
 ---
 
-### Phase 2: Mobile Optimization (Week 2)
+### Phase 2: Mobile Optimization + Testing (Week 2 - 40 hours)
 
-**Tasks:**
-1. ✅ Create `MobileUserMenu` component
-   - Bottom sheet layout
-   - Touch-optimized targets (48px min)
+**Mon-Tue (16 hours)**: Mobile Components
+1. Create `MobileUserMenu.tsx` component
+   - Bottom sheet layout (85vh height)
+   - Touch-optimized buttons (48×48px minimum)
    - Swipe-to-dismiss gesture
    - **File**: `src/components/admin/layout/Header/MobileUserMenu.tsx`
 
-2. ✅ Implement responsive wrapper
-   - MediaQuery component
-   - Conditional rendering
-   - Shared state management
+2. Create `ResponsiveUserMenu.tsx` wrapper
+   - useMediaQuery hook (768px breakpoint)
+   - Conditional rendering (dropdown vs sheet)
+   - **File**: `src/components/admin/layout/Header/ResponsiveUserMenu.tsx`
 
-3. ✅ Mobile-specific styling
-   - Full-width buttons
-   - Larger touch targets
-   - Bottom sheet animations
+3. Create `useMediaQuery.ts` hook
+   - Responsive design hook
+   - Window resize listener
+   - SSR-safe implementation
+   - **File**: `src/hooks/useMediaQuery.ts`
 
-**Deliverables:**
-- ✅ Bottom sheet menu for mobile (<768px)
-- ✅ Touch-optimized UI (44×44px minimum)
-- ✅ Swipe gestures for dismissal
+**Wed-Thu (16 hours)**: Mobile Testing
+1. iOS Safari testing (iPad, iPhone)
+2. Android Chrome testing (various screen sizes)
+3. Touch event and gesture testing
+4. Responsive breakpoint testing
+5. Fix responsive layout issues
 
-**Testing:**
-- iOS Safari testing
-- Android Chrome testing
-- Touch event tests
-- Gesture recognition tests
+**Fri (8 hours)**: Integration Testing + Buffer
+1. Integration tests for responsive wrapper
+2. Visual regression tests (mobile layouts)
+3. Performance testing on mobile
+4. Address any remaining issues
 
----
-
-### Phase 3: Animations & Polish (Week 3)
-
-**Tasks:**
-1. ✅ Add theme transition animation
-   - Fade effect on change
-   - Toast notification
-   - Loading state
-
-2. ✅ Add dropdown animations
-   - Entrance/exit animations
-   - Smooth transitions
-   - Spring physics
-
-3. ✅ Add hover states
-   - Icon translations
-   - Background transitions
-   - Scale animations
-
-4. ✅ Add status indicator animation
-   - Pulse effect for "Online"
-   - Static for "Away" and "Busy"
-
-**Deliverables:**
-- ✅ Smooth theme transitions
-- ✅ Polished dropdown animations
-- ✅ Enhanced hover states
-- ✅ Status dot animations
-
-**Testing:**
-- Performance profiling
-- Animation smoothness tests
-- Reduced motion support
+**Week 2 Deliverables:**
+- ✅ Bottom sheet menu (<768px)
+- ✅ Touch-optimized UI (48×48px targets)
+- ✅ Swipe gestures working
+- ✅ Responsive breakpoint at 768px
+- ✅ Mobile/Desktop tests passing
+- ✅ No mobile performance regressions
 
 ---
 
-### Phase 4: Keyboard Shortcuts (Week 4)
+### Phase 3: Animations, CSS, & Polish (Week 3 - 40 hours)
 
-**Tasks:**
-1. ✅ Implement hotkey library
-   - `react-hotkeys-hook` integration
-   - Command palette (optional)
+**Mon-Tue (16 hours)**: CSS Animations
+1. Add CSS @keyframes animations (from PART 6)
+   - Theme transition (300ms fade)
+   - Dropdown entrance/exit (150ms)
+   - Status pulse (2s infinite)
+   - Icon hover (150ms translate)
+   - Mobile sheet animation (300ms slide up)
+   - **File**: `src/app/globals.css` or new `src/styles/animations.css`
 
-2. ✅ Add shortcut indicators
-   - Display in menu items
-   - Tooltip on hover
-   - Help modal with shortcuts
+2. Implement animation utilities
+   - Reduced motion support (prefers-reduced-motion)
+   - Cross-browser compatibility
 
-3. ✅ Add shortcut customization
-   - User preferences
-   - Conflict detection
-   - Reset to defaults
+**Wed-Thu (16 hours)**: Polish & Hover States
+1. Enhanced hover states
+   - Icon translations on menu items
+   - Background color transitions
+   - Smooth state changes
 
-**Deliverables:**
-- ✅ Working keyboard shortcuts
-- ✅ Shortcut hints in UI
-- ✅ Help documentation
+2. Enhanced focus states
+   - Visible focus indicators
+   - Ring styling and offset
+   - Keyboard navigation polish
 
-**Testing:**
-- Keyboard shortcut tests
-- Conflict resolution tests
-- Cross-platform compatibility
+3. Update visual regression baseline
+   - Capture new baseline with animations
+   - Verify animation smoothness (60fps)
+
+**Fri (8 hours)**: Performance & Refinement
+1. Performance profiling (React DevTools Profiler)
+2. Animation smoothness tests
+3. Reduced motion testing
+4. Bundle size verification (<26KB)
+
+**Week 3 Deliverables:**
+- ✅ Smooth theme transition (300ms)
+- ✅ Dropdown entrance/exit animations (150ms)
+- ✅ Status dot pulse animation (2s)
+- ✅ Icon hover animations (150ms)
+- ✅ Mobile sheet animation (300ms)
+- ✅ Reduced motion support
+- ✅ 60fps animation performance
+- ✅ <26KB bundle size
+
+---
+
+### Phase 4: Keyboard Shortcuts & Final Testing (Week 4 - 40 hours)
+
+**Mon-Tue (16 hours)**: Keyboard Shortcuts
+1. Create `useKeyboardShortcuts.ts` hook
+   - Native event handling (no external libraries)
+   - Support for modifiers (Ctrl, Shift, Alt, Meta)
+   - Platform-specific shortcuts (⌘ for Mac, Ctrl for Windows)
+   - **File**: `src/hooks/useKeyboardShortcuts.ts`
+
+2. Integrate shortcuts in UserProfileDropdown
+   - ⌘P / Ctrl+P: Open profile panel
+   - ⌘S / Ctrl+S: Go to security settings
+   - ⌘? / Ctrl+?: Go to help
+   - ⌘Q / Ctrl+Shift+Q: Sign out
+   - ⌘⇧L / Ctrl+Shift+L: Light theme
+   - ⌘⇧D / Ctrl+Shift+D: Dark theme
+
+3. Display keyboard shortcut hints
+   - Show in menu items (⌘P, ⌘S, etc)
+   - Right-aligned text display
+
+**Wed-Thu (16 hours)**: E2E & Accessibility Testing
+1. Complete E2E test suite
+   - Dropdown open/close flows
+   - Theme/status change persistence
+   - Keyboard shortcut functionality
+   - Sign out flow
+   - Mobile interactions
+
+2. Full accessibility audit
+   - WCAG 2.1 AA compliance verification
+   - Color contrast validation
+   - Screen reader testing
+   - Keyboard navigation testing
+   - Focus management verification
+
+3. Fix test failures and accessibility issues
+
+**Fri (8 hours)**: Buffer for Issues
+1. Address any remaining E2E test failures
+2. Fix accessibility issues (if any)
+3. Final code review preparation
+4. Documentation updates
+
+**Week 4 Deliverables:**
+- ✅ 6 keyboard shortcuts implemented
+- ✅ Shortcut hints displayed in UI
+- ✅ Cross-platform support (Mac/Windows/Linux)
+- ✅ E2E test suite passing (100%)
+- ✅ WCAG 2.1 AA compliance verified
+- ✅ Screen reader support confirmed
+- ✅ All keyboard navigation working
+- ✅ Zero accessibility violations
+
+---
+
+### Phase 5: Final Review, Documentation & Deployment (Week 5 - 30 hours)
+
+**Mon**: Documentation & Storybook
+1. Create Storybook stories for all components
+   - ThemeSelector: all states and props
+   - StatusSelector: open/closed states, all statuses
+   - UserProfileDropdown: desktop and mobile previews
+   - MobileUserMenu: mobile sheet preview
+2. Update README.md with new components
+3. Document keyboard shortcuts
+4. Add JSDoc comments to all files
+
+**Tue**: Code Review & Feedback
+1. Request code review from team
+2. Address feedback and comments
+3. Update CHANGELOG.md
+4. Prepare release notes
+
+**Wed**: Performance Verification
+1. Performance benchmarking (Lighthouse)
+2. Bundle size analysis and comparison
+3. Verify all performance targets met
+4. Create performance report
+
+**Thu**: Feature Flag & Deployment Prep
+1. Set up feature flag: `enableNewDropdown`
+2. Create deployment checklist
+3. Set up monitoring (Sentry, error tracking)
+4. Test feature flag toggle (enable/disable)
+
+**Fri**: Deploy to Staging + Smoke Tests
+1. Deploy to staging environment
+2. Run smoke tests on staging
+3. Verify all features working
+4. Get stakeholder sign-off
+5. Plan production deployment schedule
+
+**Week 5 Deliverables:**
+- ✅ Complete Storybook stories
+- ✅ Updated documentation
+- ✅ CHANGELOG updated
+- ✅ Performance report generated
+- ✅ Feature flag configured
+- ✅ Deployment checklist completed
+- ✅ Monitoring configured
+- ✅ Staging deployment verified
+- ✅ Ready for production release
+
+---
+
+**TOTAL PROJECT TIMELINE**: 190 hours (5 weeks @ 40 hrs/week)
+**Status**: ✅ READY FOR IMPLEMENTATION
 
 ---
 
@@ -2281,7 +2391,7 @@ Total                     25 KB (gzipped) +25% increase
 
 **Robust:**
 - ✅ 4.1.2 Name, Role, Value: All ARIA attributes correct
-- ✅ 4.1.3 Status Messages: Toast notifications use aria-live
+- ��� 4.1.3 Status Messages: Toast notifications use aria-live
 
 ---
 
