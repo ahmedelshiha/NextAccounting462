@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react"
 import { useUserStatus } from "@/hooks/useUserStatus"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 
 interface StatusSelectorProps {
   className?: string
@@ -48,7 +49,6 @@ export const StatusSelector = memo(function StatusSelector({
   className
 }: StatusSelectorProps) {
   const { status, setStatus } = useUserStatus()
-  const [isOpen, setIsOpen] = useState(false)
   const [isChanging, setIsChanging] = useState(false)
   const [previousStatus, setPreviousStatus] = useState(status)
 
@@ -62,9 +62,6 @@ export const StatusSelector = memo(function StatusSelector({
 
         // Update status
         await setStatus(newStatus)
-
-        // Close popover
-        setIsOpen(false)
 
         // Show success feedback
         const newStatusObj = statusOptions.find((s) => s.value === newStatus)
@@ -95,49 +92,36 @@ export const StatusSelector = memo(function StatusSelector({
     >
       <span className="text-sm font-medium text-muted-foreground">Status</span>
 
-      <div className="relative">
-        <button
-          type="button"
-          disabled={isChanging}
-          onClick={() => setIsOpen(!isOpen)}
-          data-testid="status-trigger"
-          aria-label={`Current status: ${currentStatus?.label}. Click to change.`}
-          aria-pressed={isOpen}
-          aria-haspopup="menu"
-          aria-expanded={isOpen}
-          className={cn(
-            "inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm",
-            "hover:bg-accent transition-colors",
-            "focus-visible:outline-none focus-visible:ring-2",
-            "focus-visible:ring-ring focus-visible:ring-offset-2",
-            "focus-visible:ring-offset-background disabled:opacity-50",
-            "disabled:cursor-not-allowed",
-            isOpen && "bg-accent"
-          )}
-        >
-          <span
-            className={cn("h-2 w-2 rounded-full", currentStatus?.color)}
-            data-testid="status-indicator-dot"
-          />
-          <span className="capitalize" data-testid="status-label">
-            {status}
-          </span>
-          <ChevronDown
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            disabled={isChanging}
+            data-testid="status-trigger"
+            aria-label={`Current status: ${currentStatus?.label}. Click to change.`}
+            aria-haspopup="menu"
             className={cn(
-              "h-3 w-3 text-muted-foreground transition-transform duration-200",
-              isOpen && "rotate-180"
+              "inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm",
+              "hover:bg-accent transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2",
+              "focus-visible:ring-ring focus-visible:ring-offset-2",
+              "focus-visible:ring-offset-background disabled:opacity-50",
+              "disabled:cursor-not-allowed"
             )}
-          />
-        </button>
-
-        {/* Popover Content */}
-        {isOpen && (
-          <div
-            className="absolute right-0 top-full mt-1 w-40 rounded-md border border-border bg-popover p-1 shadow-md z-50"
-            role="menu"
-            aria-label="Status options"
-            data-testid="status-popover"
           >
+            <span
+              className={cn("h-2 w-2 rounded-full", currentStatus?.color)}
+              data-testid="status-indicator-dot"
+            />
+            <span className="capitalize" data-testid="status-label">
+              {status}
+            </span>
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-40 p-1">
+          <div role="menu" aria-label="Status options" data-testid="status-popover">
             {statusOptions.map((option) => {
               const isSelected = status === option.value
               return (
@@ -184,17 +168,8 @@ export const StatusSelector = memo(function StatusSelector({
               )
             })}
           </div>
-        )}
-      </div>
-
-      {/* Backdrop for closing popover */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-          data-testid="status-popover-backdrop"
-        />
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
   )
 })
