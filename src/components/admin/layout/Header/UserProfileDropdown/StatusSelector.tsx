@@ -120,15 +120,13 @@ export const StatusSelector = memo(function StatusSelector({
                   type="button"
                   role="menuitemradio"
                   aria-checked={isSelected}
-                  disabled={isChanging}
                   onClick={() => handleStatusChange(option.value)}
                   data-testid={`status-option-${option.value}`}
                   className={cn(
                     "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md",
                     "hover:bg-accent transition-colors text-left",
                     "focus-visible:outline-none focus-visible:ring-2",
-                    "focus-visible:ring-ring disabled:opacity-50",
-                    "disabled:cursor-not-allowed",
+                    "focus-visible:ring-ring",
                     isSelected && "bg-accent"
                   )}
                 >
