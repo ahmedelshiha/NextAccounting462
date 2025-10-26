@@ -321,3 +321,8 @@ export default function AdminSidebar(props: AdminSidebarProps) {
     </>
   )
 }
+
+// Memoize the component for performance optimization
+// Prevents unnecessary re-renders when parent components update
+// but props and customization remain unchanged
+export default React.memo(AdminSidebar)
