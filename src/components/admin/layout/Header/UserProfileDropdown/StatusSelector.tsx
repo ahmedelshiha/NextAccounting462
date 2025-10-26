@@ -49,43 +49,27 @@ export const StatusSelector = memo(function StatusSelector({
   className
 }: StatusSelectorProps) {
   const { status, setStatus } = useUserStatus()
-  const [isChanging, setIsChanging] = useState(false)
-  const [previousStatus, setPreviousStatus] = useState(status)
-
-  const currentStatus = statusOptions.find((s) => s.value === status)
   const [open, setOpen] = useState(false)
 
+  const currentStatus = statusOptions.find((s) => s.value === status)
+
   const handleStatusChange = useCallback(
-    async (newStatus: UserStatusType) => {
+    (newStatus: UserStatusType) => {
       try {
-        setIsChanging(true)
-        setPreviousStatus(status)
+        // Update status (synchronous function)
+        // The useUserStatus hook handles showing the toast internally
+        setStatus(newStatus)
 
-        // Update status
-        await setStatus(newStatus)
-
-        // Show success feedback
-        const newStatusObj = statusOptions.find((s) => s.value === newStatus)
-        toast.success(`Status changed to ${newStatusObj?.label}`, {
-          description: newStatusObj?.description
-        })
-        // Close popover
+        // Close popover after status change
         setOpen(false)
       } catch (error) {
         console.error("Status change error:", error)
         toast.error("Failed to change status", {
           description: "Please try again or contact support if the issue persists."
         })
-
-        // Revert to previous status on error
-        if (previousStatus) {
-          await setStatus(previousStatus)
-        }
-      } finally {
-        setIsChanging(false)
       }
     },
-    [status, setStatus, previousStatus]
+    [setStatus]
   )
 
   return (
@@ -96,10 +80,9 @@ export const StatusSelector = memo(function StatusSelector({
       <span className="text-sm font-medium text-muted-foreground">Status</span>
 
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger>
+        <PopoverTrigger asChild>
           <button
             type="button"
-            disabled={isChanging}
             data-testid="status-trigger"
             aria-label={`Current status: ${status}. Click to change.`}
             aria-haspopup="menu"
@@ -110,8 +93,7 @@ export const StatusSelector = memo(function StatusSelector({
               open && "bg-accent",
               "focus-visible:outline-none focus-visible:ring-2",
               "focus-visible:ring-ring focus-visible:ring-offset-2",
-              "focus-visible:ring-offset-background disabled:opacity-50",
-              "disabled:cursor-not-allowed"
+              "focus-visible:ring-offset-background"
             )}
           >
             <span
@@ -138,15 +120,13 @@ export const StatusSelector = memo(function StatusSelector({
                   type="button"
                   role="menuitemradio"
                   aria-checked={isSelected}
-                  disabled={isChanging}
                   onClick={() => handleStatusChange(option.value)}
                   data-testid={`status-option-${option.value}`}
                   className={cn(
                     "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md",
                     "hover:bg-accent transition-colors text-left",
                     "focus-visible:outline-none focus-visible:ring-2",
-                    "focus-visible:ring-ring disabled:opacity-50",
-                    "disabled:cursor-not-allowed",
+                    "focus-visible:ring-ring",
                     isSelected && "bg-accent"
                   )}
                 >

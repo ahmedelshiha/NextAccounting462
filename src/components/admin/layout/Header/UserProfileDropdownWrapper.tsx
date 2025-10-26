@@ -4,6 +4,8 @@ import { memo } from "react"
 import UserProfileDropdown, { type UserProfileDropdownProps } from "./UserProfileDropdown"
 import { isFeatureEnabled } from "@/lib/feature-flags"
 
+export type { UserProfileDropdownProps }
+
 function UserProfileDropdownWrapper(props: UserProfileDropdownProps) {
   const enabled = isFeatureEnabled('enableNewDropdown', true)
 
