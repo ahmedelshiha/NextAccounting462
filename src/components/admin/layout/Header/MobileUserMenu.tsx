@@ -116,26 +116,26 @@ function MobileUserMenuComponent({
               <button
                 type="button"
                 onClick={() => { setOpen(false); onOpenProfilePanel() }}
-                className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent"
+                className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
                 role="menuitem"
               >
                 <span className="flex items-center gap-3">
-                  <UserIcon className="h-4 w-4" />
+                  <UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                   Manage Profile
                 </span>
                 <span className="text-xs text-muted-foreground">⌘P</span>
               </button>
             )}
-            <a href="/settings/security" className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent" role="menuitem">
+            <a href="/settings/security" className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group" role="menuitem">
               <span className="flex items-center gap-3">
-                <Shield className="h-4 w-4" />
+                <Shield className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                 Security Settings
               </span>
               <span className="text-xs text-muted-foreground">⌘S</span>
             </a>
-            <a href="/settings" className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent" role="menuitem">
+            <a href="/settings" className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group" role="menuitem">
               <span className="flex items-center gap-3">
-                <Settings className="h-4 w-4" />
+                <Settings className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                 Settings
               </span>
             </a>
