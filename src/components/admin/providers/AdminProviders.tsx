@@ -19,6 +19,7 @@ import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring'
 import { UXMonitor } from '@/components/admin/monitoring/UXMonitor'
 import useRoleSync from '@/hooks/useRoleSync'
 import { TenantSyncProvider } from '@/components/providers/TenantSyncProvider'
+import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
 
 interface AdminProvidersProps {
   children: ReactNode
