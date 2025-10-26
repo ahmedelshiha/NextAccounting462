@@ -84,7 +84,11 @@ export const ThemeSelector = memo(function ThemeSelector({
 
   return (
     <div
-      className={cn("flex items-center justify-between px-2 py-2", className)}
+      className={cn(
+        "flex items-center justify-between px-2 py-2 transition-opacity duration-200",
+        isChanging && "animate-theme-change",
+        className
+      )}
       data-testid="theme-selector"
     >
       <span className="text-sm font-medium text-muted-foreground">Theme</span>
@@ -116,7 +120,6 @@ export const ThemeSelector = memo(function ThemeSelector({
                   : "text-muted-foreground hover:text-foreground"
               )}
               onClick={() => handleThemeChange(value)}
-              aria-pressed={isActive}
             >
               <Icon className="h-4 w-4" />
               {showLabels && <span className="ml-2 text-xs">{label}</span>}

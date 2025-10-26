@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
-const PopoverContext = createContext<{open:boolean; setOpen:(v:boolean)=>void}|undefined>(undefined)
+const PopoverContext = createContext<{open:boolean; setOpen:(v:boolean|((s:boolean)=>boolean))=>void}|undefined>(undefined)
 
 function Popover({ children, defaultOpen = false, open: controlledOpen, onOpenChange }: { children: React.ReactNode; defaultOpen?: boolean; open?: boolean; onOpenChange?: (v:boolean)=>void }) {
   const [openState, setOpenState] = useState<boolean>(defaultOpen)

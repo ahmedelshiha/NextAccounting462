@@ -88,8 +88,8 @@ function MobileUserMenuComponent({
           <ChevronDown className="h-4 w-4 text-gray-400" />
         </button>
       </SheetTrigger>
-      <SheetContent>
-        <div className="space-y-4 p-2" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+      <SheetContent className="animate-sheet-enter">
+        <div className="space-y-4 p-4" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
           {/* Header */}
           <div className="flex items-center gap-3">
             <Avatar name={name} src={image} size="md" showStatus={showStatus} />
@@ -116,26 +116,26 @@ function MobileUserMenuComponent({
               <button
                 type="button"
                 onClick={() => { setOpen(false); onOpenProfilePanel() }}
-                className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent"
+                className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
                 role="menuitem"
               >
                 <span className="flex items-center gap-3">
-                  <UserIcon className="h-4 w-4" />
+                  <UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                   Manage Profile
                 </span>
                 <span className="text-xs text-muted-foreground">⌘P</span>
               </button>
             )}
-            <a href="/settings/security" className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent" role="menuitem">
+            <a href="/settings/security" className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group" role="menuitem">
               <span className="flex items-center gap-3">
-                <Shield className="h-4 w-4" />
+                <Shield className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                 Security Settings
               </span>
               <span className="text-xs text-muted-foreground">⌘S</span>
             </a>
-            <a href="/settings" className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent" role="menuitem">
+            <a href="/settings" className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group" role="menuitem">
               <span className="flex items-center gap-3">
-                <Settings className="h-4 w-4" />
+                <Settings className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                 Settings
               </span>
             </a>
@@ -146,17 +146,17 @@ function MobileUserMenuComponent({
             <div className="space-y-1">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Quick Actions</h3>
               {(customLinks && customLinks.length ? customLinks : MENU_LINKS).map((link) => (
-                <a key={link.href} href={link.href} className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent" role="menuitem" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
+                <a key={link.href} href={link.href} className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group" role="menuitem" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
                   <span className="flex items-center gap-3">
-                    {link.icon ? <link.icon className="h-4 w-4" /> : null}
+                    {link.icon ? <link.icon className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" /> : null}
                     {link.label}
                   </span>
                 </a>
               ))}
               {HELP_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent" role="menuitem" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
+                <a key={link.href} href={link.href} className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group" role="menuitem" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
                   <span className="flex items-center gap-3">
-                    {link.icon ? <link.icon className="h-4 w-4" /> : null}
+                    {link.icon ? <link.icon className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" /> : null}
                     {link.label}
                   </span>
                   {link.label === "Help" ? (
@@ -172,11 +172,11 @@ function MobileUserMenuComponent({
             <button
               type="button"
               onClick={() => { setOpen(false); handleSignOut() }}
-              className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-red-50 text-red-600"
+              className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
               role="menuitem"
             >
               <span className="flex items-center gap-3">
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                 Sign Out
               </span>
               <span className="text-xs">⌘Q</span>

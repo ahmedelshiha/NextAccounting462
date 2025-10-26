@@ -84,22 +84,25 @@ function MenuItem({
   variant = "default"
 }: MenuItemProps) {
   const commonClasses = cn(
-    "flex items-center justify-between gap-3 w-full px-3 py-2 text-sm",
-    "rounded-md transition-colors focus-visible:outline-none",
+    "flex items-center justify-between gap-3 w-full px-3 py-2.5 text-sm",
+    "rounded-md transition-all duration-150 ease-in-out focus-visible:outline-none",
     "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background",
+    "group",
     variant === "danger"
-      ? "text-red-600 hover:bg-red-50"
-      : "text-foreground hover:bg-accent"
+      ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+      : "text-foreground hover:bg-accent dark:hover:bg-accent/50"
   )
 
   const content = (
     <>
       <div className="flex items-center gap-3">
-        {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+        {Icon && (
+          <Icon className="h-4 w-4 flex-shrink-0 transition-transform duration-150 ease-out group-hover:animate-icon-translate" />
+        )}
         <span>{label}</span>
       </div>
       {shortcut && (
-        <span className="text-xs text-muted-foreground font-mono">
+        <span className="text-xs text-muted-foreground font-mono opacity-75 group-hover:opacity-100 transition-opacity duration-150">
           {shortcut}
         </span>
       )}
