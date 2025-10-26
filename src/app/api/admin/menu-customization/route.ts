@@ -3,6 +3,7 @@ import { withTenantContext } from '@/lib/api-wrapper'
 import { tenantContext } from '@/lib/tenant-context'
 import prisma from '@/lib/prisma'
 import { MenuCustomizationData } from '@/types/admin/menuCustomization'
+import { validateMenuCustomization } from '@/lib/menu/menuValidator'
 
 /**
  * Default menu structure - returned when user has no customization
