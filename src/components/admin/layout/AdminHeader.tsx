@@ -26,7 +26,7 @@ import { Button } from '@/components/ui/button'
 import { useClientNotifications } from '@/hooks/useClientNotifications'
 import Link from 'next/link'
 import QuickLinks from './Footer/QuickLinks'
-import UserProfileDropdown from './Header/UserProfileDropdown'
+import ResponsiveUserMenu from './Header/ResponsiveUserMenu'
 import dynamic from 'next/dynamic'
 
 const ProfileManagementPanel = dynamic(
@@ -182,7 +182,7 @@ export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarT
 
             {/* User menu */}
             <div onMouseEnter={() => { try { void import('../profile/ProfileManagementPanel') } catch {} }}>
-              <UserProfileDropdown onSignOut={handleSignOut} onOpenProfilePanel={() => { try { router.push('/admin/profile') } catch { } }} triggerRef={profileTriggerRef} />
+              <ResponsiveUserMenu onSignOut={handleSignOut} onOpenProfilePanel={() => { try { router.push('/admin/profile') } catch { } }} triggerRef={profileTriggerRef} />
             </div>
           </div>
         </div>

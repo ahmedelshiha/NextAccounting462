@@ -2,6 +2,8 @@
 
 import { useMemo, type Ref, memo, type ReactNode } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import { ChevronDown, User as UserIcon, Settings, HelpCircle, LogOut, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -19,6 +21,7 @@ import { StatusSelector } from "./UserProfileDropdown/StatusSelector"
 import type { UserMenuLink } from "./UserProfileDropdown/types"
 import { MENU_LINKS, HELP_LINKS } from "./UserProfileDropdown/constants"
 import { useUserStatus } from "@/hooks/useUserStatus"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 
 export interface UserProfileDropdownProps {
   className?: string
@@ -156,6 +159,9 @@ function UserProfileDropdownComponent({
 
   const { status: userStatus } = useUserStatus()
 
+  const router = useRouter()
+  const { setTheme } = useTheme()
+
   const handleSignOut = () => {
     if (!onSignOut) return
     const ok = typeof window !== 'undefined'
@@ -163,6 +169,45 @@ function UserProfileDropdownComponent({
       : true
     if (ok) onSignOut()
   }
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 'p',
+      meta: true,
+      handler: () => {
+        try { onOpenProfilePanel?.() } catch {}
+      }
+    },
+    {
+      key: 's',
+      meta: true,
+      handler: () => router.push('/settings/security')
+    },
+    {
+      key: '/',
+      meta: true,
+      handler: () => router.push('/help')
+    },
+    {
+      key: 'q',
+      meta: true,
+      shift: true,
+      handler: () => handleSignOut()
+    },
+    {
+      key: 'l',
+      meta: true,
+      shift: true,
+      handler: () => setTheme('light') as unknown as void
+    },
+    {
+      key: 'd',
+      meta: true,
+      shift: true,
+      handler: () => setTheme('dark') as unknown as void
+    }
+  ])
 
   return (
     <DropdownMenu>
