@@ -64,16 +64,16 @@ export default function ClientOnlyAdminLayout({ children, session }: ClientOnlyA
   }
 
   if (!isClient) {
-    return <div className="min-h-screen bg-gray-50" />
+    return <div className="min-h-screen bg-background" />
   }
 
   return (
     <SessionProvider session={session}>
       <AdminProviders>
-        <div className="min-h-screen bg-gray-50 relative">
+        <div className="min-h-screen bg-background relative">
           <a
             href="#admin-main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-white focus:text-blue-600 focus:ring-2 focus:ring-blue-600 focus:px-3 focus:py-2 focus:z-[60] rounded"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-card focus:text-blue-600 focus:ring-2 focus:ring-blue-600 focus:px-3 focus:py-2 focus:z-[60] rounded"
           >
             Skip to main content
           </a>
