@@ -83,7 +83,10 @@ export default function AdminSidebar(props: AdminSidebarProps) {
 
   const userRole = (session?.user as any)?.role
 
-  const navigation: { section: string; items: NavigationItem[] }[] = [
+  // Get menu customization from store
+  const { customization } = useMenuCustomizationStore()
+
+  const defaultNavigation: { section: string; items: NavigationItem[] }[] = [
     {
       section: 'dashboard',
       items: [
