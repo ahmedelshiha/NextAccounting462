@@ -99,11 +99,11 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
   // Show loading skeleton during SSR/hydration
   if (!isClient) {
     return (
-      <div className="h-screen bg-gray-50 flex">
+      <div className="h-screen bg-muted flex">
         {/* Sidebar Skeleton */}
-        <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+        <div className="w-64 bg-background border-r border-border flex-shrink-0">
           <div className="animate-pulse">
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b border-border">
               <div className="h-8 bg-gray-300 rounded"></div>
             </div>
             <div className="p-4 space-y-2">
@@ -116,7 +116,7 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
 
         {/* Content Skeleton */}
         <div className="flex-1">
-          <div className="h-16 bg-white border-b border-gray-200"></div>
+          <div className="h-16 bg-background border-b border-border"></div>
           <div className="p-6">
             <div className="animate-pulse space-y-4">
               <div className="h-4 bg-gray-300 rounded w-1/4"></div>
@@ -130,7 +130,7 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
 
   return (
     <AdminErrorBoundary>
-      <div className={`h-screen bg-gray-50 overflow-hidden ${className}`}>
+      <div className={`h-screen bg-muted overflow-hidden ${className}`}>
         {/* Accessibility: Skip link for keyboard users */}
         <a
           href="#admin-main-content"
