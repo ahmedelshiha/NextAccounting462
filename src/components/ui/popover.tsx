@@ -26,11 +26,22 @@ function Popover({ children, defaultOpen = false, open: controlledOpen, onOpenCh
   )
 }
 
-function PopoverTrigger({ children }: { children: React.ReactNode }) {
+function PopoverTrigger({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) {
   const ctx = useContext(PopoverContext)
   if (!ctx) return <>{children}</>
   const { open, setOpen } = ctx
   const child = React.Children.only(children) as React.ReactElement<{ onClick?: (e: React.MouseEvent) => void }>
+
+  // When asChild is true, just render the child with enhanced onClick handler
+  if (asChild) {
+    return React.cloneElement(child, {
+      onClick: (e: React.MouseEvent) => {
+        setOpen((s: boolean) => !s)
+        if (child.props.onClick) child.props.onClick(e)
+      }
+    } as any)
+  }
+
   return React.cloneElement(child, {
     onClick: (e: React.MouseEvent) => {
       setOpen((s: boolean) => !s)
