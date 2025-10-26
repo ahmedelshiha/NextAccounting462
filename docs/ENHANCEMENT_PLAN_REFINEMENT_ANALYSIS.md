@@ -530,6 +530,228 @@ export const UserProfileDropdownWrapper = (props) => {
 
 ---
 
+### Missing 2.5: Design System Specifications (Added)
+
+**Current Plan**: Part 13 of enhancement plan references design specs
+
+**Details Covered** (from enhancement plan):
+```
+Theme Selector Design:
+- Width: Auto (fits 3 icons + padding)
+- Height: 32px (compact)
+- Spacing: 4px between buttons
+- States: default, hover, active, focus-visible
+
+Status Selector Design:
+- Width: 120px minimum
+- Height: 32px (compact)
+- Popover width: 160px
+- Status dot: 8px diameter
+
+Menu Items Design:
+- Height: 40px (comfortable)
+- Padding: 8px horizontal, 6px vertical
+- Gap between icon and label: 8px
+- Focus ring: 2px solid with offset
+
+Colors (from Tailwind):
+- Theme button active: bg-background shadow-sm
+- Hover: bg-accent
+- Text active: text-foreground
+- Text inactive: text-muted-foreground
+- Status dots: bg-green-500, bg-amber-400, bg-red-500
+
+Mobile Design:
+- Touch targets: 48×48px minimum (enhanced from 44×44px)
+- Sheet height: 85vh
+- Border radius (top): 20px
+- Spacing: 16px padding
+```
+
+**Status**: ✅ **Fully specified in enhancement plan Part 2**
+
+---
+
+### Missing 3: Detailed Animation Specifications (Added)
+
+**Current Plan**: Part 4 specifies animations
+
+**CSS Animations to Implement**:
+```css
+/* Theme transition (Part 4.1) */
+@keyframes theme-change {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Status dot pulse (Part 4.1) */
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Dropdown entrance (Part 4.2) */
+@keyframes dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dropdown exit (Part 4.2) */
+@keyframes dropdown-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
+
+/* Icon hover translate */
+@keyframes icon-translate {
+  to {
+    transform: translateX(2px);
+  }
+}
+```
+
+**Animation Timings**:
+- Theme change: 300ms ease-in-out
+- Status pulse: 2s ease-in-out infinite
+- Dropdown animations: 150ms ease-out
+- Icon hover: 150ms ease-out
+
+**Status**: ✅ **Fully specified in enhancement plan Part 4**
+
+---
+
+### Missing 4: Complete Keyboard Shortcut Mappings (Added)
+
+**Current Plan**: Part 5.1 defines shortcuts
+
+**Shortcut Reference Table**:
+| Shortcut | Platform | Action | Component |
+|----------|----------|--------|-----------|
+| ⌘P | macOS, Windows | Open profile panel | UserProfileDropdown |
+| Ctrl+P | Windows/Linux | Open profile panel | UserProfileDropdown |
+| ⌘S | macOS | Go to security settings | UserProfileDropdown |
+| Ctrl+S | Windows/Linux | Go to security settings | UserProfileDropdown |
+| ⌘? | macOS | Go to help | UserProfileDropdown |
+| Ctrl+? | Windows/Linux | Go to help | UserProfileDropdown |
+| ⌘Q | macOS | Sign out | UserProfileDropdown |
+| Ctrl+Shift+Q | Windows/Linux | Sign out | UserProfileDropdown |
+| ⌘⇧L | macOS | Switch to light theme | ThemeSelector |
+| Ctrl+Shift+L | Windows/Linux | Switch to light theme | ThemeSelector |
+| ⌘⇧D | macOS | Switch to dark theme | ThemeSelector |
+| Ctrl+Shift+D | Windows/Linux | Switch to dark theme | ThemeSelector |
+
+**Implementation**:
+```typescript
+const shortcuts = [
+  { key: 'p', meta: true, handler: () => onOpenProfilePanel() },
+  { key: 's', meta: true, handler: () => router.push('/admin/security') },
+  { key: '/', meta: true, handler: () => router.push('/help') },
+  { key: 'q', meta: true, shift: true, handler: () => handleSignOut() },
+  { key: 'l', meta: true, shift: true, handler: () => setTheme('light') },
+  { key: 'd', meta: true, shift: true, handler: () => setTheme('dark') }
+]
+```
+
+**Status**: ✅ **Fully specified in enhancement plan Part 5 & 9**
+
+---
+
+### Missing 5: Detailed Test Specifications (Enhanced)
+
+**Enhancement Plan Test Requirements**:
+
+**Phase 1 Unit Tests** (from Part 6):
+```
+ThemeSelector Component:
+- [ ] Renders 3 theme buttons (light, dark, system)
+- [ ] Correct theme is marked as active
+- [ ] Click handler calls setTheme with new value
+- [ ] Arrow key navigation works between buttons
+- [ ] Tab focus management correct
+- [ ] ARIA roles (radiogroup, radio) present
+- [ ] ARIA checked state updates on selection
+- [ ] Toast notification on theme change
+- [ ] Memoization prevents unnecessary re-renders
+- [ ] Accessibility audit (axe) passes
+
+StatusSelector Component:
+- [ ] Renders compact status button
+- [ ] Popover opens on button click
+- [ ] All 3 status options visible in popover
+- [ ] Status selection updates UI immediately
+- [ ] Color dots display correctly
+- [ ] Keyboard navigation in popover (arrows, enter)
+- [ ] Click outside closes popover
+- [ ] Toast notification on status change
+- [ ] ARIA roles correct (menuitemradio)
+- [ ] Accessibility audit (axe) passes
+```
+
+**Phase 2 Mobile Tests** (from Part 6):
+```
+ResponsiveUserMenu Component:
+- [ ] Desktop: Dropdown displays (≥768px)
+- [ ] Mobile: Bottom sheet displays (<768px)
+- [ ] Responsive breakpoint works correctly
+- [ ] useMediaQuery returns correct value
+- [ ] No layout shift on breakpoint change
+
+MobileUserMenu Component:
+- [ ] Bottom sheet opens on avatar click
+- [ ] All menu items visible
+- [ ] Menu items clickable with touch
+- [ ] Swipe down closes sheet
+- [ ] Touch targets ≥48×48px
+- [ ] Sheet height 85vh
+- [ ] Correct styling for mobile
+```
+
+**Phase 3 E2E Tests** (from Part 6):
+```
+UserProfileDropdown E2E:
+- [ ] Dropdown opens on trigger click
+- [ ] All sections visible (Profile, Preferences, Quick Actions)
+- [ ] Theme selection changes theme system-wide
+- [ ] Theme change persists on page reload
+- [ ] Status selection updates status indicator
+- [ ] Status persists in localStorage
+- [ ] Keyboard shortcuts work (⌘P, ⌘S, etc)
+- [ ] Sign out flow completes
+- [ ] Focus returns to trigger on close
+- [ ] Escape key closes dropdown
+```
+
+**Phase 4 Integration Tests** (from Part 6):
+```
+Component Integration:
+- [ ] UserInfo displays correct data from session
+- [ ] Avatar shows correct initials
+- [ ] MenuSection groups items correctly
+- [ ] Icons display for all menu items
+- [ ] Hover states apply correctly
+- [ ] Active states update on selection
+- [ ] Profile panel opens from dropdown
+- [ ] Security page navigates correctly
+- [ ] Help page navigates correctly
+```
+
+**Status**: ✅ **Expanded and fully detailed in this section**
+
+---
+
 ### Missing 3: Monitoring & Metrics
 
 **Current Status**: Not addressed
@@ -708,7 +930,7 @@ This section maps all guideline features from `docs/profile_dropdown_enhancement
 
 **Component & Code Features** (6):
 1. ✅ ThemeSelector component (new)
-2. �� StatusSelector component (new)
+2. ✅ StatusSelector component (new)
 3. ✅ MenuSection helper component
 4. ✅ Refactored UserProfileDropdown
 5. ✅ MobileUserMenu component (new)
