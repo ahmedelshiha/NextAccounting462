@@ -80,7 +80,7 @@ export const StatusSelector = memo(function StatusSelector({
       <span className="text-sm font-medium text-muted-foreground">Status</span>
 
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger>
           <button
             type="button"
             data-testid="status-trigger"
