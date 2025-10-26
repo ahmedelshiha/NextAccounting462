@@ -418,30 +418,30 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+          <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
           <IntelligentActivityFeed data={activityData} />
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">Quick Statistics</h3>
+          <h3 className="text-lg font-semibold text-foreground">Quick Statistics</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg border p-4">
+            <div className="bg-card rounded-lg border border-border p-4">
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-blue-600" />
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-500">Active Sessions</p>
-                  <p className="text-2xl font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Active Sessions</p>
+                  <p className="text-2xl font-semibold text-foreground">
                     {usersPayload.activeUsers || 0}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg border p-4">
+            <div className="bg-card rounded-lg border border-border p-4">
               <div className="flex items-center">
                 <Calendar className="h-8 w-8 text-green-600" />
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-500">This Week</p>
-                  <p className="text-2xl font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">This Week</p>
+                  <p className="text-2xl font-semibold text-foreground">
                     {weekBookingsResp?.total || 0}
                   </p>
                 </div>
