@@ -77,11 +77,11 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
         tabIndex={-1}
         className={`relative z-10 w-full ${sizeClass} mx-4`}
       >
-        <div className="bg-white rounded-lg shadow-lg overflow-auto max-h-[90vh]">
-          <div className="p-4 border-b">
+        <div className="bg-background rounded-lg shadow-lg overflow-auto max-h-[90vh]">
+          <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between">
-              <h2 id="modal-title" className="text-lg font-medium text-gray-900">{title}</h2>
-              <button aria-label="Close dialog" onClick={onClose} className="text-gray-500 hover:text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <h2 id="modal-title" className="text-lg font-medium text-foreground">{title}</h2>
+              <button aria-label="Close dialog" onClick={onClose} className="text-muted-foreground hover:text-foreground rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
