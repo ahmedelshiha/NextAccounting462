@@ -13,8 +13,8 @@ export interface ThemeProviderProps {
 export function ThemeProvider({
   children,
   attribute = "class",
-  defaultTheme = "system",
-  enableSystem = true,
+  defaultTheme = "light",
+  enableSystem = false,
 }: ThemeProviderProps) {
   return (
     <NextThemesProvider attribute={attribute} defaultTheme={defaultTheme} enableSystem={enableSystem}>
