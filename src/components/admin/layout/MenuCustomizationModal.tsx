@@ -16,6 +16,9 @@ import { X, Loader2 } from 'lucide-react'
 import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
 import { useMenuCustomizationModalStore } from '@/stores/admin/menuCustomizationModal.store'
 import { MenuCustomizationTabs } from './MenuCustomizationTabs'
+import { SectionsTab } from './tabs/SectionsTab'
+import { YourPracticeTab } from './tabs/YourPracticeTab'
+import { BookmarksTab } from './tabs/BookmarksTab'
 import { Button } from '@/components/ui/button'
 
 export interface MenuCustomizationModalProps {
