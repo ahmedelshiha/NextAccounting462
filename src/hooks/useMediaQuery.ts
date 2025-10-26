@@ -26,9 +26,9 @@ export function useMediaQuery(query: string) {
       return () => mediaQueryList.removeEventListener("change", listener)
     } catch {
       // Safari <14 support
-      // @ts-expect-error addListener legacy API
+      // @ts-ignore addListener legacy API
       mediaQueryList.addListener(listener)
-      // @ts-expect-error removeListener legacy API
+      // @ts-ignore removeListener legacy API
       return () => mediaQueryList.removeListener(listener)
     }
   }, [query])

@@ -30,11 +30,11 @@ function PopoverTrigger({ children }: { children: React.ReactNode }) {
   const ctx = useContext(PopoverContext)
   if (!ctx) return <>{children}</>
   const { open, setOpen } = ctx
-  const child = React.Children.only(children) as React.ReactElement
+  const child = React.Children.only(children) as React.ReactElement<{ onClick?: (e: React.MouseEvent) => void }>
   return React.cloneElement(child, {
-    onClick: (e: any) => {
-      setOpen((s) => !s)
-      if (typeof child.props.onClick === "function") child.props.onClick(e)
+    onClick: (e: React.MouseEvent) => {
+      setOpen((s: boolean) => !s)
+      if (child.props.onClick) child.props.onClick(e)
     }
   })
 }
