@@ -96,11 +96,13 @@ function MenuItem({
   const content = (
     <>
       <div className="flex items-center gap-3">
-        {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+        {Icon && (
+          <Icon className="h-4 w-4 flex-shrink-0 transition-transform duration-150 ease-out group-hover:animate-icon-translate" />
+        )}
         <span>{label}</span>
       </div>
       {shortcut && (
-        <span className="text-xs text-muted-foreground font-mono">
+        <span className="text-xs text-muted-foreground font-mono opacity-75 group-hover:opacity-100 transition-opacity duration-150">
           {shortcut}
         </span>
       )}
