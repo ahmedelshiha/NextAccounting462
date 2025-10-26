@@ -146,17 +146,17 @@ function MobileUserMenuComponent({
             <div className="space-y-1">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Quick Actions</h3>
               {(customLinks && customLinks.length ? customLinks : MENU_LINKS).map((link) => (
-                <a key={link.href} href={link.href} className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent" role="menuitem" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
+                <a key={link.href} href={link.href} className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group" role="menuitem" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
                   <span className="flex items-center gap-3">
-                    {link.icon ? <link.icon className="h-4 w-4" /> : null}
+                    {link.icon ? <link.icon className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" /> : null}
                     {link.label}
                   </span>
                 </a>
               ))}
               {HELP_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent" role="menuitem" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
+                <a key={link.href} href={link.href} className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group" role="menuitem" target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined}>
                   <span className="flex items-center gap-3">
-                    {link.icon ? <link.icon className="h-4 w-4" /> : null}
+                    {link.icon ? <link.icon className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" /> : null}
                     {link.label}
                   </span>
                   {link.label === "Help" ? (
