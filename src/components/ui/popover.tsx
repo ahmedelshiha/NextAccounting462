@@ -21,7 +21,7 @@ function PopoverTrigger({ children }: { children: React.ReactNode }) {
   const child = React.Children.only(children) as React.ReactElement
   return React.cloneElement(child, {
     onClick: (e: any) => {
-      setOpen(!open)
+      setOpen((s) => !s)
       if (typeof child.props.onClick === "function") child.props.onClick(e)
     }
   })
