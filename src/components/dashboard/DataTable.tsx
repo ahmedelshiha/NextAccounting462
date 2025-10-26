@@ -36,10 +36,10 @@ export default function DataTable<T extends { id?: string | number }>({ columns,
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200">
+      <div className="bg-background rounded-lg border border-border">
         <div className="animate-pulse">
-          <div className="h-12 bg-gray-100 rounded-t-lg" />
-          {[...Array(5)].map((_, i) => (<div key={i} className="h-16 bg-gray-50 border-t border-gray-100" />))}
+          <div className="h-12 bg-muted rounded-t-lg" />
+          {[...Array(5)].map((_, i) => (<div key={i} className="h-16 bg-muted border-t border-border" />))}
         </div>
       </div>
     )
@@ -47,17 +47,17 @@ export default function DataTable<T extends { id?: string | number }>({ columns,
 
   if (!rows.length) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-600">
+      <div className="bg-background rounded-lg border border-border p-12 text-center text-muted-foreground">
         {t('dashboard.noData')}
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-background rounded-lg border border-border overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-muted">
             <tr>
               {selectable && (
                 <th className="px-4 py-3">
@@ -65,9 +65,9 @@ export default function DataTable<T extends { id?: string | number }>({ columns,
                 </th>
               )}
               {columns.map((c) => (
-                <th key={String(c.key)} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left'}`}>
+                <th key={String(c.key)} className={`px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider ${c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left'}`}>
                   {c.sortable && onSort ? (
-                    <button onClick={() => onSort(String(c.key))} className="flex items-center gap-1 hover:text-gray-700">
+                    <button onClick={() => onSort(String(c.key))} className="flex items-center gap-1 hover:text-foreground">
                       <span>{c.label}</span>
                       {sortBy === c.key && (sortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
                     </button>
@@ -77,13 +77,13 @@ export default function DataTable<T extends { id?: string | number }>({ columns,
                 </th>
               ))}
               {actions.length > 0 && (
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('dashboard.actions')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('dashboard.actions')}</th>
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-background divide-y divide-border">
             {rows.map((row, idx) => (
-              <tr key={row.id ?? idx} className="hover:bg-gray-50">
+              <tr key={row.id ?? idx} className="hover:bg-muted">
                 {selectable && (
                   <td className="px-4 py-4"><input type="checkbox" checked={row.id != null && selected.has(row.id)} onChange={() => toggleOne(row.id)} /></td>
                 )}
