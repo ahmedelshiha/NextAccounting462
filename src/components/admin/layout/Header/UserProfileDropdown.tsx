@@ -175,41 +175,29 @@ function UserProfileDropdownComponent({
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
-    {
-      key: 'p',
-      meta: true,
-      handler: () => {
-        try { onOpenProfilePanel?.() } catch {}
-      }
-    },
-    {
-      key: 's',
-      meta: true,
-      handler: () => router.push('/settings/security')
-    },
-    {
-      key: '/',
-      meta: true,
-      handler: () => router.push('/help')
-    },
-    {
-      key: 'q',
-      meta: true,
-      shift: true,
-      handler: () => handleSignOut()
-    },
-    {
-      key: 'l',
-      meta: true,
-      shift: true,
-      handler: () => setTheme('light') as unknown as void
-    },
-    {
-      key: 'd',
-      meta: true,
-      shift: true,
-      handler: () => setTheme('dark') as unknown as void
-    }
+    // Open profile (⌘P / Ctrl+P)
+    { key: 'p', meta: true, handler: () => { try { onOpenProfilePanel?.() } catch {} } },
+    { key: 'p', ctrl: true, handler: () => { try { onOpenProfilePanel?.() } catch {} } },
+
+    // Settings (⌘S / Ctrl+S) → admin settings
+    { key: 's', meta: true, handler: () => router.push('/admin/settings') },
+    { key: 's', ctrl: true, handler: () => router.push('/admin/settings') },
+
+    // Help (⌘? / Ctrl+Shift+?) — treat as Shift+/ key
+    { key: '/', meta: true, shift: true, handler: () => router.push('/faq') },
+    { key: '?', meta: true, shift: true, handler: () => router.push('/faq') },
+    { key: '/', ctrl: true, shift: true, handler: () => router.push('/faq') },
+    { key: '?', ctrl: true, shift: true, handler: () => router.push('/faq') },
+
+    // Sign out (⌘Q / Ctrl+Q)
+    { key: 'q', meta: true, handler: () => handleSignOut() },
+    { key: 'q', ctrl: true, handler: () => handleSignOut() },
+
+    // Theme shortcuts (⌘⇧L / ⌘⇧D) and Ctrl equivalents
+    { key: 'l', meta: true, shift: true, handler: () => setTheme('light') as unknown as void },
+    { key: 'l', ctrl: true, shift: true, handler: () => setTheme('light') as unknown as void },
+    { key: 'd', meta: true, shift: true, handler: () => setTheme('dark') as unknown as void },
+    { key: 'd', ctrl: true, shift: true, handler: () => setTheme('dark') as unknown as void },
   ])
 
   return (
