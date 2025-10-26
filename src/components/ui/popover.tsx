@@ -53,15 +53,18 @@ function PopoverContent({ children, className, style }: { children: React.ReactN
   if (!ctx) return <>{children}</>
   if (!ctx.open) return null
   return (
-    <div
-      ref={ref}
-      data-slot="popover-content"
-      className={cn("z-50 rounded-md border bg-popover p-1 shadow-md absolute right-0 mt-1", className)}
-      style={style}
-      role="dialog"
-    >
-      {children}
-    </div>
+    <>
+      <div data-testid="status-popover-backdrop" className="fixed inset-0 z-40" onClick={() => ctx.setOpen(false)} />
+      <div
+        ref={ref}
+        data-slot="popover-content"
+        className={cn("z-50 rounded-md border bg-popover p-1 shadow-md absolute right-0 mt-1", className)}
+        style={style}
+        role="dialog"
+      >
+        {children}
+      </div>
+    </>
   )
 }
 
