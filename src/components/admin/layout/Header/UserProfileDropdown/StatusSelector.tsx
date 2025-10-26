@@ -53,6 +53,7 @@ export const StatusSelector = memo(function StatusSelector({
   const [previousStatus, setPreviousStatus] = useState(status)
 
   const currentStatus = statusOptions.find((s) => s.value === status)
+  const [open, setOpen] = useState(false)
 
   const handleStatusChange = useCallback(
     async (newStatus: UserStatusType) => {
