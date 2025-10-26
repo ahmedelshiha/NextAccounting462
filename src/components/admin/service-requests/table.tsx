@@ -41,7 +41,7 @@ function statusColor(s: ServiceRequestItem['status']) {
     case 'APPROVED': return 'bg-emerald-100 text-emerald-800 border-emerald-200'
     case 'IN_REVIEW': return 'bg-amber-100 text-amber-800 border-amber-200'
     case 'SUBMITTED': return 'bg-sky-100 text-sky-800 border-sky-200'
-    case 'DRAFT': default: return 'bg-muted text-muted-foreground border-gray-200'
+    case 'DRAFT': default: return 'bg-muted text-muted-foreground border-border'
   }
 }
 
@@ -49,7 +49,7 @@ function priorityColor(p: ServiceRequestItem['priority']) {
   switch (p) {
     case 'URGENT': return 'bg-red-100 text-red-800 border-red-200'
     case 'HIGH': return 'bg-orange-100 text-orange-800 border-orange-200'
-    case 'LOW': return 'bg-muted text-muted-foreground border-gray-200'
+    case 'LOW': return 'bg-muted text-muted-foreground border-border'
     case 'MEDIUM': default: return 'bg-blue-100 text-blue-800 border-blue-200'
   }
 }
@@ -151,7 +151,7 @@ export default function ServiceRequestsTable({ items, selectedIds, onToggle, onT
                     ? 'bg-red-100 text-red-800 border-red-200'
                     : s === 'REFUNDED'
                     ? 'bg-purple-100 text-purple-800 border-purple-200'
-                    : 'bg-muted text-muted-foreground border-gray-200'
+                    : 'bg-muted text-muted-foreground border-border'
                   return (
                     <div className="flex items-center gap-2">
                       <Badge className={cls}>{label}</Badge>
