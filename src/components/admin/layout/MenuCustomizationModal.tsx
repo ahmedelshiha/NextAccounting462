@@ -19,6 +19,7 @@ import { MenuCustomizationTabs } from './MenuCustomizationTabs'
 import { SectionsTab } from './tabs/SectionsTab'
 import { YourPracticeTab } from './tabs/YourPracticeTab'
 import { BookmarksTab } from './tabs/BookmarksTab'
+import { useMenuCustomizationFeature } from '@/hooks/useMenuCustomizationFeature'
 import { Button } from '@/components/ui/button'
 
 export interface MenuCustomizationModalProps {
