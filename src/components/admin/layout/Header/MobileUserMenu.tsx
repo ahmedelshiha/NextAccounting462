@@ -88,8 +88,8 @@ function MobileUserMenuComponent({
           <ChevronDown className="h-4 w-4 text-gray-400" />
         </button>
       </SheetTrigger>
-      <SheetContent>
-        <div className="space-y-4 p-2" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+      <SheetContent className="animate-sheet-enter">
+        <div className="space-y-4 p-4" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
           {/* Header */}
           <div className="flex items-center gap-3">
             <Avatar name={name} src={image} size="md" showStatus={showStatus} />
