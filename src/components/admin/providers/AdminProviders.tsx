@@ -55,8 +55,8 @@ export function AdminProviders({ children }: AdminProvidersProps) {
   return (
     <ErrorBoundary
       fallback={({ error, resetError }) => (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="max-w-md w-full bg-card shadow-lg rounded-lg p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -121,7 +121,7 @@ function RoleSyncMount() {
  */
 export function AdminProvidersServer({ children }: AdminProvidersProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {children}
     </div>
   )
