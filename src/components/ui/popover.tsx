@@ -58,3 +58,7 @@ function PopoverArrow() {
 }
 
 export { Popover, PopoverTrigger, PopoverContent, PopoverArrow }
+
+export function usePopover() {
+  return useContext(PopoverContext)
+}
