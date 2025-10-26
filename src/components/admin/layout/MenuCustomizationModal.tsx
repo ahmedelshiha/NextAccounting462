@@ -65,13 +65,22 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
 
     setIsSaving(true)
     setSaveError(null)
+    setSaveSuccess(false)
 
     try {
       await applyCustomization(draftCustomization)
+      setSaveSuccess(true)
       clearDraft()
-      onClose()
+
+      // Show success message briefly before closing
+      setTimeout(() => {
+        onClose()
+      }, 500)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to save customization'
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to save menu customization. Please try again.'
       setSaveError(message)
       setIsSaving(false)
     }
