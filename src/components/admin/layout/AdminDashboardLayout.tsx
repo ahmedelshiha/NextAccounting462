@@ -99,16 +99,16 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
   // Show loading skeleton during SSR/hydration
   if (!isClient) {
     return (
-      <div className="h-screen bg-gray-50 flex">
+      <div className="h-screen bg-background flex">
         {/* Sidebar Skeleton */}
-        <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+        <div className="w-64 bg-card border-r border-border flex-shrink-0">
           <div className="animate-pulse">
-            <div className="p-4 border-b border-gray-200">
-              <div className="h-8 bg-gray-300 rounded"></div>
+            <div className="p-4 border-b border-border">
+              <div className="h-8 bg-muted rounded"></div>
             </div>
             <div className="p-4 space-y-2">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-8 bg-gray-300 rounded"></div>
+                <div key={i} className="h-8 bg-muted rounded"></div>
               ))}
             </div>
           </div>
@@ -116,11 +116,11 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
 
         {/* Content Skeleton */}
         <div className="flex-1">
-          <div className="h-16 bg-white border-b border-gray-200"></div>
+          <div className="h-16 bg-card border-b border-border"></div>
           <div className="p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-              <div className="h-32 bg-gray-300 rounded"></div>
+              <div className="h-4 bg-muted rounded w-1/4"></div>
+              <div className="h-32 bg-muted rounded"></div>
             </div>
           </div>
         </div>
@@ -130,11 +130,11 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
 
   return (
     <AdminErrorBoundary>
-      <div className={`h-screen bg-gray-50 overflow-hidden ${className}`}>
+      <div className={`h-screen bg-background overflow-hidden ${className}`}>
         {/* Accessibility: Skip link for keyboard users */}
         <a
           href="#admin-main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-white focus:text-blue-600 focus:ring-2 focus:ring-blue-600 focus:px-3 focus:py-2 focus:z-[60] rounded"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-card focus:text-blue-600 focus:ring-2 focus:ring-blue-600 focus:px-3 focus:py-2 focus:z-[60] rounded"
           onClick={(e) => {
             e.preventDefault()
             const el = document.getElementById('admin-main-content')
