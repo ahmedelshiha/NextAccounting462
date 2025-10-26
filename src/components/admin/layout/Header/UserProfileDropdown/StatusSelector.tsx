@@ -103,9 +103,11 @@ export const StatusSelector = memo(function StatusSelector({
             data-testid="status-trigger"
             aria-label={`Current status: ${currentStatus?.label}. Click to change.`}
             aria-haspopup="menu"
+            aria-expanded={open}
             className={cn(
               "inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm",
               "hover:bg-accent transition-colors",
+              open && "bg-accent",
               "focus-visible:outline-none focus-visible:ring-2",
               "focus-visible:ring-ring focus-visible:ring-offset-2",
               "focus-visible:ring-offset-background disabled:opacity-50",
