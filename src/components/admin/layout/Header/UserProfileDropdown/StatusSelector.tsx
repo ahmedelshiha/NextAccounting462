@@ -56,20 +56,15 @@ export const StatusSelector = memo(function StatusSelector({
   const [open, setOpen] = useState(false)
 
   const handleStatusChange = useCallback(
-    async (newStatus: UserStatusType) => {
+    (newStatus: UserStatusType) => {
       try {
         setIsChanging(true)
         setPreviousStatus(status)
 
-        // Update status
-        await setStatus(newStatus)
+        // Update status (synchronous function)
+        setStatus(newStatus)
 
-        // Show success feedback
-        const newStatusObj = statusOptions.find((s) => s.value === newStatus)
-        toast.success(`Status changed to ${newStatusObj?.label}`, {
-          description: newStatusObj?.description
-        })
-        // Close popover
+        // Close popover after status change
         setOpen(false)
       } catch (error) {
         console.error("Status change error:", error)
@@ -78,8 +73,8 @@ export const StatusSelector = memo(function StatusSelector({
         })
 
         // Revert to previous status on error
-        if (previousStatus) {
-          await setStatus(previousStatus)
+        if (previousStatus !== newStatus) {
+          setStatus(previousStatus)
         }
       } finally {
         setIsChanging(false)
