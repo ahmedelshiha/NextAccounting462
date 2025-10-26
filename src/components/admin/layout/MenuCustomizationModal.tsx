@@ -35,9 +35,10 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
   )
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   // Global store (source of truth)
-  const { customization, applyCustomization, resetCustomization } = useMenuCustomizationStore()
+  const { customization, isLoading, applyCustomization, resetCustomization } = useMenuCustomizationStore()
 
   // Modal store (draft state)
   const {
