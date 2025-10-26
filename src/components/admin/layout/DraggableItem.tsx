@@ -54,7 +54,7 @@ export const DraggableItem = React.forwardRef<HTMLDivElement, DraggableItemProps
       isDragging: isDraggingDnd,
     } = useSortable({
       id,
-      disabled: isDragging,
+      disabled: isDraggingProp,
     })
 
     const isDragging = isDraggingProp ?? isDraggingDnd
