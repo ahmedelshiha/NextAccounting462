@@ -17,9 +17,14 @@ Changes in this batch:
 - Added: src/components/admin/layout/Header/MobileUserMenu.tsx
 - Added: src/components/admin/layout/Header/ResponsiveUserMenu.tsx
 - Updated: src/components/admin/layout/AdminHeader.tsx (use ResponsiveUserMenu)
+- Added: src/components/ui/popover.tsx
+- Updated: package.json (added @radix-ui/react-popover)
+- Added: src/hooks/useKeyboardShortcuts.ts
 
 Testing notes:
 - Verified desktop renders existing dropdown; mobile (<768px) renders bottom sheet.
+- Added basic swipe-to-dismiss on mobile sheet (threshold 100px).
+- Keyboard shortcuts hook added (useKeyboardShortcuts) — integration pending mapping in UserProfileDropdown.
 - Checked focus states and keyboard nav; touch targets ≥48px on mobile items.
 - No visual regressions observed; constants MENU_LINKS/HELP_LINKS currently empty, handled gracefully.
 
@@ -115,7 +120,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 - ✅ lucide-react (exists)
 - ✅ Radix UI (exists)
 - ✅ next-themes (exists)
-- �� sonner (exists)
+- ✅ sonner (exists)
 - ��� framer-motion (NOT present)
 - ❌ react-hotkeys-hook (mentioned but not present)
 
