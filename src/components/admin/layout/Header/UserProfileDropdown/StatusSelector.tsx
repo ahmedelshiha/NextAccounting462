@@ -116,7 +116,10 @@ export const StatusSelector = memo(function StatusSelector({
             <span className="capitalize" data-testid="status-label">
               {status}
             </span>
-            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+            <ChevronDown className={cn(
+              "h-3 w-3 text-muted-foreground transition-transform duration-200",
+              usePopover()?.open && "rotate-180"
+            )} />
           </button>
         </PopoverTrigger>
 
