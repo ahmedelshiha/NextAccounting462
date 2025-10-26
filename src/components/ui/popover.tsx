@@ -3,8 +3,20 @@ import { cn } from "@/lib/utils"
 
 const PopoverContext = createContext<{open:boolean; setOpen:(v:boolean)=>void}|undefined>(undefined)
 
-function Popover({ children, defaultOpen = false }: { children: React.ReactNode; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState<boolean>(defaultOpen)
+function Popover({ children, defaultOpen = false, open: controlledOpen, onOpenChange }: { children: React.ReactNode; defaultOpen?: boolean; open?: boolean; onOpenChange?: (v:boolean)=>void }) {
+  const [openState, setOpenState] = useState<boolean>(defaultOpen)
+  const isControlled = typeof controlledOpen === 'boolean'
+  const open = isControlled ? (controlledOpen as boolean) : openState
+  const setOpen = (v: boolean | ((s:boolean)=>boolean)) => {
+    if (typeof onOpenChange === 'function') {
+      const next = typeof v === 'function' ? v(open) : v
+      try { onOpenChange(next) } catch {}
+    }
+    if (!isControlled) {
+      setOpenState(typeof v === 'function' ? v(open) : v)
+    }
+  }
+
   return (
     <PopoverContext.Provider value={{ open, setOpen }}>
       <div data-slot="popover" className="relative inline-block">
