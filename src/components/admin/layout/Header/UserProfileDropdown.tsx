@@ -215,6 +215,17 @@ function UserProfileDropdownComponent({
             ) : (
               <UserIcon className="h-4 w-4 text-gray-600" />
             )}
+            {showStatus && (
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white",
+                  userStatus === "online" && "bg-green-500",
+                  userStatus === "away" && "bg-amber-400",
+                  userStatus === "busy" && "bg-red-500"
+                )}
+              />
+            )}
           </div>
           <div className="hidden md:block text-left">
             <div className="text-sm font-medium text-gray-900">{name}</div>
