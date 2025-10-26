@@ -49,19 +49,15 @@ export const StatusSelector = memo(function StatusSelector({
   className
 }: StatusSelectorProps) {
   const { status, setStatus } = useUserStatus()
-  const [isChanging, setIsChanging] = useState(false)
-  const [previousStatus, setPreviousStatus] = useState(status)
+  const [open, setOpen] = useState(false)
 
   const currentStatus = statusOptions.find((s) => s.value === status)
-  const [open, setOpen] = useState(false)
 
   const handleStatusChange = useCallback(
     (newStatus: UserStatusType) => {
       try {
-        setIsChanging(true)
-        setPreviousStatus(status)
-
         // Update status (synchronous function)
+        // The useUserStatus hook handles showing the toast internally
         setStatus(newStatus)
 
         // Close popover after status change
@@ -71,16 +67,9 @@ export const StatusSelector = memo(function StatusSelector({
         toast.error("Failed to change status", {
           description: "Please try again or contact support if the issue persists."
         })
-
-        // Revert to previous status on error
-        if (previousStatus !== newStatus) {
-          setStatus(previousStatus)
-        }
-      } finally {
-        setIsChanging(false)
       }
     },
-    [status, setStatus, previousStatus]
+    [setStatus]
   )
 
   return (
