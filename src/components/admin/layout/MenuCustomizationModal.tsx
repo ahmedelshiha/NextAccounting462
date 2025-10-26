@@ -31,6 +31,12 @@ export interface MenuCustomizationModalProps {
  * Main menu customization modal component
  */
 export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationModalProps) {
+  const { isEnabledForCurrentUser } = useMenuCustomizationFeature()
+
+  // Don't render if feature is not enabled for this user
+  if (!isEnabledForCurrentUser) {
+    return null
+  }
   const [selectedTab, setSelectedTab] = useState<'sections' | 'practice' | 'bookmarks' | 'books'>(
     'sections'
   )
