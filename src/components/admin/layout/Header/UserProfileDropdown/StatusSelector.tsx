@@ -69,6 +69,8 @@ export const StatusSelector = memo(function StatusSelector({
         toast.success(`Status changed to ${newStatusObj?.label}`, {
           description: newStatusObj?.description
         })
+        // Close popover
+        setOpen(false)
       } catch (error) {
         console.error("Status change error:", error)
         toast.error("Failed to change status", {
