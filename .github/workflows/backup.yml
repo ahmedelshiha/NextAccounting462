@@ -64,7 +64,7 @@ jobs:
 
       - name: Upload artifact (fallback)
         if: ${{ secrets.AWS_S3_BUCKET == '' && secrets.RCLONE_CONFIG == '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: backups
           path: backups/

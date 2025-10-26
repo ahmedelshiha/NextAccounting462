@@ -52,7 +52,7 @@ jobs:
           ls -la archive || true
 
       - name: Upload archive artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: archived-docs
           path: archive/
