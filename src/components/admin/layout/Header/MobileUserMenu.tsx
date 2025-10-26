@@ -172,11 +172,11 @@ function MobileUserMenuComponent({
             <button
               type="button"
               onClick={() => { setOpen(false); handleSignOut() }}
-              className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-red-50 text-red-600"
+              className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
               role="menuitem"
             >
               <span className="flex items-center gap-3">
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                 Sign Out
               </span>
               <span className="text-xs">⌘Q</span>
