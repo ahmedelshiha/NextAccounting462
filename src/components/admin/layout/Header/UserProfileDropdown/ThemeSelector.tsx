@@ -120,7 +120,6 @@ export const ThemeSelector = memo(function ThemeSelector({
                   : "text-muted-foreground hover:text-foreground"
               )}
               onClick={() => handleThemeChange(value)}
-              aria-pressed={isActive}
             >
               <Icon className="h-4 w-4" />
               {showLabels && <span className="ml-2 text-xs">{label}</span>}
