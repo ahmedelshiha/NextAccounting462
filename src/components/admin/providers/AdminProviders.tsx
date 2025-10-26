@@ -11,6 +11,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import React from 'react'
 import { SWRConfig } from 'swr'
 import { RealtimeProvider } from '@/components/dashboard/realtime/RealtimeProvider'
 import { ErrorBoundary } from '@/components/providers/error-boundary'
