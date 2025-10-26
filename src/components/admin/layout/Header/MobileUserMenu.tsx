@@ -62,7 +62,7 @@ function MobileUserMenuComponent({
               <UserIcon className="h-4 w-4 text-gray-600" />
             )}
           </div>
-          <span className="text-sm font-medium hidden xs:inline">{name}</span>
+          <span className="text-sm font-medium hidden sm:inline">{name}</span>
           <ChevronDown className="h-4 w-4 text-gray-400" />
         </button>
       </SheetTrigger>
