@@ -1,7 +1,7 @@
 "use client"
 
 import { memo, type Ref } from "react"
-import UserProfileDropdown, { type UserProfileDropdownProps } from "./UserProfileDropdown"
+import UserProfileDropdownWrapper, { type UserProfileDropdownProps } from "./UserProfileDropdownWrapper"
 import MobileUserMenu from "./MobileUserMenu"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 
@@ -21,7 +21,7 @@ function ResponsiveUserMenuComponent(props: UserProfileDropdownProps) {
     )
   }
 
-  return <UserProfileDropdown {...props} />
+  return <UserProfileDropdownWrapper {...props} />
 }
 
 export default memo(ResponsiveUserMenuComponent)

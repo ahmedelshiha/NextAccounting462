@@ -5,6 +5,14 @@
 **Review Date**: 2025-01-20  
 **Reviewer**: Senior Development Team
 
+## Implementation Update (2025-10-26)
+
+- Implemented feature flag "enableNewDropdown" with environment and DOM data-attribute support
+- Added wrapper component for safe rollout: src/components/admin/layout/Header/UserProfileDropdownWrapper.tsx
+- Integrated wrapper in ResponsiveUserMenu and Builder usage points
+- Created utility: src/lib/feature-flags.ts
+- Files modified: src/lib/feature-flags.ts, src/components/admin/layout/Header/UserProfileDropdownWrapper.tsx, src/components/admin/layout/Header/ResponsiveUserMenu.tsx, src/components/builder/UserProfileDropdownBuilder.tsx
+
 ## Execution Status (Auto-Update)
 
 - ✅ Week 1 (Core Layout): **COMPLETED** — ThemeSelector, StatusSelector integrated; UserProfileDropdown refactored with sections and shortcuts.
@@ -672,7 +680,7 @@ Mobile Design:
 | Ctrl+? | Windows/Linux | Go to help | UserProfileDropdown |
 | ⌘Q | macOS | Sign out | UserProfileDropdown |
 | Ctrl+Shift+Q | Windows/Linux | Sign out | UserProfileDropdown |
-| ⌘⇧L | macOS | Switch to light theme | ThemeSelector |
+| ���⇧L | macOS | Switch to light theme | ThemeSelector |
 | Ctrl+Shift+L | Windows/Linux | Switch to light theme | ThemeSelector |
 | ⌘⇧D | macOS | Switch to dark theme | ThemeSelector |
 | Ctrl+Shift+D | Windows/Linux | Switch to dark theme | ThemeSelector |
