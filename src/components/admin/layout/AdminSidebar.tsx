@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import React from 'react'
 import {
   BarChart3,
   Calendar,
@@ -36,6 +37,8 @@ import useRovingTabIndex from '@/hooks/useRovingTabIndex'
 import SidebarHeader from './SidebarHeader'
 import SidebarFooter from './SidebarFooter'
 import { useSidebarCollapsed, useSidebarActions } from '@/stores/admin/layout.store.selectors'
+import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
+import { applyCustomizationToNavigation } from '@/lib/menu/menuUtils'
 
 interface NavigationItem {
   name: string
