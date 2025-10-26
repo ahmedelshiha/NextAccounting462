@@ -80,10 +80,9 @@ export const StatusSelector = memo(function StatusSelector({
       <span className="text-sm font-medium text-muted-foreground">Status</span>
 
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger>
+        <PopoverTrigger asChild>
           <button
             type="button"
-            disabled={isChanging}
             data-testid="status-trigger"
             aria-label={`Current status: ${status}. Click to change.`}
             aria-haspopup="menu"
@@ -94,8 +93,7 @@ export const StatusSelector = memo(function StatusSelector({
               open && "bg-accent",
               "focus-visible:outline-none focus-visible:ring-2",
               "focus-visible:ring-ring focus-visible:ring-offset-2",
-              "focus-visible:ring-offset-background disabled:opacity-50",
-              "disabled:cursor-not-allowed"
+              "focus-visible:ring-offset-background"
             )}
           >
             <span
