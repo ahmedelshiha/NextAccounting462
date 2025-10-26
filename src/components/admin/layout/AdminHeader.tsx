@@ -82,7 +82,7 @@ export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarT
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <header className="bg-background border-b border-border sticky top-0 z-40">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left section - Mobile menu + Desktop sidebar toggle + Breadcrumbs */}
@@ -114,24 +114,24 @@ export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarT
             <nav className="flex" aria-label="Breadcrumb">
               <ol className="flex items-center space-x-2 text-sm">
                 <li>
-                  <Link 
-                    href="/admin" 
-                    className="text-gray-500 hover:text-gray-700 flex items-center"
-                  >
+                  <Link
+                  href="/admin"
+                  className="text-muted-foreground hover:text-foreground flex items-center"
+                >
                     <Home className="h-4 w-4" />
                   </Link>
                 </li>
                 {breadcrumbs.map((breadcrumb, index) => (
                   <li key={breadcrumb.href} className="flex items-center">
-                    <ChevronDown className="h-4 w-4 text-gray-400 rotate-[-90deg] mx-1" />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground rotate-[-90deg] mx-1" />
                     {breadcrumb.isLast ? (
-                      <span className="text-gray-900 font-medium">
+                      <span className="text-foreground font-medium">
                         {breadcrumb.label}
                       </span>
                     ) : (
                       <Link
                         href={breadcrumb.href}
-                        className="text-gray-500 hover:text-gray-700"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         {breadcrumb.label}
                       </Link>
@@ -146,13 +146,13 @@ export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarT
           <div className="hidden md:flex flex-1 max-w-md mx-8">
             <form onSubmit={handleSearch} className="w-full">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search admin panel..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent text-sm placeholder:text-muted-foreground"
                 />
               </div>
             </form>
