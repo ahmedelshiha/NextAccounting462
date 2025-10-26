@@ -42,8 +42,30 @@ function MobileUserMenuComponent({
     if (ok) onSignOut()
   }
 
+  const [open, setOpen] = React.useState(false)
+  const touchStartRef = React.useRef<number | null>(null)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = e.touches[0].clientY
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartRef.current === null) return
+    const currentY = e.touches[0].clientY
+    const delta = currentY - touchStartRef.current
+    // if user swipes down fast enough close early
+    if (delta > 100) {
+      setOpen(false)
+      touchStartRef.current = null
+    }
+  }
+
+  const handleTouchEnd = () => {
+    touchStartRef.current = null
+  }
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <button
           ref={triggerRef as any}
@@ -67,7 +89,7 @@ function MobileUserMenuComponent({
         </button>
       </SheetTrigger>
       <SheetContent>
-        <div className="space-y-4 p-2">
+        <div className="space-y-4 p-2" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
           {/* Header */}
           <div className="flex items-center gap-3">
             <Avatar name={name} src={image} size="md" showStatus={showStatus} />
@@ -93,7 +115,7 @@ function MobileUserMenuComponent({
             {onOpenProfilePanel && (
               <button
                 type="button"
-                onClick={onOpenProfilePanel}
+                onClick={() => { setOpen(false); onOpenProfilePanel() }}
                 className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-accent"
                 role="menuitem"
               >
@@ -149,7 +171,7 @@ function MobileUserMenuComponent({
           <div className="pt-2">
             <button
               type="button"
-              onClick={handleSignOut}
+              onClick={() => { setOpen(false); handleSignOut() }}
               className="w-full flex items-center justify-between px-3 py-3 rounded-lg hover:bg-red-50 text-red-600"
               role="menuitem"
             >
