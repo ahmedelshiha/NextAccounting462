@@ -11,32 +11,41 @@ type Shortcut = {
   handler: (e: KeyboardEvent) => void
 }
 
+function isEditableTarget(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null
+  if (!el) return false
+  const tag = el.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || (el as any).isContentEditable) return true
+  return false
+}
+
 export function useKeyboardShortcuts(shortcuts: Shortcut[]) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (isEditableTarget(e.target)) return
+
       for (const s of shortcuts) {
-        const keyMatch = e.key.toLowerCase() === s.key.toLowerCase()
+        const pressedKey = e.key.length === 1 ? e.key : e.key.toLowerCase()
+        const wantedKey = s.key.length === 1 ? s.key : s.key.toLowerCase()
+        const keyMatch = pressedKey.toLowerCase() === wantedKey.toLowerCase()
         if (!keyMatch) continue
 
-        if (Boolean(s.meta) !== e.metaKey) {
-          if (s.meta) continue
-        }
-        if (Boolean(s.ctrl) !== e.ctrlKey) {
-          if (s.ctrl) continue
-        }
-        if (Boolean(s.shift) !== e.shiftKey) {
-          if (s.shift) continue
-        }
-        if (Boolean(s.alt) !== e.altKey) {
-          if (s.alt) continue
-        }
+        // Match modifiers
+        const metaOk = s.meta ? (e.metaKey || e.ctrlKey) : (!e.metaKey)
+        const ctrlOk = s.ctrl ? e.ctrlKey : true
+        const shiftOk = s.shift ? e.shiftKey : !e.shiftKey || s.meta || s.ctrl
+        const altOk = s.alt ? e.altKey : !e.altKey
+        if (!metaOk || !ctrlOk || !shiftOk || !altOk) continue
 
         try {
+          // Prevent default browser actions (e.g., Print, Quit, Help)
+          e.preventDefault()
           s.handler(e)
+          return
         } catch (err) {
-          // swallow handler errors to avoid breaking global key handling
           // eslint-disable-next-line no-console
           console.error('Shortcut handler error', err)
+          return
         }
       }
     }
