@@ -65,4 +65,122 @@ const _api_GET = async (request: NextRequest): Promise<NextResponse> => {
   }
 }
 
+/**
+ * POST /api/admin/menu-customization
+ * Saves (upserts) the user's menu customization configuration
+ *
+ * Request Body: MenuCustomizationData
+ * Returns: Updated MenuCustomizationData
+ *
+ * Authorization: Requires authenticated user (requireAuth: true)
+ */
+const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
+  try {
+    const ctx = tenantContext.getContext()
+    const userId = String(ctx.userId ?? '')
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID not found in context' },
+        { status: 401 }
+      )
+    }
+
+    // Parse request body
+    let body: MenuCustomizationData
+    try {
+      body = await request.json()
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      )
+    }
+
+    // Validate the customization data
+    const validation = validateMenuCustomization(body)
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: validation.errors },
+        { status: 400 }
+      )
+    }
+
+    // Upsert customization record in database
+    const customization = await prisma.menuCustomization.upsert({
+      where: { userId },
+      update: {
+        sectionOrder: body.sectionOrder,
+        hiddenItems: body.hiddenItems,
+        practiceItems: body.practiceItems,
+        bookmarks: body.bookmarks,
+      },
+      create: {
+        userId,
+        sectionOrder: body.sectionOrder,
+        hiddenItems: body.hiddenItems,
+        practiceItems: body.practiceItems,
+        bookmarks: body.bookmarks,
+      },
+    })
+
+    // Parse and return customization data
+    const data: MenuCustomizationData = {
+      sectionOrder: customization.sectionOrder as string[],
+      hiddenItems: customization.hiddenItems as string[],
+      practiceItems: customization.practiceItems as any[],
+      bookmarks: customization.bookmarks as any[],
+    }
+
+    return NextResponse.json(data, { status: 200 })
+  } catch (error) {
+    console.error('[menu-customization:POST] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to save menu customization' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * DELETE /api/admin/menu-customization
+ * Resets the user's menu customization to defaults
+ *
+ * Returns: Default MenuCustomizationData
+ *
+ * Authorization: Requires authenticated user (requireAuth: true)
+ */
+const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
+  try {
+    const ctx = tenantContext.getContext()
+    const userId = String(ctx.userId ?? '')
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID not found in context' },
+        { status: 401 }
+      )
+    }
+
+    // Delete customization record from database
+    await prisma.menuCustomization.delete({
+      where: { userId },
+    }).catch(() => {
+      // Silently ignore if record doesn't exist
+    })
+
+    // Return default configuration
+    const defaultConfig = getDefaultMenuCustomization()
+    return NextResponse.json(defaultConfig, { status: 200 })
+  } catch (error) {
+    console.error('[menu-customization:DELETE] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to reset menu customization' },
+      { status: 500 }
+    )
+  }
+}
+
 export const GET = withTenantContext(_api_GET, { requireAuth: true })
+export const POST = withTenantContext(_api_POST, { requireAuth: true })
+export const DELETE = withTenantContext(_api_DELETE, { requireAuth: true })
