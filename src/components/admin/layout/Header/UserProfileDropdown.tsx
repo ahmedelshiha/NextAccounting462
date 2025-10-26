@@ -159,6 +159,9 @@ function UserProfileDropdownComponent({
 
   const { status: userStatus } = useUserStatus()
 
+  const router = useRouter()
+  const { setTheme } = useTheme()
+
   const handleSignOut = () => {
     if (!onSignOut) return
     const ok = typeof window !== 'undefined'
@@ -166,6 +169,45 @@ function UserProfileDropdownComponent({
       : true
     if (ok) onSignOut()
   }
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 'p',
+      meta: true,
+      handler: () => {
+        try { onOpenProfilePanel?.() } catch {}
+      }
+    },
+    {
+      key: 's',
+      meta: true,
+      handler: () => router.push('/settings/security')
+    },
+    {
+      key: '/',
+      meta: true,
+      handler: () => router.push('/help')
+    },
+    {
+      key: 'q',
+      meta: true,
+      shift: true,
+      handler: () => handleSignOut()
+    },
+    {
+      key: 'l',
+      meta: true,
+      shift: true,
+      handler: () => setTheme('light') as unknown as void
+    },
+    {
+      key: 'd',
+      meta: true,
+      shift: true,
+      handler: () => setTheme('dark') as unknown as void
+    }
+  ])
 
   return (
     <DropdownMenu>
