@@ -160,7 +160,14 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
-            {draftCustomization && (
+            {isLoading ? (
+              /* Loading Skeleton */
+              <div className="space-y-4 animate-pulse">
+                <div className="h-32 bg-gray-200 rounded-lg"></div>
+                <div className="h-48 bg-gray-200 rounded-lg"></div>
+                <div className="h-32 bg-gray-200 rounded-lg"></div>
+              </div>
+            ) : draftCustomization ? (
               <div className="h-full">
                 {selectedTab === 'sections' && (
                   <SectionsTab draftCustomization={draftCustomization} />
@@ -182,12 +189,38 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
                   </div>
                 )}
               </div>
+            ) : (
+              /* Error State */
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-red-600 text-sm font-medium">
+                  Failed to load customization
+                </p>
+                <p className="text-gray-500 text-sm mt-1">
+                  Please try refreshing the page
+                </p>
+              </div>
             )}
 
-            {/* Error message */}
+            {/* Error message from save */}
             {saveError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 mb-4">
-                {saveError}
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 mb-4 animate-in">
+                <div className="flex items-start gap-3">
+                  <span className="text-lg mt-0.5">⚠️</span>
+                  <div className="flex-1">
+                    <p className="font-medium">Error saving changes</p>
+                    <p className="text-red-600 text-xs mt-1">{saveError}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success message */}
+            {saveSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 animate-in">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">✓</span>
+                  <p className="font-medium">Menu customization saved successfully!</p>
+                </div>
               </div>
             )}
           </div>
