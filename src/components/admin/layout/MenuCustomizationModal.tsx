@@ -153,49 +153,22 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
             {draftCustomization && (
               <div className="h-full">
                 {selectedTab === 'sections' && (
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-600 mb-4">
-                      Drag to reorder sections. Toggle visibility of items within sections.
-                    </div>
-                    {/* SectionsTab component will be rendered here */}
-                    <div className="text-gray-500 italic">
-                      Sections Tab - Coming soon
-                    </div>
-                  </div>
+                  <SectionsTab draftCustomization={draftCustomization} />
                 )}
 
                 {selectedTab === 'practice' && (
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-600 mb-4">
-                      Customize your practice-related menu items.
-                    </div>
-                    {/* YourPracticeTab component will be rendered here */}
-                    <div className="text-gray-500 italic">
-                      Your Practice Tab - Coming soon
-                    </div>
-                  </div>
+                  <YourPracticeTab draftCustomization={draftCustomization} />
                 )}
 
                 {selectedTab === 'bookmarks' && (
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-600 mb-4">
-                      Search for pages to bookmark and organize them.
-                    </div>
-                    {/* BookmarksTab component will be rendered here */}
-                    <div className="text-gray-500 italic">
-                      Bookmarks Tab - Coming soon
-                    </div>
-                  </div>
+                  <BookmarksTab draftCustomization={draftCustomization} />
                 )}
 
                 {selectedTab === 'books' && (
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-600 mb-4">
-                      Manage your financial and accounting menu items.
-                    </div>
-                    <div className="text-gray-500 italic">
-                      Your Books Tab - Coming soon
-                    </div>
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <p className="text-gray-500 text-sm">
+                      Your Books feature coming soon
+                    </p>
                   </div>
                 )}
               </div>
