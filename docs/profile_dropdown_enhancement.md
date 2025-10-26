@@ -122,7 +122,7 @@ After thorough analysis of the comprehensive audit document and current screensh
 │ [Avatar] Preview Admin          [⚙️] │  ← Header with settings icon
 │          preview@local                  │
 │          ADMIN                          │
-├─────────────────────────────────────────┤
+├──────────────────────────────────��──────┤
 │ PROFILE                                 │  ← Section header
 │ 👤 Manage Profile                      │
 │ 🔐 Security & Privacy                  │
@@ -618,141 +618,755 @@ const UserProfileDropdown = () => {
 
 ---
 
-## PART 6: IMPLEMENTATION PLAN
+## PART 5.1: KEYBOARD SHORTCUTS - COMPLETE REFERENCE
 
-### Phase 1: Core Layout Refactor (Week 1)
+### Shortcut Mappings
 
-**Tasks:**
-1. ✅ Create new `ThemeSelector` component
-   - Horizontal radio group layout
-   - Icon-only buttons
-   - Active state styling
-   - **File**: `src/components/admin/layout/Header/UserProfileDropdown/ThemeSelector.tsx`
+| Shortcut | Platform | Action | Component |
+|----------|----------|--------|-----------|
+| ⌘P / Ctrl+P | macOS / Windows | Open profile panel | UserProfileDropdown |
+| ��S / Ctrl+S | macOS / Windows | Go to security settings | UserProfileDropdown |
+| ⌘? / Ctrl+? | macOS / Windows | Go to help | UserProfileDropdown |
+| ⌘Q / Ctrl+Shift+Q | macOS / Windows | Sign out | UserProfileDropdown |
+| ⌘⇧L / Ctrl+Shift+L | macOS / Windows | Switch to light theme | ThemeSelector |
+| ⌘⇧D / Ctrl+Shift+D | macOS / Windows | Switch to dark theme | ThemeSelector |
 
-2. ✅ Create new `StatusSelector` component
-   - Compact button with popover
-   - Nested status options
-   - Color-coded dots
-   - **File**: `src/components/admin/layout/Header/UserProfileDropdown/StatusSelector.tsx`
+### Error Handling for Theme/Status Changes
 
-3. ✅ Refactor `UserProfileDropdown.tsx`
-   - Add section grouping
-   - Integrate new selectors
-   - Add menu icons
-   - **File**: `src/components/admin/layout/Header/UserProfileDropdown.tsx`
+**Theme Change Error Handling:**
 
-4. ✅ Update `constants.ts`
-   - Add menu item icons
-   - Add keyboard shortcuts
-   - **File**: `src/components/admin/layout/Header/UserProfileDropdown/constants.ts`
+```typescript
+const handleThemeChange = async (newTheme: Theme) => {
+  const previousTheme = theme
 
-**Deliverables:**
-- ✅ Horizontal theme selector (80px height → 40px)
-- ✅ Compact status selector (120px height → 40px)
-- ✅ Section headers with separators
-- ✅ Icon system for all menu items
+  try {
+    setIsChanging(true)
 
-**Testing:**
-- Unit tests for new components
-- Visual regression tests
-- Keyboard navigation tests
-- Screen reader tests
+    // Attempt theme change
+    setTheme(newTheme)
+
+    // Verify theme actually changed
+    await new Promise(resolve => setTimeout(resolve, 200))
+
+    if (theme !== newTheme) {
+      throw new Error(`Theme change failed: expected ${newTheme}, got ${theme}`)
+    }
+
+    toast.success(`Theme changed to ${newTheme}`)
+  } catch (error) {
+    console.error('Theme change error:', error)
+    toast.error('Failed to change theme')
+
+    // Revert to previous theme
+    setTheme(previousTheme)
+  } finally {
+    setIsChanging(false)
+  }
+}
+```
+
+**Status Change Error Handling:**
+
+```typescript
+const handleStatusChange = async (newStatus: UserStatus) => {
+  const previousStatus = status
+
+  try {
+    setIsChanging(true)
+
+    // Update status
+    await updateUserStatus(newStatus)
+    setStatus(newStatus)
+
+    // Verify update
+    const updated = await getUserStatus()
+    if (updated !== newStatus) {
+      throw new Error(`Status update failed: expected ${newStatus}, got ${updated}`)
+    }
+
+    toast.success(`Status changed to ${newStatus}`)
+  } catch (error) {
+    console.error('Status change error:', error)
+    toast.error('Failed to change status')
+
+    // Revert to previous status
+    setStatus(previousStatus)
+  } finally {
+    setIsChanging(false)
+  }
+}
+```
 
 ---
 
-### Phase 2: Mobile Optimization (Week 2)
+## PART 5.2: PERFORMANCE MEASUREMENT STRATEGY
 
-**Tasks:**
-1. ✅ Create `MobileUserMenu` component
-   - Bottom sheet layout
-   - Touch-optimized targets (48px min)
+### Baseline Measurements (Before Implementation)
+
+Create a performance audit baseline:
+
+```typescript
+// Capture baseline metrics
+const baselineMetrics = {
+  bundleSize: 0,
+  dropdownOpenTime: 0,
+  themeSwitchTime: 0,
+  renderTime: 0,
+  lighthouse: 0
+}
+
+// Before starting development:
+// 1. Run: npm run build
+// 2. Check bundle size: du -sh .next
+// 3. Use Chrome DevTools Performance tab
+// 4. Run: npx lighthouse --view
+```
+
+### Performance Targets
+
+**Bundle Size:**
+- Current: ~10-12 KB
+- Target: <26 KB total
+- ThemeSelector.tsx: ~2-3 KB
+- StatusSelector.tsx: ~2-3 KB
+- Updated components: ~3-4 KB
+- Final total: ~17-22 KB ✅
+
+**Interaction Performance:**
+- Dropdown open time: <100ms
+- Theme switch time: <200ms
+- Status change time: <150ms
+- Mobile sheet animation: <300ms
+- Component render time: <50ms (with memoization)
+
+### Measurement Tools
+
+```
+- Lighthouse: npx lighthouse <url> --view
+- Chrome DevTools: Performance tab (Ctrl+Shift+I → Performance)
+- React DevTools Profiler: React tab → Profiler
+- WebPageTest: https://www.webpagetest.org
+```
+
+### Success Criteria
+
+- ✅ All bundle size targets met
+- ✅ Animation frame rate ≥ 60fps
+- ✅ No performance regressions
+- ✅ Lighthouse score ≥90
+
+---
+
+## PART 5.3: DETAILED TEST SPECIFICATIONS
+
+### Phase 1 Unit Tests (ThemeSelector & StatusSelector)
+
+**ThemeSelector Component Tests:**
+```
+- [ ] Renders 3 theme buttons (light, dark, system)
+- [ ] Correct theme is marked as active
+- [ ] Click handler calls setTheme with new value
+- [ ] Arrow key navigation works between buttons
+- [ ] Tab focus management correct (no focus trap)
+- [ ] ARIA roles (radiogroup, radio) present
+- [ ] ARIA checked state updates on selection
+- [ ] Toast notification shows on theme change
+- [ ] Memoization prevents unnecessary re-renders
+- [ ] Accessibility audit (axe) passes with no violations
+- [ ] Screen reader announces theme change
+- [ ] Focus visible indicator present
+```
+
+**StatusSelector Component Tests:**
+```
+- [ ] Renders compact status button
+- [ ] Popover opens on button click
+- [ ] All 3 status options visible in popover
+- [ ] Status selection updates UI immediately
+- [ ] Color dots display correctly (green, amber, red)
+- [ ] Keyboard navigation in popover (up, down, enter)
+- [ ] Click outside closes popover
+- [ ] Escape key closes popover
+- [ ] Toast notification on status change
+- [ ] ARIA roles correct (menuitemradio)
+- [ ] Accessibility audit (axe) passes
+- [ ] Focus returns to trigger on close
+```
+
+**UserProfileDropdown Integration Tests:**
+```
+- [ ] Dropdown opens on trigger click
+- [ ] All sections visible (Profile, Preferences, Quick Actions)
+- [ ] MenuSection headers display correctly
+- [ ] ThemeSelector integrated and functional
+- [ ] StatusSelector integrated and functional
+- [ ] Icons display for all menu items
+- [ ] Keyboard shortcuts work (⌘P, ⌘S, ⌘?, ⌘Q, etc)
+- [ ] Sign out flow completes
+- [ ] Focus returns to trigger on close
+- [ ] Escape key closes dropdown
+- [ ] ARIA attributes correct throughout
+```
+
+### Phase 2 Mobile Tests
+
+**ResponsiveUserMenu Component:**
+```
+- [ ] Desktop view displays (≥768px): UserProfileDropdown
+- [ ] Mobile view displays (<768px): MobileUserMenu
+- [ ] Responsive breakpoint works correctly
+- [ ] useMediaQuery returns correct value
+- [ ] No layout shift on breakpoint change
+- [ ] Touch events work on mobile
+- [ ] Swipe gestures work (swipe down to close)
+```
+
+**MobileUserMenu Component:**
+```
+- [ ] Bottom sheet opens on avatar click
+- [ ] All menu items visible in mobile layout
+- [ ] Menu items clickable with touch
+- [ ] Swipe down closes sheet
+- [ ] Touch targets ≥48×48px
+- [ ] Sheet height = 85vh
+- [ ] Sheet border radius = 20px top
+- [ ] Correct spacing and padding
+- [ ] Theme selector labels visible on mobile
+- [ ] Status selector functional on mobile
+- [ ] Sign out button destructive color
+- [ ] Sheet animation smooth (≤300ms)
+```
+
+### Phase 3 E2E Tests
+
+**User Flow Tests:**
+```
+- [ ] User opens dropdown
+- [ ] All sections visible (Profile, Preferences, Quick Actions)
+- [ ] Theme selection changes theme system-wide
+- [ ] Theme change persists on page reload
+- [ ] Status selection updates status indicator
+- [ ] Status persists in database/localStorage
+- [ ] Keyboard shortcuts work (⌘P opens profile, ⌘Q signs out)
+- [ ] Sign out flow completes
+- [ ] Focus returns to trigger on close
+- [ ] Mobile dropdown converts to sheet (<768px)
+- [ ] Desktop dropdown converts from sheet (≥768px)
+```
+
+**Cross-Browser Tests:**
+```
+- [ ] Chrome (latest 2 versions)
+- [ ] Firefox (latest 2 versions)
+- [ ] Safari (latest 2 versions)
+- [ ] Edge (latest)
+- [ ] iOS Safari (latest)
+- [ ] Android Chrome (latest)
+```
+
+### Phase 4 Visual Regression Tests
+
+```
+- [ ] Baseline screenshots created (all components, all states)
+- [ ] Theme changes (light, dark, system)
+- [ ] Status changes (online, away, busy)
+- [ ] Hover states captured
+- [ ] Focus states captured (keyboard navigation)
+- [ ] Mobile layout (portrait and landscape)
+- [ ] Animations smooth (no jank)
+- [ ] Text rendering correct (no pixelation)
+```
+
+### Accessibility Audit Tests
+
+```
+- [ ] axe DevTools: 0 violations
+- [ ] WCAG 2.1 AA compliance verified
+- [ ] Color contrast ≥ 3:1 for UI components
+- [ ] Color contrast ≥ 4.5:1 for text
+- [ ] Keyboard navigation complete (Tab, Arrow keys, Enter, Escape)
+- [ ] Focus management correct (focus trap, focus return)
+- [ ] Screen reader announces all content
+- [ ] Images have alt text
+- [ ] Form labels properly associated
+- [ ] Landmarks present (nav, main, etc)
+```
+
+---
+
+## PART 5.4: ROLLBACK & DEPLOYMENT STRATEGY
+
+### Rollback Plan
+
+**If Critical Issues Arise in Production (0-5 minutes):**
+1. Disable feature flag: `enableNewDropdown = false`
+2. Revert to previous UserProfileDropdown component
+3. Monitor error rates in Sentry
+4. Check user reports in support channel
+
+**Short Term Recovery (5-30 minutes):**
+1. Notify team in #incidents Slack channel
+2. Begin root cause analysis
+3. Check Sentry logs and browser console errors
+4. Identify affected browsers/devices
+
+**Fix & Re-deployment (30+ minutes):**
+1. Create hotfix branch from main
+2. Fix identified issue
+3. Run full test suite (unit, integration, E2E)
+4. Deploy to staging for verification
+5. Re-enable feature flag gradually (10% → 50% → 100%)
+
+**Post-Mortem:**
+1. Document what went wrong
+2. Update tests to prevent regression
+3. Add error monitoring/alerting
+4. Plan improvements
+
+### Pre-Deployment Checklist
+
+**Code Quality:**
+- [ ] TypeScript compilation: `npm run typecheck` passes
+- [ ] ESLint: `npm run lint` passes
+- [ ] All tests pass: `npm test`
+- [ ] E2E tests pass: `npm run test:e2e`
+- [ ] No console errors in dev
+- [ ] No hardcoded values or TODO comments
+- [ ] Code review approved
+
+**Functionality:**
+- [ ] Desktop dropdown opens/closes
+- [ ] Theme selector works (all 3 options)
+- [ ] Status selector works (all 3 options + popover)
+- [ ] Section grouping displays
+- [ ] Icons display correctly
+- [ ] Sign out flow works
+- [ ] Settings icon navigates
+- [ ] All links work
+
+**Accessibility:**
+- [ ] ARIA attributes present and correct
+- [ ] Keyboard navigation works (Tab, Enter, Escape, Arrows)
+- [ ] Focus management correct (returns to trigger)
+- [ ] Screen reader announces correctly
+- [ ] Color contrast meets WCAG AA
+- [ ] axe audit passes (0 violations)
+
+**Performance:**
+- [ ] Bundle size <26KB (component code only)
+- [ ] Theme switch time <200ms
+- [ ] Dropdown open time <100ms
+- [ ] No performance regressions
+- [ ] Lighthouse score ≥90
+
+**Mobile:**
+- [ ] Desktop works (≥768px)
+- [ ] Mobile sheet works (<768px)
+- [ ] Touch targets ≥44×44px
+- [ ] Swipe to close works
+- [ ] Responsive images optimized
+
+**Browser Compatibility:**
+- [ ] Chrome (latest 2 versions)
+- [ ] Firefox (latest 2 versions)
+- [ ] Safari (latest 2 versions)
+- [ ] Edge (latest)
+- [ ] iOS Safari (latest)
+- [ ] Android Chrome (latest)
+
+**Analytics & Monitoring:**
+- [ ] Error logging configured
+- [ ] Performance monitoring enabled
+- [ ] Feature flag configured
+- [ ] Rollback plan documented
+
+**Documentation:**
+- [ ] README updated
+- [ ] Storybook stories created
+- [ ] TypeScript types exported
+- [ ] Changelog updated
+- [ ] DEPLOYMENT.md updated
+
+---
+
+## PART 5.5: POST-DEPLOYMENT MONITORING (First 24 Hours)
+
+### Metrics to Monitor
+
+- Error rate (target: <1%)
+- Dropdown open/close times
+- Theme change success rate
+- Status change success rate
+- Mobile vs desktop breakdown
+- Browser-specific issues
+- User complaints in support
+
+### Alert Thresholds
+
+- Error rate > 5% → immediate investigation
+- Response time > 300ms → check performance
+- Mobile failures > 2% → potential mobile issue
+- Accessibility violations > 0 → check axe audit
+
+### Monitoring Tools
+
+- **Sentry**: Error tracking and real-time alerts
+- **Vercel Analytics**: Web vitals monitoring
+- **Chrome DevTools**: Manual testing
+- **Custom metrics**: Dropdown analytics (optional)
+
+### Check-in Schedule
+
+- **1 hour post-deploy**: Check Sentry/error logs
+- **4 hours post-deploy**: Check user reports and analytics
+- **24 hours post-deploy**: Full review, approve release
+
+---
+
+## PART 6: ANIMATION IMPLEMENTATION - CSS-FIRST APPROACH
+
+**IMPORTANT**: We're using CSS @keyframes animations instead of Framer Motion to keep bundle size minimal and remove external dependencies.
+
+### CSS Animation Definitions
+
+```css
+/* In globals.css or a new animations.css file */
+
+/* Theme transition effect */
+@keyframes theme-change {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Status dot pulse (online indicator) */
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Dropdown entrance animation */
+@keyframes dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dropdown exit animation */
+@keyframes dropdown-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
+
+/* Icon hover translation */
+@keyframes icon-translate {
+  to {
+    transform: translateX(2px);
+  }
+}
+
+/* Mobile sheet entrance */
+@keyframes sheet-enter {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Apply animations */
+.theme-changing {
+  animation: theme-change 300ms ease-in-out;
+}
+
+.status-pulse {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+.dropdown-content {
+  animation: dropdown-enter 150ms ease-out;
+}
+
+.dropdown-content.exiting {
+  animation: dropdown-exit 150ms ease-out;
+}
+
+.menu-icon:hover {
+  animation: icon-translate 150ms ease-out forwards;
+}
+
+.sheet-content {
+  animation: sheet-enter 300ms ease-out;
+}
+```
+
+---
+
+## PART 7: IMPLEMENTATION PLAN - UPDATED 5-WEEK TIMELINE (190 HOURS)
+
+### Phase 1: Core Layout Refactor (Week 1 - 40 hours)
+
+**Mon-Tue (16 hours)**: ThemeSelector Component
+1. Create `ThemeSelector.tsx` component
+   - Horizontal radio group layout
+   - Icon-only buttons with sr-only labels
+   - Active state styling with shadow
+   - Error handling (theme change failures)
+   - **File**: `src/components/admin/layout/Header/UserProfileDropdown/ThemeSelector.tsx`
+2. Create unit tests (8+ test cases from PART 5.3)
+3. Run axe accessibility audit
+
+**Wed-Thu (16 hours)**: StatusSelector Component
+1. Create `StatusSelector.tsx` component
+   - Compact button with Radix UI Popover
+   - Nested status options with color dots
+   - Error handling (status change failures)
+   - **File**: `src/components/admin/layout/Header/UserProfileDropdown/StatusSelector.tsx`
+2. Create unit tests (8+ test cases from PART 5.3)
+3. Run axe accessibility audit
+
+**Fri (8 hours)**: UserProfileDropdown Refactor
+1. Update `UserProfileDropdown.tsx`
+   - Add MenuSection helper for section grouping
+   - Integrate ThemeSelector and StatusSelector
+   - Add lucide icons to all menu items
+   - Add keyboard shortcut indicators (⌘P, ⌘S, etc)
+   - **File**: `src/components/admin/layout/Header/UserProfileDropdown.tsx`
+2. Update `UserInfo.tsx` component
+3. Create integration tests (5+ test cases from PART 5.3)
+
+**Week 1 Deliverables:**
+- ✅ Horizontal theme selector (40px height)
+- ✅ Compact status selector with popover (40px height)
+- ✅ Section headers with separators (3 sections)
+- ✅ Icon system (lucide-react for all items)
+- ✅ Error handling for theme/status changes
+- ✅ 30+ unit/integration tests passing
+- ✅ Zero accessibility violations
+
+---
+
+### Phase 2: Mobile Optimization + Testing (Week 2 - 40 hours)
+
+**Mon-Tue (16 hours)**: Mobile Components
+1. Create `MobileUserMenu.tsx` component
+   - Bottom sheet layout (85vh height)
+   - Touch-optimized buttons (48×48px minimum)
    - Swipe-to-dismiss gesture
    - **File**: `src/components/admin/layout/Header/MobileUserMenu.tsx`
 
-2. ✅ Implement responsive wrapper
-   - MediaQuery component
-   - Conditional rendering
-   - Shared state management
+2. Create `ResponsiveUserMenu.tsx` wrapper
+   - useMediaQuery hook (768px breakpoint)
+   - Conditional rendering (dropdown vs sheet)
+   - **File**: `src/components/admin/layout/Header/ResponsiveUserMenu.tsx`
 
-3. ✅ Mobile-specific styling
-   - Full-width buttons
-   - Larger touch targets
-   - Bottom sheet animations
+3. Create `useMediaQuery.ts` hook
+   - Responsive design hook
+   - Window resize listener
+   - SSR-safe implementation
+   - **File**: `src/hooks/useMediaQuery.ts`
 
-**Deliverables:**
-- ✅ Bottom sheet menu for mobile (<768px)
-- ✅ Touch-optimized UI (44×44px minimum)
-- ✅ Swipe gestures for dismissal
+**Wed-Thu (16 hours)**: Mobile Testing
+1. iOS Safari testing (iPad, iPhone)
+2. Android Chrome testing (various screen sizes)
+3. Touch event and gesture testing
+4. Responsive breakpoint testing
+5. Fix responsive layout issues
 
-**Testing:**
-- iOS Safari testing
-- Android Chrome testing
-- Touch event tests
-- Gesture recognition tests
+**Fri (8 hours)**: Integration Testing + Buffer
+1. Integration tests for responsive wrapper
+2. Visual regression tests (mobile layouts)
+3. Performance testing on mobile
+4. Address any remaining issues
 
----
-
-### Phase 3: Animations & Polish (Week 3)
-
-**Tasks:**
-1. ✅ Add theme transition animation
-   - Fade effect on change
-   - Toast notification
-   - Loading state
-
-2. ✅ Add dropdown animations
-   - Entrance/exit animations
-   - Smooth transitions
-   - Spring physics
-
-3. ✅ Add hover states
-   - Icon translations
-   - Background transitions
-   - Scale animations
-
-4. ✅ Add status indicator animation
-   - Pulse effect for "Online"
-   - Static for "Away" and "Busy"
-
-**Deliverables:**
-- ✅ Smooth theme transitions
-- ✅ Polished dropdown animations
-- ✅ Enhanced hover states
-- ✅ Status dot animations
-
-**Testing:**
-- Performance profiling
-- Animation smoothness tests
-- Reduced motion support
+**Week 2 Deliverables:**
+- ✅ Bottom sheet menu (<768px)
+- ✅ Touch-optimized UI (48×48px targets)
+- ✅ Swipe gestures working
+- ✅ Responsive breakpoint at 768px
+- ✅ Mobile/Desktop tests passing
+- ✅ No mobile performance regressions
 
 ---
 
-### Phase 4: Keyboard Shortcuts (Week 4)
+### Phase 3: Animations, CSS, & Polish (Week 3 - 40 hours)
 
-**Tasks:**
-1. ✅ Implement hotkey library
-   - `react-hotkeys-hook` integration
-   - Command palette (optional)
+**Mon-Tue (16 hours)**: CSS Animations
+1. Add CSS @keyframes animations (from PART 6)
+   - Theme transition (300ms fade)
+   - Dropdown entrance/exit (150ms)
+   - Status pulse (2s infinite)
+   - Icon hover (150ms translate)
+   - Mobile sheet animation (300ms slide up)
+   - **File**: `src/app/globals.css` or new `src/styles/animations.css`
 
-2. ✅ Add shortcut indicators
-   - Display in menu items
-   - Tooltip on hover
-   - Help modal with shortcuts
+2. Implement animation utilities
+   - Reduced motion support (prefers-reduced-motion)
+   - Cross-browser compatibility
 
-3. ✅ Add shortcut customization
-   - User preferences
-   - Conflict detection
-   - Reset to defaults
+**Wed-Thu (16 hours)**: Polish & Hover States
+1. Enhanced hover states
+   - Icon translations on menu items
+   - Background color transitions
+   - Smooth state changes
 
-**Deliverables:**
-- ✅ Working keyboard shortcuts
-- ✅ Shortcut hints in UI
-- ✅ Help documentation
+2. Enhanced focus states
+   - Visible focus indicators
+   - Ring styling and offset
+   - Keyboard navigation polish
 
-**Testing:**
-- Keyboard shortcut tests
-- Conflict resolution tests
-- Cross-platform compatibility
+3. Update visual regression baseline
+   - Capture new baseline with animations
+   - Verify animation smoothness (60fps)
+
+**Fri (8 hours)**: Performance & Refinement
+1. Performance profiling (React DevTools Profiler)
+2. Animation smoothness tests
+3. Reduced motion testing
+4. Bundle size verification (<26KB)
+
+**Week 3 Deliverables:**
+- ✅ Smooth theme transition (300ms)
+- ✅ Dropdown entrance/exit animations (150ms)
+- ✅ Status dot pulse animation (2s)
+- ✅ Icon hover animations (150ms)
+- ✅ Mobile sheet animation (300ms)
+- ✅ Reduced motion support
+- ✅ 60fps animation performance
+- ✅ <26KB bundle size
+
+---
+
+### Phase 4: Keyboard Shortcuts & Final Testing (Week 4 - 40 hours)
+
+**Mon-Tue (16 hours)**: Keyboard Shortcuts
+1. Create `useKeyboardShortcuts.ts` hook
+   - Native event handling (no external libraries)
+   - Support for modifiers (Ctrl, Shift, Alt, Meta)
+   - Platform-specific shortcuts (⌘ for Mac, Ctrl for Windows)
+   - **File**: `src/hooks/useKeyboardShortcuts.ts`
+
+2. Integrate shortcuts in UserProfileDropdown
+   - ⌘P / Ctrl+P: Open profile panel
+   - ⌘S / Ctrl+S: Go to security settings
+   - ⌘? / Ctrl+?: Go to help
+   - ⌘Q / Ctrl+Shift+Q: Sign out
+   - ⌘⇧L / Ctrl+Shift+L: Light theme
+   - ⌘⇧D / Ctrl+Shift+D: Dark theme
+
+3. Display keyboard shortcut hints
+   - Show in menu items (⌘P, ⌘S, etc)
+   - Right-aligned text display
+
+**Wed-Thu (16 hours)**: E2E & Accessibility Testing
+1. Complete E2E test suite
+   - Dropdown open/close flows
+   - Theme/status change persistence
+   - Keyboard shortcut functionality
+   - Sign out flow
+   - Mobile interactions
+
+2. Full accessibility audit
+   - WCAG 2.1 AA compliance verification
+   - Color contrast validation
+   - Screen reader testing
+   - Keyboard navigation testing
+   - Focus management verification
+
+3. Fix test failures and accessibility issues
+
+**Fri (8 hours)**: Buffer for Issues
+1. Address any remaining E2E test failures
+2. Fix accessibility issues (if any)
+3. Final code review preparation
+4. Documentation updates
+
+**Week 4 Deliverables:**
+- ✅ 6 keyboard shortcuts implemented
+- ✅ Shortcut hints displayed in UI
+- ✅ Cross-platform support (Mac/Windows/Linux)
+- ✅ E2E test suite passing (100%)
+- ✅ WCAG 2.1 AA compliance verified
+- ✅ Screen reader support confirmed
+- ✅ All keyboard navigation working
+- ✅ Zero accessibility violations
+
+---
+
+### Phase 5: Final Review, Documentation & Deployment (Week 5 - 30 hours)
+
+**Mon**: Documentation & Storybook
+1. Create Storybook stories for all components
+   - ThemeSelector: all states and props
+   - StatusSelector: open/closed states, all statuses
+   - UserProfileDropdown: desktop and mobile previews
+   - MobileUserMenu: mobile sheet preview
+2. Update README.md with new components
+3. Document keyboard shortcuts
+4. Add JSDoc comments to all files
+
+**Tue**: Code Review & Feedback
+1. Request code review from team
+2. Address feedback and comments
+3. Update CHANGELOG.md
+4. Prepare release notes
+
+**Wed**: Performance Verification
+1. Performance benchmarking (Lighthouse)
+2. Bundle size analysis and comparison
+3. Verify all performance targets met
+4. Create performance report
+
+**Thu**: Feature Flag & Deployment Prep
+1. Set up feature flag: `enableNewDropdown`
+2. Create deployment checklist
+3. Set up monitoring (Sentry, error tracking)
+4. Test feature flag toggle (enable/disable)
+
+**Fri**: Deploy to Staging + Smoke Tests
+1. Deploy to staging environment
+2. Run smoke tests on staging
+3. Verify all features working
+4. Get stakeholder sign-off
+5. Plan production deployment schedule
+
+**Week 5 Deliverables:**
+- ✅ Complete Storybook stories
+- ✅ Updated documentation
+- ✅ CHANGELOG updated
+- ✅ Performance report generated
+- ✅ Feature flag configured
+- ✅ Deployment checklist completed
+- ✅ Monitoring configured
+- ✅ Staging deployment verified
+- ✅ Ready for production release
+
+---
+
+**TOTAL PROJECT TIMELINE**: 190 hours (5 weeks @ 40 hrs/week)
+**Status**: ✅ READY FOR IMPLEMENTATION
 
 ---
 
@@ -1777,7 +2391,7 @@ Total                     25 KB (gzipped) +25% increase
 
 **Robust:**
 - ✅ 4.1.2 Name, Role, Value: All ARIA attributes correct
-- ✅ 4.1.3 Status Messages: Toast notifications use aria-live
+- ��� 4.1.3 Status Messages: Toast notifications use aria-live
 
 ---
 
