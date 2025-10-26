@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import UserProfileDropdown from "../UserProfileDropdown"
+import UserProfileDropdown from "../UserProfileDropdown.tsx"
 import { useSession } from "next-auth/react"
 import { useUserStatus } from "@/hooks/useUserStatus"
 import { useTheme } from "next-themes"
