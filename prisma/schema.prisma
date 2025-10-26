@@ -79,6 +79,7 @@ model User {
   favoriteSettings   FavoriteSetting[]
   auditEvents        AuditEvent[]
   userProfile        UserProfile?
+  menuCustomization  MenuCustomization?
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
