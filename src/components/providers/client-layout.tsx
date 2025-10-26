@@ -231,15 +231,23 @@ export function ClientLayout({ children, session, orgName, orgLogoUrl, contactEm
   const pathname = usePathname()
   const showPortalChat = pathname?.startsWith('/portal') || false
   const isAdminRoute = pathname?.startsWith('/admin') || false
+  const isPortalRoute = pathname?.startsWith('/portal') || false
+  const isDashboardRoute = isAdminRoute || isPortalRoute
 
-  // Ensure dark theme is only applied within admin dashboard
+  // Apply dark theme ONLY on admin dashboard and portal routes
   useEffect(() => {
     try {
-      if (!isAdminRoute && typeof document !== 'undefined') {
-        document.documentElement.classList.remove('dark')
+      if (typeof document !== 'undefined') {
+        if (isDashboardRoute) {
+          // Actively add dark class to admin/portal routes
+          document.documentElement.classList.add('dark')
+        } else {
+          // Remove dark class from all public pages
+          document.documentElement.classList.remove('dark')
+        }
       }
     } catch {}
-  }, [isAdminRoute])
+  }, [isDashboardRoute])
 
   // Global sidebar keyboard shortcuts
   useSidebarKeyboardShortcuts()
