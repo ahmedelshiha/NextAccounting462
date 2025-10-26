@@ -72,5 +72,6 @@ function PopoverArrow() {
 export { Popover, PopoverTrigger, PopoverContent, PopoverArrow }
 
 export function usePopover() {
-  return useContext(PopoverContext)
+  const ctx = useContext(PopoverContext)
+  return ctx || { open: false, setOpen: () => {} }
 }
