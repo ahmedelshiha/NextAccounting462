@@ -93,7 +93,7 @@ export const StatusSelector = memo(function StatusSelector({
     >
       <span className="text-sm font-medium text-muted-foreground">Status</span>
 
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -119,7 +119,7 @@ export const StatusSelector = memo(function StatusSelector({
             </span>
             <ChevronDown className={cn(
               "h-3 w-3 text-muted-foreground transition-transform duration-200",
-              usePopover()?.open && "rotate-180"
+              open && "rotate-180"
             )} />
           </button>
         </PopoverTrigger>
