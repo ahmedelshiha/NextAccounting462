@@ -27,6 +27,29 @@ interface AdminProvidersProps {
 }
 
 /**
+ * Menu Customization Mount Component
+ *
+ * Initializes the menu customization store when the admin dashboard loads.
+ * This ensures user preferences are loaded from the server on app bootstrap.
+ */
+function MenuCustomizationMount() {
+  const { loadCustomization } = useMenuCustomizationStore()
+
+  React.useEffect(() => {
+    try {
+      loadCustomization().catch((error) => {
+        console.error('Failed to load menu customization:', error)
+        // Silently fail - the store will use default configuration
+      })
+    } catch (error) {
+      console.error('Menu customization initialization error:', error)
+    }
+  }, [loadCustomization])
+
+  return null
+}
+
+/**
  * Performance monitoring wrapper component that tracks admin dashboard metrics
  */
 function PerformanceWrapper({ children }: { children: ReactNode }) {
