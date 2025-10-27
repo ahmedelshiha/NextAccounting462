@@ -517,3 +517,32 @@ Recommended next steps (operational):
 **Total Implementation Time:** ~2 weeks (24 tasks, ~20 days of work)
 **Test Coverage:** 90%+ overall (2,300+ lines of test code)
 **Status:** ✅ Production Ready
+
+## Test Run: unit+integration (executed)
+
+Date: 2025-10-27
+
+Commands run:
+- pnpm exec vitest --run src/lib/menu src/stores/admin --reporter dot --threads false
+- pnpm exec vitest --run --reporter dot --threads false tests/integration
+
+Summary:
+- Tests executed: 146
+- Passed: 141
+- Failed: 5
+
+Failing tests (details):
+1. src/lib/menu/__tests__/menuUtils.test.ts > menuUtils > applyCustomizationToNavigation > should remove parent items when all children are hidden
+   - Error: Assertion failed — expected 0 but received undefined (the test expects section.items to exist but function returned no sections for this case).
+2. src/stores/admin/__tests__/layout.store.test.ts (4 tests)
+   - Error: TypeError: storage.setItem is not a function — test environment lacks a proper localStorage mock for the store's persistence middleware.
+
+Immediate recommended fixes:
+- Fix applyCustomizationToNavigation to ensure sections array always exists and that sections[0]?.items is defined in edge cases where all children are filtered out.
+- Add or improve localStorage mocking in layout.store tests (provide a simple mock implementation or use vitest's globalSetup to polyfill window.localStorage/storage used by zustand persistence middleware).
+
+Next steps I can take now (choose one):
+- I can implement the minimal fixes for the two failing areas and re-run the tests.
+- I can open an issue/PR with the failing test details and suggested fixes for the team to review.
+
+Please confirm which action you want me to take next.
