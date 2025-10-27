@@ -122,6 +122,8 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
   }, [resetCustomization, clearDraft, onClose])
 
   // Check feature flag and modal visibility - these are safe after all hooks
+  // If the feature is not enabled for the current user, or the modal is not open, return null.
+  // The isEnabledForCurrentUser check is crucial here.
   if (!isEnabledForCurrentUser || !isOpen) return null
 
   return (
