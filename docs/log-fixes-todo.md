@@ -66,3 +66,54 @@
    - [x] /api/admin/tasks/analytics returns 200 with valid shape — Implemented with tests
    - [x] Perf logs show endpoint names; p95 < 1s for most /api/* — Implemented with endpoint tracking
    - [x] 401/403 handled with graceful UI — AuthErrorFallback component ready
+
+---
+
+## 🎯 FINAL IMPLEMENTATION SUMMARY
+
+### Files Modified/Created:
+
+**Backend/API Layer:**
+- `src/app/api/admin/tasks/analytics/route.ts` — Added tenant filters, structured logging, dev-mode error details
+- `src/app/api/admin/tasks/analytics/__tests__/route.test.ts` — Comprehensive unit tests (NEW)
+- `src/lib/prisma-query-monitor.ts` — Slow-query monitoring with sampling (NEW)
+- `src/lib/prisma.ts` — Integrated query monitoring setup
+
+**Frontend/Hook Layer:**
+- `src/hooks/useServicesData.ts` — Added AuthError detection and graceful handling
+- `src/hooks/useUnifiedData.ts` — Added custom fetcher with auth error detection
+- `src/hooks/usePerformanceMonitoring.ts` — Added endpoint tracking, sampling, p95 metrics
+
+**UI Components:**
+- `src/components/dashboard/AuthErrorFallback.tsx` — Auth error fallback component (NEW)
+- `src/components/admin/dashboard/AdminOverview.tsx` — Integrated auth error fallback
+
+### Key Improvements:
+
+1. **Tenant Scoping**: Fixed 500 error on `/api/admin/tasks/analytics` by ensuring all Prisma queries include proper tenant filters
+
+2. **Auth Error Handling**: Graceful 401/403 responses with user-friendly fallback UI and CTAs (sign-in, retry)
+
+3. **Performance Observability**:
+   - Per-endpoint tracking with p95 percentile calculation
+   - Slow-query detection on Prisma with 20% sampling
+   - 10% sampling on client-side perf alerts to reduce noise
+   - URL/endpoint context in performance logs
+
+4. **Structured Logging**: All errors include context, duration, and tenant info for better debugging
+
+### Test Coverage:
+
+- Unit tests for analytics endpoint (6 test cases)
+- Tenant filter verification
+- Auth error handling validation
+- Empty data handling
+- Development-mode error details
+
+### Deployment Notes:
+
+- No breaking changes
+- Backward compatible
+- Performance monitoring is opt-in (dev mode only by default)
+- Auth error handling is passive (doesn't change API contracts)
+- Tests use standard vitest mocking patterns
