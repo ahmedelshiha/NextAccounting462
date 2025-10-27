@@ -7,19 +7,27 @@ import { useAdminLayoutStore } from '../layout.store'
 describe('AdminLayoutStore', () => {
   beforeEach(() => {
     // Setup proper localStorage mock for tests
+    const store = new Map<string, string>()
+
     const localStorageMock = {
-      getItem: vi.fn(() => null),
-      setItem: vi.fn(),
-      removeItem: vi.fn(),
-      clear: vi.fn(),
-      key: vi.fn(() => null),
-      length: 0,
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => store.set(key, value),
+      removeItem: (key: string) => store.delete(key),
+      clear: () => store.clear(),
+      key: (index: number) => {
+        const keys = Array.from(store.keys())
+        return keys[index] ?? null
+      },
+      get length() {
+        return store.size
+      },
     }
 
     // Assign to global object
     Object.defineProperty(window, 'localStorage', {
       value: localStorageMock,
       writable: true,
+      configurable: true,
     })
 
     // reset store state
@@ -31,8 +39,8 @@ describe('AdminLayoutStore', () => {
         expandedGroups: [],
       },
     })
-    // clear any mocked storage calls
-    vi.clearAllMocks()
+    // clear localStorage store
+    store.clear()
   })
 
   it('initializes with default state', () => {
