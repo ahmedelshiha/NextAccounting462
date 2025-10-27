@@ -170,7 +170,8 @@ export function SectionsTab({ draftCustomization }: SectionsTabProps) {
     const missingDefaultSections = DEFAULT_MENU_SECTIONS.filter(s => !validSectionIds.includes(s.id));
     const finalSectionOrder = [...validSectionIds, ...missingDefaultSections.map(s => s.id)];
 
-    return finalSectionOrder.map(id => DEFAULT_MENU_SECTIONS.find(s => s.id === id)).filter(Boolean);
+    const merged = finalSectionOrder.map(id => DEFAULT_MENU_SECTIONS.find(s => s.id === id)).filter((s): s is MenuSection => Boolean(s))
+    return merged
 
   }, [draftCustomization.sectionOrder])
 
