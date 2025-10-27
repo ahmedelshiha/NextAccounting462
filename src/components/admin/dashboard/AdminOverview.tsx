@@ -118,6 +118,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: analytics,
     error: analyticsError,
+    authError: analyticsAuthError,
     isLoading: analyticsLoading,
   } = useUnifiedData<AnalyticsResponse>({
     key: 'analytics',
@@ -129,6 +130,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: bookingStats,
     error: bookingStatsError,
+    authError: bookingStatsAuthError,
     isLoading: bookingStatsLoading,
   } = useUnifiedData<{ success?: boolean; data?: BookingStatsPayload }>({
     key: 'bookings/stats',
@@ -140,6 +142,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: serviceRequestsAnalytics,
     error: serviceRequestsError,
+    authError: serviceRequestsAuthError,
     isLoading: serviceRequestsLoading,
   } = useUnifiedData<{ success?: boolean; data?: ServiceRequestAnalyticsPayload }>({
     key: 'service-requests/analytics',
@@ -150,6 +153,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: tasksAnalyticsData,
     error: tasksError,
+    authError: tasksAuthError,
     isLoading: tasksLoading,
   } = useUnifiedData<TaskAnalyticsPayload>({
     key: 'tasks/analytics',
@@ -160,6 +164,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: servicesStatsData,
     error: servicesError,
+    authError: servicesAuthError,
     isLoading: servicesStatsLoading,
   } = useUnifiedData<ServicesStatsPayload>({
     key: 'services/stats',
@@ -172,6 +177,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: usersOverview,
     error: usersError,
+    authError: usersAuthError,
     isLoading: usersLoading,
   } = useUnifiedData<UsersStatsPayload>({
     key: 'stats/users',
