@@ -13,7 +13,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical } from 'lucide-react'
-import { MenuCustomizationData, MenuSection } from '@/types/admin/menuCustomization'
+import { MenuCustomizationData, MenuSection, MenuItem } from '@/types/admin/menuCustomization'
 import { useMenuCustomizationModalStore } from '@/stores/admin/menuCustomizationModal.store'
 import { DEFAULT_MENU_SECTIONS } from '@/lib/menu/defaultMenu'
 
@@ -87,7 +87,7 @@ function SortableSection({ section, expandedSections, toggleSectionExpanded, tog
               )
 
               // Recursively render children if they exist and are not hidden
-              const renderItem = (currentItem, depth = 0) => {
+              const renderItem = (currentItem: MenuItem, depth = 0) => {
                 const currentIsHidden = draftCustomization.hiddenItems.includes(currentItem.href || '')
                 const hasChildren = currentItem.children && currentItem.children.length > 0
 
