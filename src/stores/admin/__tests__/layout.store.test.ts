@@ -1,4 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
+// @vitest-environment jsdom
+import { renderHook, act } from '@testing-library/react'
 import { useAdminLayoutStore } from '../layout.store'
 
 describe('AdminLayoutStore', () => {
