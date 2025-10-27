@@ -372,6 +372,22 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
 
   const isLoading = analyticsLoading || bookingStatsLoading || serviceRequestsLoading || tasksLoading || servicesStatsLoading || usersLoading
 
+  // Show auth error fallback if any endpoint returns 401/403
+  if (firstAuthError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <AuthErrorFallback
+          error={firstAuthError}
+          title={firstAuthError.statusCode === 401 ? 'Session Expired' : 'Access Denied'}
+          description={firstAuthError.statusCode === 401
+            ? 'Your session has expired. Please sign in again to access the dashboard.'
+            : 'You do not have permission to view the dashboard. Contact your administrator for access.'
+          }
+        />
+      </div>
+    )
+  }
+
   const activityData = {
     recentBookings: (recentBookingsResp?.bookings || []).map((b: any) => ({
       id: b.id,
