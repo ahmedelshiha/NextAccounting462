@@ -14,7 +14,7 @@ const nextConfig = {
   
   
   // External packages for server components
-  serverExternalPackages: ['@sentry/nextjs'],
+  serverExternalPackages: ['@sentry/nextjs', 'ioredis'],
   // Prevent bundling node built-ins into client bundles (stubs for Turbopack/webpack)
   webpack: (config, { isServer }) => {
     if (!isServer) {
