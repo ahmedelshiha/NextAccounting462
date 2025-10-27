@@ -31,12 +31,9 @@ export interface MenuCustomizationModalProps {
  * Main menu customization modal component
  */
 export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationModalProps) {
+  // All hooks must be called unconditionally at the top level
   const { isEnabledForCurrentUser } = useMenuCustomizationFeature()
 
-  // Don't render if feature is not enabled for this user
-  if (!isEnabledForCurrentUser) {
-    return null
-  }
   const [selectedTab, setSelectedTab] = useState<'sections' | 'practice' | 'bookmarks' | 'books'>(
     'sections'
   )
@@ -124,7 +121,8 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
     }
   }, [resetCustomization, clearDraft, onClose])
 
-  if (!isOpen) return null
+  // Check feature flag and modal visibility - these are safe after all hooks
+  if (!isEnabledForCurrentUser || !isOpen) return null
 
   return (
     <>
