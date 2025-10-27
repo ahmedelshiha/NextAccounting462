@@ -202,8 +202,6 @@ const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
   }
 }
 
-const ALLOWED_ADMIN_ROLES = ['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF']
-
 export const GET = withTenantContext(_api_GET, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })
 export const POST = withTenantContext(_api_POST, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })
 export const DELETE = withTenantContext(_api_DELETE, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })
