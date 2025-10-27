@@ -11,6 +11,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import React from 'react'
 import { SWRConfig } from 'swr'
 import { RealtimeProvider } from '@/components/dashboard/realtime/RealtimeProvider'
 import { ErrorBoundary } from '@/components/providers/error-boundary'
@@ -19,10 +20,34 @@ import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring'
 import { UXMonitor } from '@/components/admin/monitoring/UXMonitor'
 import useRoleSync from '@/hooks/useRoleSync'
 import { TenantSyncProvider } from '@/components/providers/TenantSyncProvider'
+import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
 
 interface AdminProvidersProps {
   children: ReactNode
   session?: any
+}
+
+/**
+ * Menu Customization Mount Component
+ *
+ * Initializes the menu customization store when the admin dashboard loads.
+ * This ensures user preferences are loaded from the server on app bootstrap.
+ */
+function MenuCustomizationMount() {
+  const { loadCustomization } = useMenuCustomizationStore()
+
+  React.useEffect(() => {
+    try {
+      loadCustomization().catch((error) => {
+        console.error('Failed to load menu customization:', error)
+        // Silently fail - the store will use default configuration
+      })
+    } catch (error) {
+      console.error('Menu customization initialization error:', error)
+    }
+  }, [loadCustomization])
+
+  return null
 }
 
 /**
@@ -94,6 +119,7 @@ export function AdminProviders({ children }: AdminProvidersProps) {
             <RealtimeProvider>
               <PerformanceWrapper>
                 <RoleSyncMount />
+                <MenuCustomizationMount />
                 <UXMonitor>
                   {children}
                 </UXMonitor>

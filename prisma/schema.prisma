@@ -79,6 +79,7 @@ model User {
   favoriteSettings   FavoriteSetting[]
   auditEvents        AuditEvent[]
   userProfile        UserProfile?
+  menuCustomization  MenuCustomization?
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
@@ -1643,4 +1644,22 @@ model CrowdinIntegration {
 
   @@index([tenantId])
   @@map("crowdin_integrations")
+}
+
+// Menu customization settings per-user
+model MenuCustomization {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sectionOrder    Json     @default("[]")      // String[] - e.g., ["dashboard", "business", ...]
+  hiddenItems     Json     @default("[]")      // String[] - e.g., ["admin/analytics", "admin/reports"]
+  practiceItems   Json     @default("[]")      // PracticeItem[]
+  bookmarks       Json     @default("[]")      // Bookmark[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@map("menu_customizations")
 }
