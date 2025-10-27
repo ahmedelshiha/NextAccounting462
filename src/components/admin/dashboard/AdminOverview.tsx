@@ -298,6 +298,17 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
     return analytics?.revenue_trend
   }, [servicesPayload, analytics, revenueMetrics.target])
 
+  const authErrors = [
+    analyticsAuthError,
+    bookingStatsAuthError,
+    serviceRequestsAuthError,
+    tasksAuthError,
+    servicesAuthError,
+    usersAuthError,
+  ].filter(Boolean)
+
+  const firstAuthError = authErrors.length > 0 ? authErrors[0] : null
+
   const combinedError = analyticsError || bookingStatsError || serviceRequestsError || tasksError || servicesError || usersError
   const errorMessage = combinedError ? 'Failed to load dashboard metrics' : null
 
