@@ -111,17 +111,17 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
     const customization = await prisma.menuCustomization.upsert({
       where: { userId },
       update: {
-        sectionOrder: body.sectionOrder,
-        hiddenItems: body.hiddenItems,
-        practiceItems: body.practiceItems,
-        bookmarks: body.bookmarks,
+        sectionOrder: body.sectionOrder as Prisma.InputJsonValue,
+        hiddenItems: body.hiddenItems as Prisma.InputJsonValue,
+        practiceItems: body.practiceItems as Prisma.InputJsonValue,
+        bookmarks: body.bookmarks as Prisma.InputJsonValue,
       },
       create: {
         userId,
-        sectionOrder: body.sectionOrder,
-        hiddenItems: body.hiddenItems,
-        practiceItems: body.practiceItems,
-        bookmarks: body.bookmarks,
+        sectionOrder: body.sectionOrder as Prisma.InputJsonValue,
+        hiddenItems: body.hiddenItems as Prisma.InputJsonValue,
+        practiceItems: body.practiceItems as Prisma.InputJsonValue,
+        bookmarks: body.bookmarks as Prisma.InputJsonValue,
       },
     })
 
