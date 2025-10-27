@@ -13,7 +13,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical } from 'lucide-react'
-import { MenuCustomizationData } from '@/types/admin/menuCustomization'
+import { MenuCustomizationData, MenuSection, MenuItem } from '@/types/admin/menuCustomization'
 import { useMenuCustomizationModalStore } from '@/stores/admin/menuCustomizationModal.store'
 import { DEFAULT_MENU_SECTIONS } from '@/lib/menu/defaultMenu'
 
@@ -24,7 +24,7 @@ export interface SectionsTabProps {
 /**
  * Draggable Section Item Component
  */
-function SortableSection({ section, expandedSections, toggleSectionExpanded, toggleItemVisibility, draftCustomization }) {
+function SortableSection({ section, expandedSections, toggleSectionExpanded, toggleItemVisibility, draftCustomization }: { section: MenuSection; expandedSections: Set<string>; toggleSectionExpanded: (id: string) => void; toggleItemVisibility: (path: string) => void; draftCustomization: MenuCustomizationData }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section.id })
 
   const style = {
@@ -87,7 +87,7 @@ function SortableSection({ section, expandedSections, toggleSectionExpanded, tog
               )
 
               // Recursively render children if they exist and are not hidden
-              const renderItem = (currentItem, depth = 0) => {
+              const renderItem = (currentItem: MenuItem, depth = 0) => {
                 const currentIsHidden = draftCustomization.hiddenItems.includes(currentItem.href || '')
                 const hasChildren = currentItem.children && currentItem.children.length > 0
 
@@ -123,7 +123,7 @@ function SortableSection({ section, expandedSections, toggleSectionExpanded, tog
                         )}
                       </button>
                     </div>
-                    {hasChildren && !currentIsHidden && currentItem.children.map(child => renderItem(child, depth + 1))}
+                    {hasChildren && !currentIsHidden && currentItem.children?.map(child => renderItem(child, depth + 1))}
                   </React.Fragment>
                 )
               }
@@ -170,7 +170,8 @@ export function SectionsTab({ draftCustomization }: SectionsTabProps) {
     const missingDefaultSections = DEFAULT_MENU_SECTIONS.filter(s => !validSectionIds.includes(s.id));
     const finalSectionOrder = [...validSectionIds, ...missingDefaultSections.map(s => s.id)];
 
-    return finalSectionOrder.map(id => DEFAULT_MENU_SECTIONS.find(s => s.id === id)).filter(Boolean);
+    const merged = finalSectionOrder.map(id => DEFAULT_MENU_SECTIONS.find(s => s.id === id)).filter((s): s is MenuSection => Boolean(s))
+    return merged
 
   }, [draftCustomization.sectionOrder])
 
