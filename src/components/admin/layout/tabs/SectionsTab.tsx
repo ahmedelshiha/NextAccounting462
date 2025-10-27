@@ -24,7 +24,7 @@ export interface SectionsTabProps {
 /**
  * Draggable Section Item Component
  */
-function SortableSection({ section, expandedSections, toggleSectionExpanded, toggleItemVisibility, draftCustomization }) {
+function SortableSection({ section, expandedSections, toggleSectionExpanded, toggleItemVisibility, draftCustomization }: { section: MenuSection; expandedSections: Set<string>; toggleSectionExpanded: (id: string) => void; toggleItemVisibility: (path: string) => void; draftCustomization: MenuCustomizationData }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section.id })
 
   const style = {
