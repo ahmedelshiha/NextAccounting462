@@ -185,7 +185,57 @@ export function usePerformanceMonitoring(componentName: string = 'AdminDashboard
 
         const resourceObserver = new PerformanceObserver((list) => {
           list.getEntries().forEach((entry: any) => {
-            if (entry.name.includes('/api/')) updateMetric('apiResponseTime', entry.duration)
+            if (entry.name.includes('/api/')) {
+              const duration = entry.duration
+              const endpoint = extractApiEndpoint(entry.name)
+
+              // Update global apiResponseTime metric
+              updateMetric('apiResponseTime', duration)
+
+              // Track per-endpoint metrics
+              if (!apiMetricsRef.current[endpoint]) {
+                apiMetricsRef.current[endpoint] = []
+              }
+              apiMetricsRef.current[endpoint].push(duration)
+
+              // Check threshold with endpoint context
+              const threshold = PERFORMANCE_THRESHOLDS.apiResponseTime
+              if (duration > threshold) {
+                checkThreshold('apiResponseTime', duration, endpoint)
+              }
+
+              // Update aggregated endpoint metrics
+              const durations = apiMetricsRef.current[endpoint]
+              const maxDuration = Math.max(...durations)
+              const totalDuration = durations.reduce((a, b) => a + b, 0)
+              const sorted = [...durations].sort((a, b) => a - b)
+              const p95Index = Math.floor(sorted.length * 0.95)
+              const p95 = sorted[p95Index] || 0
+
+              setMetrics(prev => ({
+                ...prev,
+                apiEndpointMetrics: {
+                  ...prev.apiEndpointMetrics,
+                  [endpoint]: {
+                    count: durations.length,
+                    maxDuration,
+                    totalDuration,
+                    p95,
+                  }
+                }
+              }))
+
+              // Log slow endpoint if sampling hits
+              if (duration > threshold && Math.random() < ALERT_SAMPLING_RATE) {
+                logger.info('Slow API endpoint detected', {
+                  endpoint,
+                  duration,
+                  threshold,
+                  p95,
+                  callCount: durations.length,
+                })
+              }
+            }
           })
         })
         resourceObserver.observe({ entryTypes: ['resource'] })
