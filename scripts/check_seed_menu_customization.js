@@ -4,7 +4,7 @@ const { PrismaClient } = require('@prisma/client')
   const prisma = new PrismaClient()
   try {
     console.log('Checking for table menu_customizations...')
-    const res = await prisma.$queryRawUnsafe("SELECT to_regclass('public.menu_customizations') as tbl")
+    const res = await prisma.$queryRawUnsafe("SELECT to_regclass('public.menu_customizations')::text as tbl")
     const tableName = Array.isArray(res) ? res[0].tbl : res.tbl
     if (!tableName) {
       console.error('Table menu_customizations does NOT exist.')
