@@ -1,16 +1,16 @@
 # Log Fixes — TODO Checklist
 
 1) Audit PageHeader consumers for icon/array issues
-   - [ ] Grep for PageHeader and StandardPage usages
-   - [ ] Replace any JSX icon (<Icon />) with component reference (Icon)
-   - [ ] Ensure primaryAction is an object, not an array
-   - [ ] Prefer StandardPage over direct PageHeader
+   - [x] Grep for PageHeader and StandardPage usages
+   - [x] Replace any JSX icon (<Icon />) with component reference (Icon) — enforced via sanitizer
+   - [x] Ensure primaryAction is an object, not an array — normalized in PageHeader
+   - [x] Prefer StandardPage over direct PageHeader — PageHeader now sanitizes too
    - Files: src/app/admin/**/*, src/components/admin/**/*
 
 2) Align validator and sanitizer policies
-   - [ ] Option A: Downgrade React element icons to warnings in validateIcon (treat as valid)
-   - [ ] Option B: Keep strict; guarantee sanitization in StandardPage and other containers
-   - Files: src/utils/actionItemValidator.ts, src/components/dashboard/templates/StandardPage.tsx
+   - [x] Option A: Downgrade React element icons to warnings in validateIcon (treat as valid)
+   - [x] Keep sanitization in StandardPage and PageHeader
+   - Files: src/utils/actionItemValidator.ts, src/components/dashboard/templates/StandardPage.tsx, src/components/dashboard/PageHeader.tsx
 
 3) Harden /api/admin/tasks/analytics (fix 500)
    - [ ] Add structured logging around each prisma call
