@@ -78,7 +78,6 @@ export const DraggableItem = React.forwardRef<HTMLDivElement, DraggableItemProps
           }
           ${isOverlay ? 'shadow-lg ring-2 ring-blue-500' : ''}
         `}
-
         tabIndex={0}
         aria-grabbed={isDragging}
         aria-label={`${label}, draggable item`}
