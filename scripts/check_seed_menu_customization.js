@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
 
 ;(async () => {
-  const prisma = new PrismaClient()
+  const { default: prisma } = await import('../src/lib/prisma')
   try {
     console.log('Checking for table menu_customizations...')
     const res = await prisma.$queryRawUnsafe("SELECT to_regclass('public.menu_customizations')::text as tbl")
