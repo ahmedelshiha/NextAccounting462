@@ -1,5 +1,6 @@
 import type { PrismaClient as PrismaClientType } from '@prisma/client'
 import { registerTenantGuard } from '@/lib/prisma-tenant-guard'
+import { setupPrismaQueryMonitor } from '@/lib/prisma-query-monitor'
 
 declare global {
   // Cache Prisma in global for hot-reload/dev to avoid multiple instances
