@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withTenantContext } from '@/lib/api-wrapper'
 import { tenantContext } from '@/lib/tenant-context'
+import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { MenuCustomizationData } from '@/types/admin/menuCustomization'
 import { validateMenuCustomization } from '@/lib/menu/menuValidator'
