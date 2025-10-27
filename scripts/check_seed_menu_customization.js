@@ -14,8 +14,43 @@ const { PrismaClient } = require('@prisma/client')
 
     console.log('Table exists:', tableName)
 
-    // Upsert a test record
+    // Ensure test tenant exists
+    const tenantSlug = 'test-tenant'
+    let tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } })
+    if (!tenant) {
+      console.log('Creating test tenant...')
+      tenant = await prisma.tenant.create({ data: { slug: tenantSlug, name: 'Test Tenant' } })
+      console.log('Created tenant id=', tenant.id)
+    } else {
+      console.log('Using existing tenant id=', tenant.id)
+    }
+
+    // Ensure test user exists (use specific id to match menu customization FK)
     const userId = 'test-user-menu-customization'
+    let user = await prisma.user.findUnique({ where: { id: userId } })
+    if (!user) {
+      console.log('Creating test user with id=', userId)
+      user = await prisma.user.create({
+        data: {
+          id: userId,
+          tenantId: tenant.id,
+          email: 'test-user@example.com',
+          name: 'Test User',
+        },
+      })
+      console.log('Created user id=', user.id)
+
+      // Also create tenant membership
+      try {
+        await prisma.tenantMembership.create({ data: { userId: user.id, tenantId: tenant.id, isDefault: true } })
+      } catch (e) {
+        // ignore if exists
+      }
+    } else {
+      console.log('Using existing user id=', user.id)
+    }
+
+    // Upsert a test record
     const testData = {
       sectionOrder: ['dashboard','business','financial','operations','system'],
       hiddenItems: ['admin/analytics'],
@@ -40,7 +75,7 @@ const { PrismaClient } = require('@prisma/client')
       ],
     }
 
-    console.log('Upserting test record for userId=', userId)
+    console.log('Upserting test menu customization for userId=', userId)
     const upserted = await prisma.menuCustomization.upsert({
       where: { userId },
       update: {
