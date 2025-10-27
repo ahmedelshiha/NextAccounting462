@@ -123,7 +123,7 @@ function SortableSection({ section, expandedSections, toggleSectionExpanded, tog
                         )}
                       </button>
                     </div>
-                    {hasChildren && !currentIsHidden && currentItem.children.map(child => renderItem(child, depth + 1))}
+                    {hasChildren && !currentIsHidden && currentItem.children?.map(child => renderItem(child, depth + 1))}
                   </React.Fragment>
                 )
               }
