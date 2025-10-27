@@ -92,7 +92,18 @@ export const applyCustomizationToNavigation = (
   }
 
   // Remove sections with no items
-  sections = sections.filter((section) => section.items.length > 0)
+  // Keep empty sections if the original navigation had items with children
+  sections = sections.filter((section) => {
+    if (section.items.length > 0) return true
+
+    // Find original section to inspect original items
+    const original = navigation.find((s) => s.section === section.section)
+    if (!original) return false
+
+    // If the original section had at least one item with children, preserve the empty section
+    const hadChildren = original.items.some((item) => Array.isArray(item.children) && item.children.length > 0)
+    return hadChildren ? true : false
+  })
 
   return sections
 }
