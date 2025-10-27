@@ -17,6 +17,7 @@ import AdminErrorBoundary from './AdminErrorBoundary'
 import { useResponsive } from '@/hooks/admin/useResponsive'
 import { useSidebarCollapsed, useSidebarActions } from '@/stores/admin/layout.store.selectors'
 import type { AdminDashboardLayoutProps } from '@/types/admin/layout'
+import { MenuCustomizationModal } from './MenuCustomizationModal'
 
 /**
  * AdminDashboardLayout - The main layout component for admin dashboard
@@ -96,6 +97,9 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
     }
   }, [responsive, sidebarCollapsed])
 
+  // Local state for menu customization modal
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false)
+
   // Show loading skeleton during SSR/hydration
   if (!isClient) {
     return (
@@ -151,6 +155,7 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
         isCollapsed={sidebarCollapsed}
         isMobile={responsive.isMobile}
         onClose={handleMobileSidebarClose}
+        onOpenMenuCustomization={() => setIsMenuModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -178,6 +183,12 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
         {/* Admin Footer */}
         <AdminFooter />
       </div>
+
+      {/* Menu Customization Modal */}
+      <MenuCustomizationModal
+        isOpen={isMenuModalOpen}
+        onClose={() => setIsMenuModalOpen(false)}
+      />
     </div>
     </AdminErrorBoundary>
   )
