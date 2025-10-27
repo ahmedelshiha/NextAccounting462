@@ -6,31 +6,7 @@ import { useAdminLayoutStore } from '../layout.store'
 
 describe('AdminLayoutStore', () => {
   beforeEach(() => {
-    // Setup proper localStorage mock for tests
-    const store = new Map<string, string>()
-
-    const localStorageMock = {
-      getItem: (key: string) => store.get(key) ?? null,
-      setItem: (key: string, value: string) => store.set(key, value),
-      removeItem: (key: string) => store.delete(key),
-      clear: () => store.clear(),
-      key: (index: number) => {
-        const keys = Array.from(store.keys())
-        return keys[index] ?? null
-      },
-      get length() {
-        return store.size
-      },
-    }
-
-    // Assign to global object
-    Object.defineProperty(window, 'localStorage', {
-      value: localStorageMock,
-      writable: true,
-      configurable: true,
-    })
-
-    // reset store state
+    // reset store state to default
     useAdminLayoutStore.setState({
       sidebar: {
         collapsed: false,
@@ -39,8 +15,6 @@ describe('AdminLayoutStore', () => {
         expandedGroups: [],
       },
     })
-    // clear localStorage store
-    store.clear()
   })
 
   it('initializes with default state', () => {
