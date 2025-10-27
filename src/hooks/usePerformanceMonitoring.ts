@@ -16,6 +16,7 @@ interface PerformanceMetrics {
   sessionStartTime: number
   routeChangeTime?: number
   sidebarToggleTime?: number
+  apiEndpointMetrics?: Record<string, { count: number; maxDuration: number; totalDuration: number; p95: number }>
 }
 
 interface PerformanceAlert {
@@ -24,6 +25,7 @@ interface PerformanceAlert {
   value: number
   threshold: number
   timestamp: number
+  url?: string
 }
 
 const PERFORMANCE_THRESHOLDS = {
@@ -35,16 +37,37 @@ const PERFORMANCE_THRESHOLDS = {
   renderTime: 500,
 }
 
+/**
+ * Sampling rate for performance alerts (0.1 = log 10% of sampled alerts)
+ * This reduces noise from high-frequency metrics while still capturing patterns
+ */
+const ALERT_SAMPLING_RATE = 0.1
+
+/**
+ * Extract the endpoint path from a full URL for grouping
+ * e.g., "/api/admin/services/stats?range=30d" -> "/api/admin/services/stats"
+ */
+function extractApiEndpoint(url: string): string {
+  try {
+    const path = new URL(url, window.location.origin).pathname
+    return path
+  } catch {
+    return url
+  }
+}
+
 export function usePerformanceMonitoring(componentName: string = 'AdminDashboard') {
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     userInteractions: 0,
     errorCount: 0,
     sessionStartTime: Date.now(),
+    apiEndpointMetrics: {},
   })
 
   const [alerts, setAlerts] = useState<PerformanceAlert[]>([])
   const metricsRef = useRef<PerformanceMetrics>(metrics)
   const componentMountTime = useRef<number>(Date.now())
+  const apiMetricsRef = useRef<Record<string, number[]>>({})
 
   useEffect(() => {
     metricsRef.current = metrics
