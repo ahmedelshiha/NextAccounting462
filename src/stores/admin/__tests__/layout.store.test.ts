@@ -2,9 +2,26 @@ import { renderHook, act } from '@testing-library/react'
 // @vitest-environment jsdom
 import { renderHook, act } from '@testing-library/react'
 import { useAdminLayoutStore } from '../layout.store'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
 
 describe('AdminLayoutStore', () => {
   beforeEach(() => {
+    // Setup proper localStorage mock for tests
+    const localStorageMock = {
+      getItem: vi.fn(() => null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+      key: vi.fn(() => null),
+      length: 0,
+    }
+
+    // Assign to global object
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    })
+
     // reset store state
     useAdminLayoutStore.setState({
       sidebar: {
@@ -14,8 +31,8 @@ describe('AdminLayoutStore', () => {
         expandedGroups: [],
       },
     })
-    // clear localStorage
-    try { localStorage.clear() } catch {}
+    // clear any mocked storage calls
+    vi.clearAllMocks()
   })
 
   it('initializes with default state', () => {
