@@ -80,52 +80,44 @@ export function validateIcon(icon: IconType | React.ReactNode, context: string =
     return { isValid: true, errors, warnings }
   }
 
-  // Check for React component objects (main cause of error #31)
+  // Treat valid React elements as acceptable (avoid false negatives)
+  if (React.isValidElement(icon)) {
+    warnings.push(`${context}: React element passed as icon - ensure it's intentional`)
+    return { isValid: true, errors, warnings }
+  }
+
+  // Correct: function component reference
+  if (typeof icon === 'function') {
+    return { isValid: true, errors, warnings }
+  }
+
+  // Likely a React component object (not element) — discourage
   if (typeof icon === 'object' && icon && '$$typeof' in icon) {
     errors.push(`${context}: React component object detected - use component reference instead of JSX element`)
     console.error(`🚨 ${context}: React component object passed as icon:`, {
       iconType: typeof icon,
-      iconKeys: Object.keys(icon),
-      hasRender: 'render' in icon,
-      hasDisplayName: 'displayName' in icon,
+      iconKeys: Object.keys(icon as any),
+      hasRender: 'render' in (icon as any),
+      hasDisplayName: 'displayName' in (icon as any),
       suggestion: 'Pass the component reference (e.g., Plus) instead of JSX element (e.g., <Plus />)'
     })
     return { isValid: false, errors, warnings }
   }
 
-  // Check for function (IconType) - this is correct
-  if (typeof icon === 'function') {
-    try {
-      // Try to instantiate to ensure it's a valid React component
-      const TestIcon = icon as IconType
-      // Basic validation that it can accept className prop
-      return { isValid: true, errors, warnings }
-    } catch (error) {
-      errors.push(`${context}: Icon function cannot be instantiated as React component`)
-    }
-  }
-
-  // Check for valid React elements
-  if (React.isValidElement(icon)) {
-    // This is generally okay, but log for monitoring
-    warnings.push(`${context}: React element passed as icon - ensure it's intentional`)
-    return { isValid: true, errors, warnings }
-  }
-
-  // Check for invalid types
+  // Primitive hints
   if (typeof icon === 'string' || typeof icon === 'number') {
     warnings.push(`${context}: String/number passed as icon - may not render correctly`)
     return { isValid: true, errors, warnings }
   }
 
-  // Unknown object type
+  // Unknown objects — warn only
   if (typeof icon === 'object') {
     warnings.push(`${context}: Unknown object type passed as icon`)
     console.warn(`${context}: Unknown icon object:`, {
       iconType: typeof icon,
-      iconConstructor: icon?.constructor?.name,
-      iconKeys: Object.keys(icon || {}),
-      icon: icon
+      iconConstructor: (icon as any)?.constructor?.name,
+      iconKeys: Object.keys((icon as any) || {}),
+      icon: icon as any
     })
   }
 
