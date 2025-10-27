@@ -15,6 +15,22 @@ const nextConfig = {
   
   // External packages for server components
   serverExternalPackages: ['@sentry/nextjs'],
+  // Prevent bundling node built-ins into client bundles (stubs for Turbopack/webpack)
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve = config.resolve || {}
+      config.resolve.fallback = {
+        ...(config.resolve.fallback || {}),
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+        child_process: false,
+        crypto: false,
+      }
+    }
+    return config
+  },
   
   // Experimental features for better performance
   experimental: {
