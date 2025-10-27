@@ -6,6 +6,8 @@ import prisma from '@/lib/prisma'
 import { MenuCustomizationData } from '@/types/admin/menuCustomization'
 import { validateMenuCustomization } from '@/lib/menu/menuValidator'
 
+const ALLOWED_ADMIN_ROLES = ['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF']
+
 /**
  * Default menu structure - returned when user has no customization
  */
