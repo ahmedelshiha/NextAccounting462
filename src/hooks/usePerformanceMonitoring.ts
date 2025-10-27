@@ -108,25 +108,33 @@ export function usePerformanceMonitoring(componentName: string = 'AdminDashboard
     })
   }
 
-  const checkThreshold = (metric: string, value: number) => {
+  const checkThreshold = (metric: string, value: number, url?: string) => {
     const threshold = (PERFORMANCE_THRESHOLDS as any)[metric]
     if (threshold && value > threshold) {
+      // Apply sampling to reduce noise in logs
+      const shouldLog = Math.random() < ALERT_SAMPLING_RATE
+
       const alert: PerformanceAlert = {
         type: value > threshold * 1.5 ? 'error' : 'warning',
         metric,
         value,
         threshold,
         timestamp: Date.now(),
+        url,
       }
 
       setAlerts(prev => [...prev.slice(-4), alert])
 
-      logger.warn(`Performance threshold exceeded for ${metric}`, {
-        metric,
-        value,
-        threshold,
-        severity: alert.type,
-      })
+      if (shouldLog) {
+        logger.warn(`Performance threshold exceeded for ${metric}`, {
+          metric,
+          value,
+          threshold,
+          severity: alert.type,
+          ...(url && { url }),
+          samplingRate: ALERT_SAMPLING_RATE,
+        })
+      }
     }
   }
 
