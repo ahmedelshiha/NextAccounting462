@@ -3,6 +3,9 @@
 Time range observed: 2025-10-27T20:12:53.160Z → 2025-10-27T20:12:56.646Z
 Scope: Parsed console/network/perf lines from docs/tax-hub.vercel.app-1761596140828.log
 
+## Status Update
+- P0-1 completed: Adjusted icon validation order and normalized/sanitized actions in PageHeader to eliminate false error logs for React elements and arrays.
+
 ## Summary
 - Notable issues:
   - Repeated PageHeader prop validation errors (icons/actions)
