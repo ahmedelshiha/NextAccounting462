@@ -10,6 +10,7 @@
 import { useMemo, useState } from 'react'
 import AnalyticsPage from '@/components/dashboard/templates/AnalyticsPage'
 import IntelligentActivityFeed from '@/components/dashboard/analytics/IntelligentActivityFeed'
+import { AuthErrorFallback } from '@/components/dashboard/AuthErrorFallback'
 import { useUnifiedData } from '@/hooks/useUnifiedData'
 import { Download, RefreshCw, Calendar, Users } from 'lucide-react'
 import { fetchExportBlob } from '@/lib/admin-export'
