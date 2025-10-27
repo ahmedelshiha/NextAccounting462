@@ -13,7 +13,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical } from 'lucide-react'
-import { MenuCustomizationData } from '@/types/admin/menuCustomization'
+import { MenuCustomizationData, MenuSection } from '@/types/admin/menuCustomization'
 import { useMenuCustomizationModalStore } from '@/stores/admin/menuCustomizationModal.store'
 import { DEFAULT_MENU_SECTIONS } from '@/lib/menu/defaultMenu'
 
