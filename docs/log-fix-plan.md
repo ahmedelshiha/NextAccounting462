@@ -1,5 +1,8 @@
 # Log Fix Plan (Prioritized)
 
+## Status
+- P0-1 (PageHeader validation noise) — Completed: validator ordering fixed; PageHeader now normalizes arrays and sanitizes icons.
+
 ## P0 — Breakage and High Noise
 1) PageHeader prop/validation errors (High noise, risk of React error #31)
    - Owner: Frontend
