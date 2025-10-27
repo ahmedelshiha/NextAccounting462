@@ -113,15 +113,15 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
       update: {
         sectionOrder: body.sectionOrder as Prisma.InputJsonValue,
         hiddenItems: body.hiddenItems as Prisma.InputJsonValue,
-        practiceItems: body.practiceItems as Prisma.InputJsonValue,
-        bookmarks: body.bookmarks as Prisma.InputJsonValue,
+        practiceItems: body.practiceItems as unknown as Prisma.InputJsonValue,
+        bookmarks: body.bookmarks as unknown as Prisma.InputJsonValue,
       },
       create: {
         userId,
         sectionOrder: body.sectionOrder as Prisma.InputJsonValue,
         hiddenItems: body.hiddenItems as Prisma.InputJsonValue,
-        practiceItems: body.practiceItems as Prisma.InputJsonValue,
-        bookmarks: body.bookmarks as Prisma.InputJsonValue,
+        practiceItems: body.practiceItems as unknown as Prisma.InputJsonValue,
+        bookmarks: body.bookmarks as unknown as Prisma.InputJsonValue,
       },
     })
 
