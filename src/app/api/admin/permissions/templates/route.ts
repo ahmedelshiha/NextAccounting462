@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import prisma from '@/lib/prisma'
 import { PermissionEngine } from '@/lib/permission-engine'
 import { Permission } from '@/lib/permissions'
 
