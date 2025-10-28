@@ -788,13 +788,65 @@ const TemplatesContent = memo(function TemplatesContent({
 /**
  * History Tab Content
  */
-function HistoryContent() {
+const HistoryContent = memo(function HistoryContent({
+  changeHistory,
+}: {
+  changeHistory: PermissionChangeSet[]
+}) {
+  if (changeHistory.length === 0) {
+    return (
+      <div className="h-full overflow-y-auto p-4 md:p-6">
+        <div className="text-center py-8 md:py-12">
+          <Clock className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-2 md:mb-3" />
+          <p className="text-gray-600 text-xs md:text-sm">No changes yet</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="h-full overflow-y-auto p-4 md:p-6">
-      <div className="text-center py-8 md:py-12">
-        <FileText className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-2 md:mb-3" />
-        <p className="text-gray-600 text-xs md:text-sm">Permission history coming soon</p>
+      <div className="space-y-3 md:space-y-4">
+        {changeHistory.map((change, index) => (
+          <div
+            key={index}
+            className="p-3 md:p-4 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                {change.roleChange && (
+                  <p className="text-xs md:text-sm font-medium">
+                    Role change: <span className="text-blue-600">{change.roleChange.from}</span>
+                    {' → '}
+                    <span className="text-blue-600">{change.roleChange.to}</span>
+                  </p>
+                )}
+                {change.permissionChanges && (
+                  <div className="mt-2 space-y-1">
+                    {change.permissionChanges.added.length > 0 && (
+                      <p className="text-xs text-gray-700">
+                        <span className="inline-block bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">
+                          +{change.permissionChanges.added.length} permissions
+                        </span>
+                      </p>
+                    )}
+                    {change.permissionChanges.removed.length > 0 && (
+                      <p className="text-xs text-gray-700">
+                        <span className="inline-block bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">
+                          -{change.permissionChanges.removed.length} permissions
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <Badge variant="secondary" className="text-xs flex-shrink-0">
+                Step {index + 1}
+              </Badge>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
-}
+})
