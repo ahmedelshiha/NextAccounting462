@@ -135,7 +135,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchPerm
     }
 
     // Calculate proposed permissions for validation
-    const updatedUserPermissions: Record<string, string[]> = {}
+    const updatedUserPermissions: Record<string, Permission[]> = {}
     const userRoleChanges: Record<string, string> = {}
 
     for (const targetUser of targetUsers) {

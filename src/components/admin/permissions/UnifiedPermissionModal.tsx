@@ -473,7 +473,7 @@ export default function UnifiedPermissionModal({
   if (isMobile) {
     return (
       <Sheet open onOpenChange={onClose}>
-        <SheetContent side="bottom" className="h-[90vh] p-0 flex flex-col" asChild={false}>
+        <SheetContent side="bottom" className="h-[90vh] p-0 flex flex-col">
           <SheetHeader className="border-b px-4 py-3">
             {headerContent}
           </SheetHeader>
