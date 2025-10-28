@@ -109,8 +109,8 @@ export default function BulkOperationsMode({
 
           {/* Warning */}
           {hasMultipleRoles && (
-            <Alert variant="warning">
-              <AlertTriangle className="h-4 w-4" />
+            <Alert className="border-yellow-200 bg-yellow-50">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
               <AlertDescription>
                 <div>
                   <p className="font-medium text-sm">
