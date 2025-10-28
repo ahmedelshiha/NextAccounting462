@@ -130,7 +130,7 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-200"
+        className="fixed inset-0 bg-gray-900 bg-opacity-25 z-40 transition-opacity duration-200"
         onClick={handleCancel}
         aria-hidden="true"
       />
@@ -138,27 +138,27 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+          className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-100"
           role="dialog"
           aria-labelledby="menu-modal-title"
           aria-modal="true"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-6 border-b border-gray-100">
             <div>
-              <h2 id="menu-modal-title" className="text-xl font-bold text-gray-900">
-                Customize Menu
+              <h2 id="menu-modal-title" className="text-lg font-bold text-gray-900">
+                Customize your menu
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Reorder, hide, and organize your admin menu to fit your workflow
+              <p className="text-sm text-gray-500 mt-0.5">
+                Browse, hide, and organize your admin menu to fit your workflow
               </p>
             </div>
             <button
               onClick={handleCancel}
-              className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors p-1 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
               aria-label="Close menu customization"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
@@ -233,11 +233,11 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 gap-3">
+          <div className="flex items-center justify-between p-6 border-t border-gray-100 bg-white gap-4">
             <button
               onClick={handleReset}
               disabled={isSaving}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Reset to Defaults
             </button>
@@ -246,7 +246,7 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
               <button
                 onClick={handleCancel}
                 disabled={isSaving}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-sm font-medium border-2 border-emerald-600 text-emerald-600 bg-white rounded-lg hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Cancel
               </button>
@@ -254,10 +254,10 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
               <button
                 onClick={handleSave}
                 disabled={isSaving || !isDirty}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 border border-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
               >
                 {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>
