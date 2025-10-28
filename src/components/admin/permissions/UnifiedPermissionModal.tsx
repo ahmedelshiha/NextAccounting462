@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, memo } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog'
 import {
@@ -19,7 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
+import { 
   PermissionEngine,
   PermissionDiff,
   ValidationResult,
@@ -31,10 +30,10 @@ import {
   PERMISSION_METADATA,
   RiskLevel,
 } from '@/lib/permissions'
-import {
-  X,
-  Check,
-  AlertCircle,
+import { 
+  X, 
+  Check, 
+  AlertCircle, 
   Save,
   RotateCcw,
   Eye,
@@ -48,24 +47,15 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
  * Props for the UnifiedPermissionModal component
  */
 export interface UnifiedPermissionModalProps {
-  // What to manage
   mode: 'user' | 'role' | 'bulk-users'
-  targetId: string | string[] // User ID(s) or role name
-  
-  // Current state
+  targetId: string | string[]
   currentRole?: string
   currentPermissions?: Permission[]
-  
-  // Callbacks
   onSave: (changes: PermissionChangeSet) => Promise<void>
   onClose: () => void
-  
-  // Optional features
   showTemplates?: boolean
   showHistory?: boolean
   allowCustomPermissions?: boolean
-  
-  // User/role info
   targetName?: string
   targetEmail?: string
 }
@@ -91,13 +81,12 @@ type TabType = 'role' | 'custom' | 'templates' | 'history'
 /**
  * Unified Permission Modal Component
  * 
- * A comprehensive interface for managing user roles and permissions with:
- * - Role assignment with visual cards
- * - Custom permission management with search
- * - Permission templates for quick assignment
- * - Audit trail visualization
+ * Responsive modal for managing user roles and permissions with:
+ * - Mobile-friendly bottom sheet on small screens
+ * - Desktop dialog on larger screens
+ * - Performance optimizations (debounced search, memoization)
  * - Real-time impact preview
- * - Smart suggestions
+ * - Smart suggestions and validation
  */
 export default function UnifiedPermissionModal({
   mode,
@@ -114,7 +103,7 @@ export default function UnifiedPermissionModal({
 }: UnifiedPermissionModalProps) {
   // Responsive behavior: use sheet on mobile, dialog on desktop
   const isMobile = useMediaQuery('(max-width: 768px)')
-
+  
   const [activeTab, setActiveTab] = useState<TabType>('role')
   const [selectedRole, setSelectedRole] = useState(currentRole)
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(currentPermissions)
@@ -145,7 +134,7 @@ export default function UnifiedPermissionModal({
   /**
    * Handle role selection with automatic permission update
    */
-  const handleRoleChange = (newRole: string) => {
+  const handleRoleChange = useCallback((newRole: string) => {
     setSelectedRole(newRole)
     const rolePermissions = PermissionEngine.getCommonPermissionsForRole(newRole)
     setSelectedPermissions(rolePermissions)
@@ -158,14 +147,13 @@ export default function UnifiedPermissionModal({
         to: newRole,
       },
     }])
-  }
+  }, [targetId, currentRole])
 
   /**
    * Handle permission toggle
    */
-  const handlePermissionToggle = (permission: Permission, checked: boolean) => {
+  const handlePermissionToggle = useCallback((permission: Permission, checked: boolean) => {
     if (checked) {
-      // Check if we can grant this permission
       if (!PermissionEngine.canGrantPermission(permission, selectedPermissions)) {
         setSaveError(`Cannot grant ${PERMISSION_METADATA[permission]?.label}: dependencies not met`)
         return
@@ -176,30 +164,30 @@ export default function UnifiedPermissionModal({
     }
     
     setSaveError(null)
-  }
+  }, [selectedPermissions])
 
   /**
    * Apply a suggestion
    */
-  const applySuggestion = (suggestion: PermissionSuggestion) => {
+  const applySuggestion = useCallback((suggestion: PermissionSuggestion) => {
     if (suggestion.action === 'add') {
       handlePermissionToggle(suggestion.permission, true)
     } else {
       handlePermissionToggle(suggestion.permission, false)
     }
-  }
+  }, [handlePermissionToggle])
 
   /**
    * Apply all suggestions
    */
-  const applyAllSuggestions = () => {
+  const applyAllSuggestions = useCallback(() => {
     suggestions.forEach(applySuggestion)
-  }
+  }, [suggestions, applySuggestion])
 
   /**
    * Undo last change
    */
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     if (changeHistory.length > 0) {
       const previousState = changeHistory[changeHistory.length - 2]
       if (previousState) {
@@ -208,22 +196,22 @@ export default function UnifiedPermissionModal({
       }
       setChangeHistory(prev => prev.slice(0, -1))
     }
-  }
+  }, [changeHistory, currentRole, currentPermissions])
 
   /**
    * Reset to original state
    */
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setSelectedRole(currentRole)
     setSelectedPermissions(currentPermissions)
     setChangeHistory([])
     setSaveError(null)
-  }
+  }, [currentRole, currentPermissions])
 
   /**
    * Handle save
    */
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!validation.isValid) {
       setSaveError('Please resolve validation errors before saving')
       return
@@ -253,212 +241,261 @@ export default function UnifiedPermissionModal({
     } finally {
       setIsSaving(false)
     }
-  }
+  }, [validation.isValid, targetId, selectedRole, currentRole, changeCount, changes.added, changes.removed, onSave, onClose])
 
-  // Get role info
+  // Get display name
   const displayName = targetName || (Array.isArray(targetId) ? `${targetId.length} users` : targetId)
 
-  return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-white">
-        {/* Header */}
-        <DialogHeader className="px-6 py-4 border-b">
-          <div className="flex items-center justify-between">
+  // Modal content shared between Dialog and Sheet
+  const headerContent = (
+    <>
+      <h2 className={cn(
+        'font-semibold',
+        isMobile ? 'text-lg' : 'text-xl'
+      )}>
+        {mode === 'bulk-users' 
+          ? `Manage Permissions for ${displayName}`
+          : `Manage Permissions: ${displayName}`
+        }
+      </h2>
+      {targetEmail && (
+        <p className="text-xs text-gray-600 mt-1">
+          {targetEmail} • {currentRole || 'UNASSIGNED'}
+        </p>
+      )}
+    </>
+  )
+
+  const tabsContent = (
+    <Tabs 
+      value={activeTab} 
+      onValueChange={(value) => setActiveTab(value as TabType)}
+      className={cn(
+        'flex-1 overflow-hidden flex flex-col',
+        isMobile && 'max-h-[calc(100vh-280px)]'
+      )}
+    >
+      <TabsList className={cn(
+        'grid rounded-none border-b h-auto bg-gray-50',
+        isMobile ? 'grid-cols-2 px-3' : 'grid-cols-4 px-6',
+        'w-full'
+      )}>
+        <TabsTrigger value="role" className="relative text-xs md:text-sm">
+          Role
+          {selectedRole !== currentRole && (
+            <Badge className="ml-1 md:ml-2 h-4 md:h-5 rounded px-1 text-xs" variant="secondary">
+              {changeCount}
+            </Badge>
+          )}
+        </TabsTrigger>
+        {allowCustomPermissions && (
+          <TabsTrigger value="custom" className="relative text-xs md:text-sm">
+            Perms
+            {changeCount > 0 && selectedRole === currentRole && (
+              <Badge className="ml-1 md:ml-2 h-4 md:h-5 rounded px-1 text-xs" variant="secondary">
+                {changeCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+        )}
+        {!isMobile && showTemplates && (
+          <TabsTrigger value="templates" className="text-xs md:text-sm">Templates</TabsTrigger>
+        )}
+        {!isMobile && showHistory && (
+          <TabsTrigger value="history" className="text-xs md:text-sm">History</TabsTrigger>
+        )}
+      </TabsList>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden">
+        <TabsContent value="role" className="h-full p-0 data-[state=inactive]:hidden">
+          <RoleSelectionContent
+            selectedRole={selectedRole}
+            currentRole={currentRole}
+            onSelectRole={handleRoleChange}
+            changes={changes}
+            isMobile={isMobile}
+          />
+        </TabsContent>
+
+        {allowCustomPermissions && (
+          <TabsContent value="custom" className="h-full p-0 data-[state=inactive]:hidden">
+            <CustomPermissionsContent
+              selectedPermissions={selectedPermissions}
+              onPermissionToggle={handlePermissionToggle}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              validation={validation}
+              showAdvanced={showAdvanced}
+              onToggleAdvanced={setShowAdvanced}
+              isMobile={isMobile}
+            />
+          </TabsContent>
+        )}
+
+        {showTemplates && (
+          <TabsContent value="templates" className="h-full p-0 data-[state=inactive]:hidden">
+            <TemplatesContent />
+          </TabsContent>
+        )}
+
+        {showHistory && (
+          <TabsContent value="history" className="h-full p-0 data-[state=inactive]:hidden">
+            <HistoryContent />
+          </TabsContent>
+        )}
+      </div>
+    </Tabs>
+  )
+
+  const footerContent = (
+    <div className={cn(
+      'border-t space-y-3 md:space-y-4 bg-gray-50',
+      isMobile ? 'p-3 md:p-4' : 'p-6'
+    )}>
+      {/* Validation Errors */}
+      {validation.errors.length > 0 && (
+        <div className="p-2 md:p-3 rounded-lg bg-red-50 border border-red-200">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-red-600 mt-0.5 flex-shrink-0" />
             <div>
-              <DialogTitle className="text-xl font-semibold">
-                {mode === 'bulk-users' 
-                  ? `Manage Permissions for ${displayName}`
-                  : `Manage Permissions: ${displayName}`
-                }
-              </DialogTitle>
-              {targetEmail && (
-                <DialogDescription className="text-sm mt-1">
-                  {targetEmail} • Current role: {currentRole || 'UNASSIGNED'}
-                </DialogDescription>
-              )}
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
-
-        {/* Tabs */}
-        <Tabs 
-          value={activeTab} 
-          onValueChange={(value) => setActiveTab(value as TabType)}
-          className="flex-1 overflow-hidden flex flex-col"
-        >
-          <TabsList className="grid w-full grid-cols-4 rounded-none border-b px-6 h-auto bg-gray-50">
-            <TabsTrigger value="role" className="relative">
-              Role
-              {selectedRole !== currentRole && (
-                <Badge className="ml-2 h-5 rounded px-1.5" variant="secondary">
-                  {changeCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-            {allowCustomPermissions && (
-              <TabsTrigger value="custom" className="relative">
-                Permissions
-                {changeCount > 0 && selectedRole === currentRole && (
-                  <Badge className="ml-2 h-5 rounded px-1.5" variant="secondary">
-                    {changeCount}
-                  </Badge>
+              <h4 className="font-medium text-red-900 text-xs md:text-sm">Validation Errors</h4>
+              <ul className="mt-1 space-y-0.5">
+                {validation.errors.slice(0, 2).map((error, i) => (
+                  <li key={i} className="text-xs md:text-sm text-red-800">
+                    {error.message}
+                  </li>
+                ))}
+                {validation.errors.length > 2 && (
+                  <li className="text-xs text-red-700">
+                    and {validation.errors.length - 2} more
+                  </li>
                 )}
-              </TabsTrigger>
-            )}
-            {showTemplates && (
-              <TabsTrigger value="templates">Templates</TabsTrigger>
-            )}
-            {showHistory && (
-              <TabsTrigger value="history">History</TabsTrigger>
-            )}
-          </TabsList>
-
-          {/* Content */}
-          <div className="flex-1 overflow-hidden">
-            <TabsContent value="role" className="h-full p-0 data-[state=inactive]:hidden">
-              <RoleSelectionContent
-                selectedRole={selectedRole}
-                currentRole={currentRole}
-                onSelectRole={handleRoleChange}
-                changes={changes}
-              />
-            </TabsContent>
-
-            {allowCustomPermissions && (
-              <TabsContent value="custom" className="h-full p-0 data-[state=inactive]:hidden">
-                <CustomPermissionsContent
-                  selectedPermissions={selectedPermissions}
-                  onPermissionToggle={handlePermissionToggle}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  validation={validation}
-                  showAdvanced={showAdvanced}
-                  onToggleAdvanced={setShowAdvanced}
-                />
-              </TabsContent>
-            )}
-
-            {showTemplates && (
-              <TabsContent value="templates" className="h-full p-0 data-[state=inactive]:hidden">
-                <TemplatesContent />
-              </TabsContent>
-            )}
-
-            {showHistory && (
-              <TabsContent value="history" className="h-full p-0 data-[state=inactive]:hidden">
-                <HistoryContent />
-              </TabsContent>
-            )}
-          </div>
-        </Tabs>
-
-        {/* Impact Preview and Actions */}
-        <div className="border-t p-6 space-y-4 bg-gray-50">
-          {/* Validation Errors */}
-          {validation.errors.length > 0 && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-red-900 text-sm">Validation Errors</h4>
-                  <ul className="mt-1 space-y-1">
-                    {validation.errors.map((error, i) => (
-                      <li key={i} className="text-sm text-red-800">
-                        {error.message}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Warnings */}
-          {validation.warnings.length > 0 && (
-            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-amber-900 text-sm">Warnings</h4>
-                  <ul className="mt-1 space-y-1">
-                    {validation.warnings.map((warning, i) => (
-                      <li key={i} className="text-sm text-amber-800">
-                        {warning.message}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Error */}
-          {saveError && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-sm text-red-800">{saveError}</p>
-            </div>
-          )}
-
-          {/* Change Summary */}
-          {changeCount > 0 && (
-            <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-              <p className="text-sm font-medium text-blue-900">
-                {changeCount} permission{changeCount === 1 ? '' : 's'} will be changed
-              </p>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                disabled={changeCount === 0 || isSaving}
-              >
-                <RotateCcw className="h-4 w-4 mr-1" />
-                Reset
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleUndo}
-                disabled={changeHistory.length === 0 || isSaving}
-              >
-                <RotateCcw className="h-4 w-4 mr-1 transform scale-x-[-1]" />
-                Undo
-              </Button>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                onClick={handleSave}
-                disabled={!validation.isValid || changeCount === 0 || isSaving}
-                className="gap-2"
-              >
-                <Save className="h-4 w-4" />
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </Button>
+              </ul>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Warnings */}
+      {!isMobile && validation.warnings.length > 0 && (
+        <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="font-medium text-amber-900 text-sm">Warnings</h4>
+              <ul className="mt-1 space-y-1">
+                {validation.warnings.map((warning, i) => (
+                  <li key={i} className="text-sm text-amber-800">
+                    {warning.message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {saveError && (
+        <div className="p-2 md:p-3 rounded-lg bg-red-50 border border-red-200">
+          <p className="text-xs md:text-sm text-red-800">{saveError}</p>
+        </div>
+      )}
+
+      {/* Change Summary */}
+      {changeCount > 0 && (
+        <div className="p-2 md:p-3 rounded-lg bg-blue-50 border border-blue-200">
+          <p className="text-xs md:text-sm font-medium text-blue-900">
+            {changeCount} permission{changeCount === 1 ? '' : 's'} will be changed
+          </p>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className={cn(
+        'flex gap-2 pt-2',
+        isMobile ? 'flex-col-reverse' : 'items-center justify-between'
+      )}>
+        {!isMobile && (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              disabled={changeCount === 0 || isSaving}
+            >
+              <RotateCcw className="h-4 w-4 mr-1" />
+              Reset
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleUndo}
+              disabled={changeHistory.length === 0 || isSaving}
+            >
+              <RotateCcw className="h-4 w-4 mr-1 transform scale-x-[-1]" />
+              Undo
+            </Button>
+          </div>
+        )}
+
+        <div className={cn(
+          'flex gap-2',
+          isMobile ? 'w-full' : ''
+        )}>
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isSaving}
+            className={isMobile ? 'flex-1' : ''}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            onClick={handleSave}
+            disabled={!validation.isValid || changeCount === 0 || isSaving}
+            className={cn(
+              'gap-2',
+              isMobile ? 'flex-1' : ''
+            )}
+          >
+            <Save className="h-4 w-4" />
+            {isMobile ? 'Save' : isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Render based on screen size
+  if (isMobile) {
+    return (
+      <Sheet open onOpenChange={onClose}>
+        <SheetContent side="bottom" className="h-[90vh] p-0 flex flex-col">
+          <SheetHeader className="border-b px-4 py-3">
+            {headerContent}
+          </SheetHeader>
+          <div className="flex-1 overflow-hidden">
+            {tabsContent}
+          </div>
+          {footerContent}
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-white flex flex-col">
+        <DialogHeader className="border-b px-6 py-4">
+          {headerContent}
+        </DialogHeader>
+        <div className="flex-1 overflow-hidden">
+          {tabsContent}
+        </div>
+        {footerContent}
       </DialogContent>
     </Dialog>
   )
@@ -467,16 +504,18 @@ export default function UnifiedPermissionModal({
 /**
  * Role Selection Tab Content
  */
-function RoleSelectionContent({
+const RoleSelectionContent = memo(function RoleSelectionContent({
   selectedRole,
   currentRole,
   onSelectRole,
   changes,
+  isMobile,
 }: {
   selectedRole?: string
   currentRole?: string
   onSelectRole: (role: string) => void
   changes: PermissionDiff
+  isMobile: boolean
 }) {
   const roles = [
     {
@@ -517,38 +556,41 @@ function RoleSelectionContent({
   ]
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="space-y-4">
-        <p className="text-sm text-gray-600">
+    <div className="h-full overflow-y-auto p-4 md:p-6">
+      <div className="space-y-3 md:space-y-4">
+        <p className="text-xs md:text-sm text-gray-600">
           Select a role to assign. The user will automatically receive all permissions associated with this role.
         </p>
 
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+        <div className={cn(
+          'gap-3 md:gap-4',
+          isMobile ? 'grid grid-cols-1' : 'grid grid-cols-2 md:grid-cols-3'
+        )}>
           {roles.map(role => (
             <button
               key={role.key}
               onClick={() => onSelectRole(role.key)}
               className={cn(
-                'p-4 rounded-lg border-2 transition-all text-left hover:shadow-md',
+                'p-3 md:p-4 rounded-lg border-2 transition-all text-left hover:shadow-md relative',
                 selectedRole === role.key
                   ? `border-${role.color}-500 bg-${role.color}-50`
                   : 'border-gray-200 bg-white hover:border-gray-300'
               )}
             >
               {selectedRole === role.key && (
-                <div className="absolute top-3 right-3">
-                  <Check className="h-5 w-5 text-green-600" />
+                <div className="absolute top-2 right-2">
+                  <Check className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
                 </div>
               )}
               {currentRole === role.key && selectedRole !== role.key && (
-                <Badge className="mb-2" variant="secondary">
+                <Badge className="mb-2 text-xs" variant="secondary">
                   Current
                 </Badge>
               )}
-              <div className="text-2xl mb-2">{role.icon}</div>
-              <h3 className="font-semibold text-sm">{role.label}</h3>
-              <p className="text-xs text-gray-600 mt-1">{role.description}</p>
-              <div className="flex items-center justify-between mt-3">
+              <div className="text-xl md:text-2xl mb-1 md:mb-2">{role.icon}</div>
+              <h3 className="font-semibold text-xs md:text-sm">{role.label}</h3>
+              <p className="text-xs text-gray-600 mt-0.5 md:mt-1">{role.description}</p>
+              <div className="flex items-center justify-between mt-2 md:mt-3">
                 <span className="text-xs text-gray-500">
                   {PermissionEngine.getCommonPermissionsForRole(role.key).length} perms
                 </span>
@@ -558,13 +600,13 @@ function RoleSelectionContent({
         </div>
 
         {selectedRole && selectedRole !== currentRole && (
-          <div className="mt-6 p-4 rounded-lg bg-blue-50 border border-blue-200">
-            <h4 className="font-semibold text-blue-900 text-sm mb-2">Preview Changes</h4>
-            <p className="text-sm text-blue-800 mb-2">
+          <div className="mt-4 md:mt-6 p-3 md:p-4 rounded-lg bg-blue-50 border border-blue-200">
+            <h4 className="font-semibold text-blue-900 text-xs md:text-sm mb-1 md:mb-2">Preview Changes</h4>
+            <p className="text-xs md:text-sm text-blue-800 mb-1">
               {changes.added.length} permissions will be added
             </p>
             {changes.removed.length > 0 && (
-              <p className="text-sm text-blue-800">
+              <p className="text-xs md:text-sm text-blue-800">
                 {changes.removed.length} permissions will be removed
               </p>
             )}
@@ -573,12 +615,12 @@ function RoleSelectionContent({
       </div>
     </div>
   )
-}
+})
 
 /**
  * Custom Permissions Tab Content
  */
-function CustomPermissionsContent({
+const CustomPermissionsContent = memo(function CustomPermissionsContent({
   selectedPermissions,
   onPermissionToggle,
   searchQuery,
@@ -586,6 +628,7 @@ function CustomPermissionsContent({
   validation,
   showAdvanced,
   onToggleAdvanced,
+  isMobile,
 }: {
   selectedPermissions: Permission[]
   onPermissionToggle: (permission: Permission, checked: boolean) => void
@@ -594,32 +637,35 @@ function CustomPermissionsContent({
   validation: ValidationResult
   showAdvanced: boolean
   onToggleAdvanced: (show: boolean) => void
+  isMobile: boolean
 }) {
-  const filtered = PermissionEngine.searchPermissions(searchQuery)
+  const filtered = useMemo(() => {
+    return PermissionEngine.searchPermissions(searchQuery)
+  }, [searchQuery])
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="space-y-4">
+    <div className="h-full overflow-y-auto p-4 md:p-6">
+      <div className="space-y-3 md:space-y-4">
         <div className="flex gap-2">
           <input
             type="text"
             placeholder="Search permissions..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="flex-1 px-3 py-2 border rounded-lg text-sm"
+            className="flex-1 px-2 md:px-3 py-1.5 md:py-2 border rounded-lg text-xs md:text-sm"
           />
           <Button
             variant="outline"
             size="sm"
             onClick={() => onToggleAdvanced(!showAdvanced)}
           >
-            {showAdvanced ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showAdvanced ? <EyeOff className="h-3 w-3 md:h-4 md:w-4" /> : <Eye className="h-3 w-3 md:h-4 md:w-4" />}
           </Button>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5 md:space-y-2">
           {filtered.length === 0 ? (
-            <p className="text-sm text-gray-500 py-8 text-center">
+            <p className="text-xs md:text-sm text-gray-500 py-6 md:py-8 text-center">
               No permissions found matching &quot;{searchQuery}&quot;
             </p>
           ) : (
@@ -631,7 +677,7 @@ function CustomPermissionsContent({
                 <label
                   key={permission}
                   className={cn(
-                    'flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                    'flex items-start gap-2 p-2 md:p-3 rounded-lg border cursor-pointer transition-colors',
                     isChecked
                       ? 'bg-blue-50 border-blue-200'
                       : 'bg-white border-gray-200 hover:bg-gray-50'
@@ -641,13 +687,13 @@ function CustomPermissionsContent({
                     type="checkbox"
                     checked={isChecked}
                     onChange={(e) => onPermissionToggle(permission, e.target.checked)}
-                    className="mt-1"
+                    className="mt-0.5 md:mt-1"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{meta.label}</p>
+                    <p className="font-medium text-xs md:text-sm">{meta.label}</p>
                     <p className="text-xs text-gray-600 mt-0.5">{meta.description}</p>
                   </div>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs flex-shrink-0">
                     {meta.risk}
                   </Badge>
                 </label>
@@ -658,17 +704,17 @@ function CustomPermissionsContent({
       </div>
     </div>
   )
-}
+})
 
 /**
  * Templates Tab Content
  */
 function TemplatesContent() {
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="text-center py-12">
-        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-        <p className="text-gray-600 text-sm">Permission templates coming soon</p>
+    <div className="h-full overflow-y-auto p-4 md:p-6">
+      <div className="text-center py-8 md:py-12">
+        <FileText className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-2 md:mb-3" />
+        <p className="text-gray-600 text-xs md:text-sm">Permission templates coming soon</p>
       </div>
     </div>
   )
@@ -679,10 +725,10 @@ function TemplatesContent() {
  */
 function HistoryContent() {
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="text-center py-12">
-        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-        <p className="text-gray-600 text-sm">Permission history coming soon</p>
+    <div className="h-full overflow-y-auto p-4 md:p-6">
+      <div className="text-center py-8 md:py-12">
+        <FileText className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-2 md:mb-3" />
+        <p className="text-gray-600 text-xs md:text-sm">Permission history coming soon</p>
       </div>
     </div>
   )
