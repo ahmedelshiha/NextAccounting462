@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Permission, PERMISSIONS, PERMISSION_METADATA } from '@/lib/permissions'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 export interface PermissionTemplate {
   id: string
