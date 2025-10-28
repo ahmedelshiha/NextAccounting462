@@ -670,6 +670,9 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
   showAdvanced,
   onToggleAdvanced,
   isMobile,
+  suggestions,
+  onApplySuggestion,
+  onDismissSuggestion,
 }: {
   selectedPermissions: Permission[]
   onPermissionToggle: (permission: Permission, checked: boolean) => void
@@ -679,6 +682,9 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
   showAdvanced: boolean
   onToggleAdvanced: (show: boolean) => void
   isMobile: boolean
+  suggestions: PermissionSuggestion[]
+  onApplySuggestion: (suggestion: PermissionSuggestion) => void
+  onDismissSuggestion: (suggestion: PermissionSuggestion) => void
 }) {
   const filtered = useMemo(() => {
     return PermissionEngine.searchPermissions(searchQuery)
@@ -687,6 +693,16 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
   return (
     <div className="h-full overflow-y-auto p-4 md:p-6">
       <div className="space-y-3 md:space-y-4">
+        {/* Suggestions Panel */}
+        {!isMobile && suggestions.length > 0 && (
+          <SmartSuggestionsPanel
+            suggestions={suggestions}
+            onApply={onApplySuggestion}
+            onDismiss={onDismissSuggestion}
+          />
+        )}
+
+        {/* Search Bar */}
         <div className="flex gap-2">
           <input
             type="text"
@@ -704,6 +720,7 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
           </Button>
         </div>
 
+        {/* Permissions List */}
         <div className="space-y-1.5 md:space-y-2">
           {filtered.length === 0 ? (
             <p className="text-xs md:text-sm text-gray-500 py-6 md:py-8 text-center">
