@@ -181,29 +181,6 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
             <p className="text-gray-500 text-sm mt-1">Please try refreshing the page</p>
           </div>
         )}
-
-        {/* Error message from save */}
-        {saveError && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 mb-4 animate-in mt-4">
-            <div className="flex items-start gap-3">
-              <span className="text-lg mt-0.5">⚠️</span>
-              <div className="flex-1">
-                <p className="font-medium">Error saving changes</p>
-                <p className="text-red-600 text-xs mt-1">{saveError}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Success message */}
-        {saveSuccess && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 animate-in mt-4">
-            <div className="flex items-center gap-3">
-              <span className="text-lg">✓</span>
-              <p className="font-medium">Menu customization saved successfully!</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Footer Actions */}
