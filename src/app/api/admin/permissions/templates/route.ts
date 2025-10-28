@@ -223,7 +223,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
         ...template,
         permissions: Array.isArray(template.permissions)
           ? template.permissions
-          : JSON.parse(template.permissions || '[]'),
+          : JSON.parse(typeof template.permissions === 'string' ? template.permissions : '[]'),
       },
     })
   } catch (error) {
