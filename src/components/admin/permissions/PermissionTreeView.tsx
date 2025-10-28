@@ -56,7 +56,7 @@ export const PermissionTreeView = memo(function PermissionTreeView({
   onSearchChange,
 }: PermissionTreeViewProps) {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>()
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
 
   // On mobile, default to collapsed categories for better UX
@@ -196,7 +196,7 @@ export const PermissionTreeView = memo(function PermissionTreeView({
           Object.entries(groupedPermissions).map(([category, permissions]) => (
             <PermissionCategory
               key={category}
-              category={category as PermissionCategory}
+              category={category}
               permissions={permissions}
               selectedPermissions={selectedPermissions}
               isExpanded={expandedCategories.has(category)}
@@ -218,7 +218,7 @@ export const PermissionTreeView = memo(function PermissionTreeView({
  * Permission Category Component - Memoized for performance
  */
 interface PermissionCategoryProps {
-  category: PermissionCategory
+  category: string
   permissions: Permission[]
   selectedPermissions: Permission[]
   isExpanded: boolean
