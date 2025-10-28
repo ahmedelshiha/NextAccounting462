@@ -6,6 +6,8 @@ import prisma from '@/lib/prisma'
 import { MenuCustomizationData } from '@/types/admin/menuCustomization'
 import { validateMenuCustomization } from '@/lib/menu/menuValidator'
 
+const ALLOWED_ADMIN_ROLES = ['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF']
+
 /**
  * Default menu structure - returned when user has no customization
  */
@@ -30,6 +32,12 @@ const _api_GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
     const ctx = tenantContext.getContext()
     const userId = String(ctx.userId ?? '')
+
+    // Server-side guard: allow only admin/staff roles or super admin
+    const role = ctx.role ?? ''
+    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+      return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
+    }
 
     if (!userId) {
       return NextResponse.json(
@@ -79,6 +87,12 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
     const ctx = tenantContext.getContext()
     const userId = String(ctx.userId ?? '')
+
+    // Server-side guard: allow only admin/staff roles or super admin
+    const role = ctx.role ?? ''
+    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+      return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
+    }
 
     if (!userId) {
       return NextResponse.json(
@@ -156,6 +170,12 @@ const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
     const ctx = tenantContext.getContext()
     const userId = String(ctx.userId ?? '')
 
+    // Server-side guard: allow only admin/staff roles or super admin
+    const role = ctx.role ?? ''
+    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+      return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
+    }
+
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID not found in context' },
@@ -182,6 +202,6 @@ const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
   }
 }
 
-export const GET = withTenantContext(_api_GET, { requireAuth: true })
-export const POST = withTenantContext(_api_POST, { requireAuth: true })
-export const DELETE = withTenantContext(_api_DELETE, { requireAuth: true })
+export const GET = withTenantContext(_api_GET, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })
+export const POST = withTenantContext(_api_POST, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })
+export const DELETE = withTenantContext(_api_DELETE, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })
