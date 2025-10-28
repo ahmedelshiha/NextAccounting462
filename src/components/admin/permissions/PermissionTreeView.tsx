@@ -61,7 +61,7 @@ export const PermissionTreeView = memo(function PermissionTreeView({
 
   // On mobile, default to collapsed categories for better UX
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(() => {
-    return new Set(isMobile ? [] : Object.values(PermissionCategory))
+    return new Set(isMobile ? [] : Object.values(PermissionCategoryEnum))
   })
   const [showAdvanced, setShowAdvanced] = useState(false)
   
