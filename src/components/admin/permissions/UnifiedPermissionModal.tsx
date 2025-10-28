@@ -116,6 +116,7 @@ export default function UnifiedPermissionModal({
   const [changeHistory, setChangeHistory] = useState<PermissionChangeSet[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [dismissedSuggestions, setDismissedSuggestions] = useState<Permission[]>([])
 
   // Calculate changes in real-time
   const changes = useMemo(() => {
