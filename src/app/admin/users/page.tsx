@@ -1187,10 +1187,8 @@ export default function AdminUsersPage() {
       </AlertDialog>
 
       {/* Permission Management Modal */}
-      {selectedUser && (
+      {permissionModalOpen && selectedUser && (
         <UnifiedPermissionModal
-          open={permissionModalOpen}
-          onOpenChange={setPermissionModalOpen}
           mode="user"
           targetId={selectedUser.id}
           currentRole={selectedUser.role}
@@ -1199,6 +1197,9 @@ export default function AdminUsersPage() {
           onClose={() => setPermissionModalOpen(false)}
           targetName={selectedUser.name || selectedUser.email}
           targetEmail={selectedUser.email}
+          showTemplates={true}
+          showHistory={true}
+          allowCustomPermissions={true}
         />
       )}
     </div>
