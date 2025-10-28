@@ -80,6 +80,9 @@ model User {
   auditEvents        AuditEvent[]
   userProfile        UserProfile?
   menuCustomization  MenuCustomization?
+  permissionAuditsChanged  PermissionAudit[] @relation("AuditChangedBy")
+  templatesCreated   PermissionTemplate[] @relation("TemplateCreatedBy")
+  rolesCreated       CustomRole[] @relation("RoleCreatedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
