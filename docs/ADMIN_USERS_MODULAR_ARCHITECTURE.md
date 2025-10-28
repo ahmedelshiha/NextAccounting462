@@ -510,7 +510,7 @@ After Refactor:  ~45 KB (initial load)
 │ │ [🔄 Refresh] [⬇️ Export]                      │  │
 │ └──────────────────────────────────────────────┘  │
 │                                                     │
-│ ┌──────────────────────────────────────────────┐  │
+│ ┌──��───────────────────────────────────────────┐  │
 │ │ Name           │ Email         │ Role │ Status  │
 │ ├──────────────────────────────────────────────┤  │
 │ │ John Doe       │ john@ex...    │ Admin│ Active  │
@@ -528,7 +528,7 @@ After Refactor:  ~45 KB (initial load)
 ```
 ┌─────────────────────────────────────────────────┐
 │ × Manage User                          [Full Screen] │
-├─────────────────────────────────────────────────┤
+├─���───────────────────────────────────────────────┤
 │                                                 │
 │  [Overview] [Details] [Activity] [Settings]     │
 │                                                 │
@@ -546,7 +546,7 @@ After Refactor:  ~45 KB (initial load)
 │  │                                         │   │
 │  │ [Edit Profile] [Manage Permissions]    │   │
 │  │ [Suspend] [Delete]                     │   │
-│  └─────────────────────────────────────────┘   │
+│  └───────────────────────────���─────────────┘   │
 │                                                 │
 │                           [Cancel] [Save]      │
 └─────────────────────────────────────────────────┘
@@ -693,6 +693,843 @@ test('Admin can manage user permissions end-to-end', async ({ page }) => {
   // 7. Verify audit trail
 })
 ```
+
+---
+
+## 🔧 User Management Settings - Super Admin Configuration Panel
+
+### Overview
+A dedicated settings module at `/admin/settings/user-management` that allows Super Admins to globally configure user-related behaviors, defaults, and policies.
+
+### Current Gap Analysis
+**What Exists:**
+- ✅ Team Management settings (organizational structure, skills, workload)
+- ✅ Security & Compliance settings (passwords, 2FA, compliance)
+- ✅ Client Management settings
+- ❌ **Missing: User-specific configuration panel**
+
+**What's Needed:**
+A comprehensive User Management Settings page where Super Admins can configure:
+1. User role defaults and hierarchies
+2. Permission templates and presets
+3. Default onboarding workflows
+4. User data retention policies
+5. User activity monitoring
+6. API rate limits per user role
+7. Session and timeout policies
+8. User invitations and sign-up settings
+
+---
+
+### Comprehensive User Management Settings Architecture
+
+#### New Component Structure
+```
+src/app/admin/settings/user-management/
+├── page.tsx                          (Main settings shell, ~80 lines)
+├── components/
+│   ├── RoleManagement.tsx            (Role configuration, ~200 lines)
+│   ├── PermissionTemplates.tsx       (Permission preset config, ~180 lines)
+│   ├── OnboardingWorkflows.tsx       (User onboarding setup, ~200 lines)
+│   ├── UserPolicies.tsx              (Data retention, activity, etc, ~180 lines)
+│   ├── RateLimiting.tsx              (API limits per role, ~150 lines)
+│   ├── SessionManagement.tsx         (Timeout, security policies, ~150 lines)
+│   └── InvitationSettings.tsx        (Signup & invitations, ~150 lines)
+├── hooks/
+│   ├── useUserManagementSettings.ts  (Fetch & cache settings, ~100 lines)
+│   ├── useRoleConfiguration.ts       (Role CRUD operations, ~120 lines)
+│   └── usePolicyValidation.ts        (Policy conflict detection, ~100 lines)
+└── types/
+    └── index.ts                      (TypeScript interfaces, ~200 lines)
+```
+
+#### Tab Structure (7 Main Configuration Sections)
+```
+[Roles] [Permissions] [Onboarding] [Policies] [Rate Limiting] [Sessions] [Invitations]
+```
+
+---
+
+### Section 1: Role Management (200 lines)
+
+**Purpose:** Define and customize user roles, hierarchy, and permissions
+
+**Features:**
+```typescript
+interface RoleConfig {
+  // System Roles (locked)
+  systemRoles: {
+    SUPER_ADMIN: {
+      name: 'Super Administrator'
+      description: 'Full system access'
+      permissions: Permission[]
+      canDelegate: boolean
+      maxInstances: number | null // null = unlimited
+    }
+    ADMIN: { ... }
+    TEAM_LEAD: { ... }
+    TEAM_MEMBER: { ... }
+    STAFF: { ... }
+    CLIENT: { ... }
+  }
+
+  // Custom Roles
+  customRoles: {
+    name: string
+    description: string
+    baseRole: UserRole  // Inherit from system role
+    customPermissions: Permission[]
+    isActive: boolean
+    createdAt: Date
+  }[]
+
+  // Role Hierarchy
+  hierarchy: {
+    canDelegate: Record<UserRole, UserRole[]>  // e.g., ADMIN can create TEAM_LEAD, TEAM_MEMBER
+    inheritPermissions: Record<UserRole, boolean>
+  }
+
+  // Default Assignments
+  defaultRoleOnSignup: UserRole  // Usually CLIENT
+  defaultRoleOnInvite: UserRole  // Usually TEAM_MEMBER
+}
+```
+
+**UI Features:**
+- ✅ Drag-and-drop role hierarchy editor
+- ✅ View all permissions assigned to a role
+- ✅ Create custom roles based on system roles
+- ✅ Set default roles for different signup scenarios
+- ✅ Role usage statistics (how many users per role)
+- ✅ Permission preview when hovering over a role
+- ✅ Bulk permission assignment to roles
+
+**Examples:**
+```
+System Roles (Read-Only):
+├─ SUPER_ADMIN (1 user max, 100+ permissions)
+├─ ADMIN (Unlimited, 85 permissions)
+├─ TEAM_LEAD (Unlimited, 45 permissions)
+├─ TEAM_MEMBER (Unlimited, 25 permissions)
+├─ STAFF (Unlimited, 15 permissions)
+└─ CLIENT (Unlimited, 5 permissions)
+
+Custom Roles:
+├─ Accountant (Based on TEAM_MEMBER + custom perms)
+├─ Finance Manager (Based on ADMIN + subset)
+└─ Report Analyst (Based on STAFF + analytics perms)
+```
+
+---
+
+### Section 2: Permission Templates (180 lines)
+
+**Purpose:** Pre-configured permission sets for quick user assignment
+
+**Features:**
+```typescript
+interface PermissionTemplate {
+  id: string
+  name: string  // e.g., "Accountant", "Finance Manager"
+  description: string
+  category: 'role-based' | 'department' | 'skill-based'
+
+  permissions: Permission[]
+
+  // Metadata
+  usageCount: number  // How many users have this template
+  lastUsedAt: Date
+  createdBy: string
+  isActive: boolean
+  isSystem: boolean  // Can't be deleted
+
+  // Suggested for
+  suggestedRoles: UserRole[]
+  suggestedDepartments: string[]
+}
+```
+
+**Pre-built System Templates:**
+```
+1. Accounting Manager
+   ├─ Bookkeeping (view, create, edit)
+   ├─ Invoice Management (full access)
+   ├─ Financial Reports (view, export)
+   ├─ Expense Management (moderate access)
+   └─ Team View (read-only)
+
+2. Bookkeeper
+   ├─ Bookkeeping (full access)
+   ├─ Invoice Management (create, edit)
+   ├─ Financial Reports (view only)
+   └─ Expense Management (own expenses only)
+
+3. Client Portal User
+   ├─ View own documents
+   ├─ Submit expenses
+   ├─ View own invoices (paid status only)
+   └─ Book appointments
+
+4. Support Agent
+   ├─ View all service requests
+   ├─ Update service requests
+   ├─ Comment on requests
+   ├─ View knowledge base
+   └─ Export reports
+
+5. Custom Template (Create your own)
+   ├─ Select individual permissions
+   ├─ Test on demo user
+   ├─ Save and reuse
+```
+
+**UI Features:**
+- ✅ Template cards with permission count and usage stats
+- ✅ Copy system template to create custom variant
+- ✅ Drag-and-drop permission selector
+- ✅ Template preview (see all permissions)
+- ✅ Test on demo user before deployment
+- ✅ Version history (track template changes)
+- ✅ Usage analytics (which users have this template)
+
+---
+
+### Section 3: Onboarding Workflows (200 lines)
+
+**Purpose:** Configure user onboarding processes and automation
+
+**Features:**
+```typescript
+interface OnboardingConfig {
+  // Welcome Email
+  welcomeEmail: {
+    enabled: boolean
+    subject: string
+    template: string
+    includingManualWithKey: boolean
+  }
+
+  // Auto-assignment
+  autoAssignment: {
+    enabled: boolean
+    assignToManager: boolean  // Auto-assign to inviting user's manager
+    permissionTemplate: string
+    departmentFromInviter: boolean
+  }
+
+  // First Login
+  firstLogin: {
+    forcePasswordChange: boolean
+    passwordExpiryDays: number
+    requireProfileCompletion: boolean
+    requiredProfileFields: string[]  // name, phone, company, etc
+    showTutorial: boolean
+    tutorialModules: string[]
+  }
+
+  // Checklist
+  checklist: {
+    enabled: boolean
+    items: {
+      title: string
+      description: string
+      required: boolean
+      dueInDays: number
+    }[]
+  }
+
+  // Notification
+  notificationOnInvite: {
+    toAdmin: boolean
+    toManager: boolean
+    toNewUser: boolean
+  }
+}
+```
+
+**Workflow Examples:**
+
+**Scenario 1: New Employee Onboarding**
+```
+1. HR Invites new employee
+2. System sends welcome email
+3. Employee creates password
+4. System forces profile completion (name, phone, company)
+5. System assigns to team based on department
+6. System assigns permission template: "Accountant"
+7. Email sent to manager: "New team member ready"
+8. 30-day follow-up: "Complete profile picture?"
+```
+
+**Scenario 2: Client Self-Signup**
+```
+1. Client visits sign-up
+2. System assigns default role: CLIENT
+3. System assigns permission template: "Client Portal User"
+4. System sends welcome with document links
+5. Show portal tutorial
+6. Request company details (optional)
+7. No manager assignment
+```
+
+**Scenario 3: Contractor Onboarding**
+```
+1. Admin invites contractor
+2. System forces 2FA setup
+3. System assigns limited permission template
+4. System sets 90-day access expiry
+5. System requires NDA acceptance
+6. No auto-assignment (manual only)
+```
+
+**UI Features:**
+- ✅ Visual workflow builder (drag-and-drop steps)
+- ✅ Conditional logic (IF role = X THEN do Y)
+- ✅ Email template editor with live preview
+- ✅ Checklist item management
+- ✅ Scenario templates (Employee, Client, Contractor)
+- ✅ Send test emails to preview
+- ✅ Automation logs (track completed workflows)
+
+---
+
+### Section 4: User Policies (180 lines)
+
+**Purpose:** Configure user lifecycle and data management policies
+
+**Features:**
+```typescript
+interface UserPolicies {
+  // Data Retention
+  dataRetention: {
+    inactiveUserDays: number  // Days before marking inactive
+    archiveInactiveAfterDays: number | null  // null = never
+    deleteArchivedAfterDays: number | null  // null = manual only
+    archiveNotificationDays: number  // Days before archiving
+    keepAuditLogs: boolean
+    auditLogRetentionYears: number
+  }
+
+  // Activity Monitoring
+  activityMonitoring: {
+    trackLoginAttempts: boolean
+    trackDataAccess: boolean
+    trackPermissionChanges: boolean
+    trackBulkActions: boolean
+    retentionDays: number
+    alertOnSuspiciousActivity: boolean
+  }
+
+  // Access Control
+  accessControl: {
+    requireMFAForRole: Record<UserRole, boolean>  // Which roles must have MFA
+    minPasswordAgeDays: number
+    maxPasswordAgeDays: number
+    preventPreviousPasswords: number  // Can't reuse last N passwords
+    lockoutAfterFailedAttempts: number
+    lockoutDurationMinutes: number
+  }
+
+  // IP & Location
+  ipLocation: {
+    restrictByIP: boolean
+    allowedIPRanges: string[]  // CIDR notation
+    warnOnNewLocation: boolean
+    requireMFAOnNewLocation: boolean
+    geofenceCountries: string[] | null  // null = no restriction
+  }
+
+  // Device Management
+  deviceManagement: {
+    trackDevices: boolean
+    requireDeviceApproval: boolean
+    maxDevicesPerUser: number
+    warnBeforeNewDevice: boolean
+  }
+}
+```
+
+**Policy Examples:**
+
+**Standard Employee Policy:**
+```
+Inactivity: Mark inactive after 60 days
+Archive: After 180 days of inactivity (warn 30 days before)
+Delete: After 1 year in archive (manual approval required)
+MFA: Required for ADMIN, TEAM_LEAD
+Password: Min 12 chars, change every 90 days
+IP Restriction: No restriction
+Device Management: Max 3 devices, approval required
+```
+
+**Contractor Policy:**
+```
+Inactivity: Mark inactive after 14 days
+Archive: After 30 days of inactivity
+Delete: After 90 days in archive (automatic)
+MFA: Required
+Password: 16 chars, change every 30 days
+IP Restriction: Whitelist only approved IPs
+Device Management: Max 1 device, approval required
+Access Expiry: Auto-expire after contract end date
+```
+
+**Client Policy:**
+```
+Inactivity: Mark after 1 year
+Archive: Never (unless manually requested)
+MFA: Optional (can require by company)
+Password: Min 8 chars, no rotation
+IP Restriction: None
+Device Management: Unlimited
+```
+
+**UI Features:**
+- ✅ Policy templates (Standard, Contractor, Client)
+- ✅ Role-specific policy customization
+- ✅ Dry-run tool (show who would be affected)
+- ✅ Archive & deletion preview reports
+- ✅ Activity monitoring dashboard
+- ✅ Suspicious activity alerts
+- ✅ Compliance report generator
+
+---
+
+### Section 5: Rate Limiting (150 lines)
+
+**Purpose:** Configure API rate limits and resource quotas per role
+
+**Features:**
+```typescript
+interface RateLimitConfig {
+  roles: Record<UserRole, {
+    apiCallsPerMinute: number
+    apiCallsPerDay: number
+    bulkOperationLimit: number  // Max rows per bulk import
+    reportGenerationPerDay: number
+    exportSizeGB: number  // Max export size per day
+    concurrentSessions: number
+    fileUploadSizeMB: number
+  }>
+
+  // Global limits
+  global: {
+    tenantApiCallsPerMinute: number
+    tenantApiCallsPerDay: number
+    tenantConcurrentUsers: number
+  }
+
+  // Throttling
+  throttling: {
+    enableAdaptiveThrottling: boolean  // Slower during high load
+    gracefulDegradation: boolean  // Reduce features instead of errors
+  }
+}
+```
+
+**Default Limits:**
+
+| Role | API/min | API/day | Bulk Ops | Exports/day | Sessions |
+|------|---------|---------|----------|-------------|----------|
+| SUPER_ADMIN | 10,000 | Unlimited | 100,000 | 50 | Unlimited |
+| ADMIN | 5,000 | 1,000,000 | 50,000 | 20 | 10 |
+| TEAM_LEAD | 1,000 | 100,000 | 10,000 | 10 | 5 |
+| TEAM_MEMBER | 500 | 50,000 | 5,000 | 5 | 3 |
+| STAFF | 300 | 25,000 | 1,000 | 3 | 2 |
+| CLIENT | 100 | 10,000 | 500 | 1 | 2 |
+
+**UI Features:**
+- ✅ Per-role rate limit editor
+- ✅ Visual charts (current usage vs. limit)
+- ✅ Alert configuration (when approaching limits)
+- ✅ Whitelist high-priority users
+- ✅ Test limits with mock requests
+- ✅ Usage analytics per role
+- ✅ Bulk limit adjustment wizard
+
+---
+
+### Section 6: Session Management (150 lines)
+
+**Purpose:** Configure session timeouts, concurrent session limits, and security
+
+**Features:**
+```typescript
+interface SessionConfig {
+  // Timeouts
+  sessionTimeout: {
+    byRole: Record<UserRole, {
+      absoluteMaxMinutes: number  // Max session duration
+      inactivityMinutes: number  // Auto-logout on inactivity
+      warningBeforeLogoutMinutes: number
+      allowExtend: boolean
+      maxExtensions: number
+    }>
+    global: {
+      absoluteMaxDays: number  // Override all roles
+      forceLogoutTime: string  // e.g., "11:00 PM" for daily logout
+    }
+  }
+
+  // Concurrent Sessions
+  concurrentSessions: {
+    byRole: Record<UserRole, number>
+    allowMultipleDevices: boolean
+    requireMFAForMultipleSessions: boolean
+    kickOldestSession: boolean  // Or reject new login
+  }
+
+  // Session Security
+  security: {
+    requireSSL: boolean
+    httpOnlyTokens: boolean
+    sameSiteCookies: 'Strict' | 'Lax' | 'None'
+    resetTokensOnPasswordChange: boolean
+    invalidateOnPermissionChange: boolean
+    regenerateSessionIdOnLogin: boolean
+  }
+
+  // Device Management
+  devices: {
+    requireDeviceId: boolean
+    trackUserAgent: boolean
+    warnOnBrowserChange: boolean
+    warnOnIPChange: boolean
+  }
+}
+```
+
+**Timeout Scenarios:**
+
+**Scenario 1: Office Worker**
+```
+Absolute Max: 8 hours
+Inactivity Timeout: 30 minutes
+Warning Before: 5 minutes
+Can Extend: Yes (up to 3 times)
+Force Logout: 11:00 PM daily
+```
+
+**Scenario 2: Client Portal User**
+```
+Absolute Max: 24 hours
+Inactivity Timeout: 1 hour
+Warning Before: 10 minutes
+Can Extend: No
+Force Logout: None
+```
+
+**Scenario 3: Admin/Super Admin**
+```
+Absolute Max: 12 hours
+Inactivity Timeout: 1 hour
+Warning Before: 15 minutes
+Can Extend: Yes (unlimited)
+Force Logout: 9:00 PM daily (can override)
+```
+
+**UI Features:**
+- ✅ Visual timeline (session duration visualization)
+- ✅ Concurrent session manager (see active sessions per user)
+- ✅ Test timeout scenarios
+- ✅ Device tracking dashboard
+- ✅ Session warning message editor
+- ✅ Force logout notifications
+- ✅ Session audit log (who logged in/out, when, from where)
+
+---
+
+### Section 7: Invitation Settings (150 lines)
+
+**Purpose:** Configure user invitation and sign-up behaviors
+
+**Features:**
+```typescript
+interface InvitationConfig {
+  // Invitation
+  invitations: {
+    defaultRole: UserRole  // When inviting without specifying role
+    expiryDays: number  // How long before invitation expires
+    resendLimit: number  // How many times can resend
+    requireEmail: boolean
+    allowMultipleInvites: boolean  // Or consolidate into one
+    notificationEmail: boolean
+  }
+
+  // Sign-up (if enabled)
+  signUp: {
+    enabled: boolean
+    defaultRole: UserRole
+    requireApproval: boolean
+    approvalNotification: {
+      toAdmins: boolean
+      toManager: boolean
+    }
+    requiredFields: string[]  // email, name, company, phone
+    prohibitedDomains: string[]  // e.g., ["temp-email.com"]
+    allowedDomains: string[] | null  // null = all allowed
+  }
+
+  // Email Verification
+  verification: {
+    required: boolean
+    expiryHours: number
+    resendLimit: number
+  }
+
+  // Domain-based Auto-Assignment
+  domainAutoAssign: {
+    enabled: boolean
+    rules: {
+      emailDomain: string  // e.g., "mycompany.com"
+      assignRole: UserRole
+      assignDepartment: string
+      assignManager: string | null
+    }[]
+  }
+}
+```
+
+**Sign-up Scenarios:**
+
+**Scenario 1: Closed Invitation Only**
+```
+Sign-up: Disabled
+Invitations: Open
+Approval: None
+Email Verification: Auto
+Expiry: 7 days
+```
+
+**Scenario 2: Public Sign-up (Company Domain)**
+```
+Sign-up: Enabled
+Default Role: TEAM_MEMBER
+Approval: Yes (notify admins)
+Allowed Domains: ["mycompany.com"]
+Email Verification: Required (24 hours)
+Auto-assign: Yes (by domain)
+```
+
+**Scenario 3: Open Client Sign-up**
+```
+Sign-up: Enabled
+Default Role: CLIENT
+Approval: No
+Allowed Domains: Any
+Prohibited Domains: ["temp-email.com"]
+Email Verification: Required
+Auto-assign: No
+```
+
+**UI Features:**
+- ✅ Invitation link generator
+- ✅ Bulk invitation import (CSV)
+- ✅ Sign-up form customizer
+- ✅ Domain-based rules builder
+- ✅ Email template preview
+- ✅ Test invitation flow
+- ✅ Invitation analytics (sent, accepted, expired)
+- ✅ Pending invitations manager
+
+---
+
+### Settings API Endpoints
+
+**Endpoints to Create:**
+
+```typescript
+// User Management Settings
+GET    /api/admin/settings/user-management
+PUT    /api/admin/settings/user-management
+
+// Role Configuration
+GET    /api/admin/settings/user-management/roles
+POST   /api/admin/settings/user-management/roles
+PUT    /api/admin/settings/user-management/roles/:id
+DELETE /api/admin/settings/user-management/roles/:id
+
+// Permission Templates
+GET    /api/admin/settings/user-management/templates
+POST   /api/admin/settings/user-management/templates
+PUT    /api/admin/settings/user-management/templates/:id
+DELETE /api/admin/settings/user-management/templates/:id
+
+// Onboarding Workflows
+GET    /api/admin/settings/user-management/onboarding
+PUT    /api/admin/settings/user-management/onboarding
+POST   /api/admin/settings/user-management/onboarding/test  // Send test email
+
+// User Policies
+GET    /api/admin/settings/user-management/policies
+PUT    /api/admin/settings/user-management/policies
+POST   /api/admin/settings/user-management/policies/preview  // Show affected users
+
+// Rate Limiting
+GET    /api/admin/settings/user-management/rate-limits
+PUT    /api/admin/settings/user-management/rate-limits
+
+// Session Management
+GET    /api/admin/settings/user-management/sessions
+PUT    /api/admin/settings/user-management/sessions
+GET    /api/admin/settings/user-management/sessions/active  // List active sessions
+
+// Invitation Settings
+GET    /api/admin/settings/user-management/invitations
+PUT    /api/admin/settings/user-management/invitations
+POST   /api/admin/settings/user-management/invitations/bulk  // Bulk invite
+```
+
+---
+
+### Integration with Admin Users Dashboard
+
+**How Settings Affect the Users Page:**
+
+1. **User Creation Workflow**
+   - Uses default role from settings
+   - Applies default permission template
+   - Triggers onboarding workflow
+   - Sends invitation email from settings template
+
+2. **User Profile Dialog**
+   - Shows warnings when changing role (policy checks)
+   - Validates MFA requirement based on settings
+   - Shows session limits before creating sessions
+   - Suggests permission templates from settings
+
+3. **Permission Management Modal**
+   - Pre-populated with template suggestions from settings
+   - Validates against role hierarchy from settings
+   - Shows rate limit impact
+
+4. **Activity Tab**
+   - Displays activity retention based on settings
+   - Flags suspicious activity per monitoring settings
+   - Shows IP/location warnings per settings
+
+---
+
+### Database Schema Extensions
+
+**New Tables Needed:**
+
+```sql
+-- User Management Settings
+CREATE TABLE user_management_settings (
+  id UUID PRIMARY KEY,
+  tenantId UUID NOT NULL,
+  config JSONB NOT NULL,  -- Stores all settings
+  createdAt TIMESTAMP,
+  updatedAt TIMESTAMP,
+  UNIQUE(tenantId)
+);
+
+-- Role Configuration History
+CREATE TABLE role_config_history (
+  id UUID PRIMARY KEY,
+  tenantId UUID NOT NULL,
+  roleId TEXT NOT NULL,
+  changes JSONB NOT NULL,
+  changedBy UUID NOT NULL,
+  createdAt TIMESTAMP,
+  INDEX(tenantId, roleId, createdAt)
+);
+
+-- Permission Template
+CREATE TABLE permission_templates (
+  id UUID PRIMARY KEY,
+  tenantId UUID NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  permissions JSONB NOT NULL,  -- Array of permission keys
+  usageCount INT DEFAULT 0,
+  lastUsedAt TIMESTAMP,
+  createdBy UUID NOT NULL,
+  isActive BOOLEAN DEFAULT true,
+  isSystem BOOLEAN DEFAULT false,
+  createdAt TIMESTAMP,
+  updatedAt TIMESTAMP,
+  UNIQUE(tenantId, name),
+  INDEX(tenantId, isActive)
+);
+
+-- Onboarding Workflow
+CREATE TABLE onboarding_workflows (
+  id UUID PRIMARY KEY,
+  tenantId UUID NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  config JSONB NOT NULL,
+  isActive BOOLEAN DEFAULT true,
+  createdAt TIMESTAMP,
+  updatedAt TIMESTAMP,
+  INDEX(tenantId)
+);
+
+-- User Policy Log
+CREATE TABLE user_policy_logs (
+  id UUID PRIMARY KEY,
+  tenantId UUID NOT NULL,
+  userId UUID NOT NULL,
+  policyType VARCHAR(100) NOT NULL,  -- e.g., 'inactivity', 'deletion'
+  action VARCHAR(100) NOT NULL,  -- e.g., 'marked_inactive', 'archived'
+  details JSONB,
+  createdAt TIMESTAMP,
+  INDEX(tenantId, userId, createdAt),
+  INDEX(policyType, createdAt)
+);
+```
+
+---
+
+### Implementation Roadmap
+
+**Phase 1: Foundation (Days 1-3)**
+- [ ] Create settings schema and database tables
+- [ ] Build API endpoints for settings management
+- [ ] Extract role management component
+- [ ] Extract permission templates component
+
+**Phase 2: Configuration UI (Days 4-6)**
+- [ ] Build onboarding workflows component
+- [ ] Build user policies component
+- [ ] Build rate limiting component
+- [ ] Build session management component
+
+**Phase 3: Advanced Features (Days 7-8)**
+- [ ] Build invitation settings component
+- [ ] Implement policy preview tool (dry-run)
+- [ ] Add email template editor
+- [ ] Add automation logs viewer
+
+**Phase 4: Integration (Days 9-10)**
+- [ ] Integrate settings with users dashboard
+- [ ] Update user creation workflow
+- [ ] Update permission modal to use templates
+- [ ] Add policy warnings to user profile dialog
+
+**Phase 5: Testing & Deployment (Days 11-12)**
+- [ ] Unit tests for each component
+- [ ] Integration tests
+- [ ] Performance testing
+- [ ] Production deployment
+
+---
+
+### Benefits of This Settings Architecture
+
+| Benefit | Impact |
+|---------|--------|
+| **Centralized Control** | Super admin controls all user-related behaviors from one place |
+| **Consistency** | All user operations follow same policies (no manual exceptions needed) |
+| **Compliance** | Easy to configure for regulations (GDPR, SOX, HIPAA) |
+| **Automation** | Reduces manual user management tasks by 70% |
+| **Scalability** | Handles 10,000+ users with automated policies |
+| **Auditability** | Complete audit trail of policy changes |
+| **Flexibility** | Unlimited role combinations, templates, and workflows |
+| **Integration** | Seamlessly integrates with modular users dashboard |
+| **Template Reuse** | Reduce configuration time through templates |
+| **Risk Management** | Policy preview shows impact before applying |
 
 ---
 
