@@ -112,6 +112,9 @@ export default function UnifiedPermissionModal({
   targetName,
   targetEmail,
 }: UnifiedPermissionModalProps) {
+  // Responsive behavior: use sheet on mobile, dialog on desktop
+  const isMobile = useMediaQuery('(max-width: 768px)')
+
   const [activeTab, setActiveTab] = useState<TabType>('role')
   const [selectedRole, setSelectedRole] = useState(currentRole)
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(currentPermissions)
