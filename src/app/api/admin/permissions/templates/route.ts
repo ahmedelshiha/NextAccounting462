@@ -156,7 +156,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           ...template,
           permissions: Array.isArray(template.permissions)
             ? template.permissions
-            : JSON.parse(template.permissions || '[]'),
+            : JSON.parse(typeof template.permissions === 'string' ? template.permissions : '[]'),
         },
       },
       { status: 201 }
