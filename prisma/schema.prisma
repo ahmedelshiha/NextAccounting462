@@ -246,6 +246,9 @@ model Tenant {
   auditEvents          AuditEvent[]
   translationKeys      TranslationKey[]
   translationMetrics   TranslationMetrics[]
+  permissionAudits     PermissionAudit[]
+  permissionTemplates  PermissionTemplate[]
+  customRoles          CustomRole[]
 
   @@index([status])
 }
