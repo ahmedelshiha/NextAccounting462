@@ -1080,6 +1080,17 @@ export default function AdminUsersPage() {
                             </div>
                           </div>
                         )}
+                        {perms.canManageUsers && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full flex items-center gap-2"
+                            onClick={() => setPermissionModalOpen(true)}
+                          >
+                            <Shield className="h-4 w-4" />
+                            Manage Permissions
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
