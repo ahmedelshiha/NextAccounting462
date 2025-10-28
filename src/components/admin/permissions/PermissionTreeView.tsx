@@ -21,7 +21,7 @@ import {
   Permission,
   PERMISSIONS,
   PERMISSION_METADATA,
-  PermissionCategory,
+  PermissionCategory as PermissionCategoryEnum,
   RiskLevel,
 } from '@/lib/permissions'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -56,7 +56,7 @@ export const PermissionTreeView = memo(function PermissionTreeView({
   onSearchChange,
 }: PermissionTreeViewProps) {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>()
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
 
   // On mobile, default to collapsed categories for better UX
