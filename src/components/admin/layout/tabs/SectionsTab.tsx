@@ -113,7 +113,7 @@ function SortableSection({ section, expandedSections, toggleSectionExpanded, tog
 
                       <button
                         onClick={() => toggleItemVisibility(currentItem.href || '')}
-                        className="p-1 rounded hover:bg-gray-200 transition-colors text-gray-600 hover:text-gray-900"
+                        className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
                         title={currentIsHidden ? 'Show item' : 'Hide item'}
                       >
                         {currentIsHidden ? (
