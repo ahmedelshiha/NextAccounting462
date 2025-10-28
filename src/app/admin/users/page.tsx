@@ -1145,13 +1145,13 @@ export default function AdminUsersPage() {
               {statusAction?.action === 'suspend' && 'Suspend User Account'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {statusAction?.action === 'activate' && 
+              {statusAction?.action === 'activate' &&
                 `Are you sure you want to activate ${statusAction.user.name || statusAction.user.email}'s account? They will regain access to their account.`
               }
-              {statusAction?.action === 'deactivate' && 
+              {statusAction?.action === 'deactivate' &&
                 `Are you sure you want to deactivate ${statusAction.user.name || statusAction.user.email}'s account? They will lose access but their data will be preserved.`
               }
-              {statusAction?.action === 'suspend' && 
+              {statusAction?.action === 'suspend' &&
                 `Are you sure you want to suspend ${statusAction.user.name || statusAction.user.email}'s account? This action should only be used for policy violations.`
               }
             </AlertDialogDescription>
@@ -1162,8 +1162,8 @@ export default function AdminUsersPage() {
               onClick={handleStatusChange}
               disabled={updating}
               className={
-                statusAction?.action === 'suspend' 
-                  ? 'bg-red-600 hover:bg-red-700' 
+                statusAction?.action === 'suspend'
+                  ? 'bg-red-600 hover:bg-red-700'
                   : statusAction?.action === 'activate'
                   ? 'bg-green-600 hover:bg-green-700'
                   : ''
@@ -1185,6 +1185,22 @@ export default function AdminUsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Permission Management Modal */}
+      {selectedUser && (
+        <UnifiedPermissionModal
+          open={permissionModalOpen}
+          onOpenChange={setPermissionModalOpen}
+          mode="user"
+          targetId={selectedUser.id}
+          currentRole={selectedUser.role}
+          currentPermissions={selectedUser.permissions || []}
+          onSave={handleSavePermissions}
+          onClose={() => setPermissionModalOpen(false)}
+          targetName={selectedUser.name || selectedUser.email}
+          targetEmail={selectedUser.email}
+        />
+      )}
     </div>
   )
 }
