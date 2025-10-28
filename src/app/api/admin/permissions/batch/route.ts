@@ -13,8 +13,8 @@ interface BatchPermissionRequest {
     to: string
   }
   permissionChanges?: {
-    added: string[]
-    removed: string[]
+    added: Permission[]
+    removed: Permission[]
   }
   reason?: string
   dryRun?: boolean
