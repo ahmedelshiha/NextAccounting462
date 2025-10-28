@@ -162,6 +162,10 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
 
 export function hasPermission(userRole: string | undefined | null, permission: Permission): boolean {
   if (!userRole) return false
+  try {
+    const roleNormalized = String(userRole).toUpperCase()
+    if (roleNormalized === 'SUPER_ADMIN') return true
+  } catch {}
   const allowed = ROLE_PERMISSIONS[userRole]
   return Array.isArray(allowed) ? allowed.includes(permission) : false
 }
