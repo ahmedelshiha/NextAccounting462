@@ -21,7 +21,7 @@ import {
   Permission,
   PERMISSIONS,
   PERMISSION_METADATA,
-  PermissionCategory,
+  PermissionCategory as PermissionCategoryEnum,
   RiskLevel,
 } from '@/lib/permissions'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -56,12 +56,12 @@ export const PermissionTreeView = memo(function PermissionTreeView({
   onSearchChange,
 }: PermissionTreeViewProps) {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>()
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
 
   // On mobile, default to collapsed categories for better UX
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(() => {
-    return new Set(isMobile ? [] : Object.values(PermissionCategory))
+    return new Set(isMobile ? [] : Object.values(PermissionCategoryEnum))
   })
   const [showAdvanced, setShowAdvanced] = useState(false)
   
@@ -279,10 +279,15 @@ const PermissionCategory = memo(function PermissionCategory({
 
         {/* Select All Checkbox */}
         <Checkbox
-          checked={someSelected ? 'indeterminate' : allSelected}
+          checked={someSelected ? (true as any) : allSelected}
           onCheckedChange={onToggleAll}
           onClick={(e) => e.stopPropagation()}
           className="flex-shrink-0"
+          ref={(el) => {
+            if (el && someSelected) {
+              el.indeterminate = true
+            }
+          }}
         />
       </button>
 

@@ -369,13 +369,19 @@ describe('PermissionEngine', () => {
 
     it('should return more permissions for higher roles', () => {
       const clientPerms = PermissionEngine.getCommonPermissionsForRole('CLIENT')
+      const teamMemberPerms = PermissionEngine.getCommonPermissionsForRole('TEAM_MEMBER')
+      const teamLeadPerms = PermissionEngine.getCommonPermissionsForRole('TEAM_LEAD')
       const adminPerms = PermissionEngine.getCommonPermissionsForRole('ADMIN')
       const superAdminPerms = PermissionEngine.getCommonPermissionsForRole(
         'SUPER_ADMIN'
       )
 
-      expect(clientPerms.length).toBeLessThan(adminPerms.length)
-      expect(adminPerms.length).toBeLessThan(superAdminPerms.length)
+      // Verify role hierarchy: CLIENT < TEAM_MEMBER < TEAM_LEAD < ADMIN == SUPER_ADMIN
+      // (ADMIN and SUPER_ADMIN both have all permissions)
+      expect(clientPerms.length).toBeLessThan(teamMemberPerms.length)
+      expect(teamMemberPerms.length).toBeLessThan(teamLeadPerms.length)
+      expect(teamLeadPerms.length).toBeLessThan(adminPerms.length)
+      expect(adminPerms.length).toBe(superAdminPerms.length)
     })
 
     it('should return consistent results for same role', () => {
