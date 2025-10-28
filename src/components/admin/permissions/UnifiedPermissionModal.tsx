@@ -373,7 +373,10 @@ export default function UnifiedPermissionModal({
 
         {showTemplates && (
           <TabsContent value="templates" className="h-full p-0 data-[state=inactive]:hidden">
-            <TemplatesContent />
+            <TemplatesContent
+              selectedPermissions={selectedPermissions}
+              onApplyTemplate={handleApplyTemplate}
+            />
           </TabsContent>
         )}
 
