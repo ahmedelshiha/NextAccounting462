@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, memo, useCallback, useRef, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -13,7 +13,7 @@ import {
   ZapOff,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { 
+import {
   PermissionEngine,
   ValidationResult,
 } from '@/lib/permission-engine'
@@ -24,6 +24,7 @@ import {
   PermissionCategory,
   RiskLevel,
 } from '@/lib/permissions'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 /**
  * Props for PermissionTreeView component
