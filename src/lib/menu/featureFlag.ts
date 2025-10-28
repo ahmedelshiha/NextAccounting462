@@ -52,6 +52,8 @@ export const isMenuCustomizationEnabledForUser = (userId: string): boolean => {
     return false
   }
 
+  // The user is an admin super user, so we assume they should have access
+  // if the feature is globally enabled.
   // TODO: Add user-specific logic here:
   // - Check user role
   // - Check beta tester list

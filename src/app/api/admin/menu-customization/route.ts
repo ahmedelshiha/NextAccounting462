@@ -6,6 +6,8 @@ import prisma from '@/lib/prisma'
 import { MenuCustomizationData } from '@/types/admin/menuCustomization'
 import { validateMenuCustomization } from '@/lib/menu/menuValidator'
 
+const ALLOWED_ADMIN_ROLES = ['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF']
+
 /**
  * Default menu structure - returned when user has no customization
  */
@@ -31,9 +33,15 @@ const _api_GET = async (request: NextRequest): Promise<NextResponse> => {
     const ctx = tenantContext.getContext()
     const userId = String(ctx.userId ?? '')
 
+    // Server-side guard: allow only admin/staff roles or super admin
+    const role = ctx.role ?? ''
+    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+      return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
+    }
+
     if (!userId) {
       return NextResponse.json(
-        { error: 'User ID not found in context' },
+        { error: 'User not authenticated', message: 'User ID not found in context' },
         { status: 401 }
       )
     }
@@ -59,8 +67,9 @@ const _api_GET = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
     console.error('[menu-customization:GET] Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch menu customization'
     return NextResponse.json(
-      { error: 'Failed to fetch menu customization' },
+      { error: errorMessage, message: 'Failed to fetch menu customization' },
       { status: 500 }
     )
   }
@@ -80,9 +89,15 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
     const ctx = tenantContext.getContext()
     const userId = String(ctx.userId ?? '')
 
+    // Server-side guard: allow only admin/staff roles or super admin
+    const role = ctx.role ?? ''
+    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+      return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
+    }
+
     if (!userId) {
       return NextResponse.json(
-        { error: 'User ID not found in context' },
+        { error: 'User not authenticated', message: 'User ID not found in context' },
         { status: 401 }
       )
     }
@@ -93,7 +108,7 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
       body = await request.json()
     } catch (error) {
       return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
+        { error: 'Invalid request format', message: 'Request body must be valid JSON' },
         { status: 400 }
       )
     }
@@ -101,8 +116,14 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
     // Validate the customization data
     const validation = validateMenuCustomization(body)
     if (!validation.isValid) {
+      const errorMessage = validation.errors.length > 0
+        ? validation.errors[0]
+        : 'Menu customization data is invalid'
       return NextResponse.json(
-        { error: 'Validation failed', details: validation.errors },
+        {
+          error: errorMessage,
+          details: validation.errors
+        },
         { status: 400 }
       )
     }
@@ -113,15 +134,15 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
       update: {
         sectionOrder: body.sectionOrder as Prisma.InputJsonValue,
         hiddenItems: body.hiddenItems as Prisma.InputJsonValue,
-        practiceItems: body.practiceItems as Prisma.InputJsonValue,
-        bookmarks: body.bookmarks as Prisma.InputJsonValue,
+        practiceItems: body.practiceItems as unknown as Prisma.InputJsonValue,
+        bookmarks: body.bookmarks as unknown as Prisma.InputJsonValue,
       },
       create: {
         userId,
         sectionOrder: body.sectionOrder as Prisma.InputJsonValue,
         hiddenItems: body.hiddenItems as Prisma.InputJsonValue,
-        practiceItems: body.practiceItems as Prisma.InputJsonValue,
-        bookmarks: body.bookmarks as Prisma.InputJsonValue,
+        practiceItems: body.practiceItems as unknown as Prisma.InputJsonValue,
+        bookmarks: body.bookmarks as unknown as Prisma.InputJsonValue,
       },
     })
 
@@ -136,8 +157,9 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
     console.error('[menu-customization:POST] Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to save menu customization'
     return NextResponse.json(
-      { error: 'Failed to save menu customization' },
+      { error: errorMessage, message: 'Failed to save menu customization' },
       { status: 500 }
     )
   }
@@ -156,9 +178,15 @@ const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
     const ctx = tenantContext.getContext()
     const userId = String(ctx.userId ?? '')
 
+    // Server-side guard: allow only admin/staff roles or super admin
+    const role = ctx.role ?? ''
+    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+      return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
+    }
+
     if (!userId) {
       return NextResponse.json(
-        { error: 'User ID not found in context' },
+        { error: 'User not authenticated', message: 'User ID not found in context' },
         { status: 401 }
       )
     }
@@ -175,13 +203,14 @@ const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(defaultConfig, { status: 200 })
   } catch (error) {
     console.error('[menu-customization:DELETE] Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to reset menu customization'
     return NextResponse.json(
-      { error: 'Failed to reset menu customization' },
+      { error: errorMessage, message: 'Failed to reset menu customization' },
       { status: 500 }
     )
   }
 }
 
-export const GET = withTenantContext(_api_GET, { requireAuth: true })
-export const POST = withTenantContext(_api_POST, { requireAuth: true })
-export const DELETE = withTenantContext(_api_DELETE, { requireAuth: true })
+export const GET = withTenantContext(_api_GET, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })
+export const POST = withTenantContext(_api_POST, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })
+export const DELETE = withTenantContext(_api_DELETE, { requireAuth: true, allowedRoles: ALLOWED_ADMIN_ROLES })

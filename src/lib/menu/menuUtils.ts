@@ -74,9 +74,8 @@ export const applyCustomizationToNavigation = (
   if (customization.hiddenItems && customization.hiddenItems.length > 0) {
     const hiddenSet = new Set(customization.hiddenItems)
 
-    sections = sections.map((section) => ({
-      ...section,
-      items: section.items
+    sections = sections.map((section) => {
+      const filteredItems = section.items
         .filter((item) => !hiddenSet.has(item.href))
         .map((item) => ({
           ...item,
@@ -85,14 +84,37 @@ export const applyCustomizationToNavigation = (
             : undefined,
         }))
         .filter((item) => {
-          // Keep items that have children or no children to remove
+          // Keep items that have children with length > 0, or items with no children
           return !item.children || item.children.length > 0
-        }),
-    }))
+        })
+
+      return {
+        ...section,
+        items: filteredItems,
+      }
+    })
   }
 
-  // Remove sections with no items
-  sections = sections.filter((section) => section.items.length > 0)
+  // Remove sections with no items, but keep sections if original had items with children
+  sections = sections.filter((section) => {
+    // Always keep sections that have items
+    if (section.items && section.items.length > 0) {
+      return true
+    }
+
+    // For empty sections, check if original section had items with children
+    const original = navigation.find((s) => s.section === section.section)
+    if (!original) {
+      return false
+    }
+
+    // Preserve section if any original item had children
+    const hadOriginalChildren = original.items.some(
+      (item) => item.children && Array.isArray(item.children) && item.children.length > 0
+    )
+
+    return hadOriginalChildren
+  })
 
   return sections
 }

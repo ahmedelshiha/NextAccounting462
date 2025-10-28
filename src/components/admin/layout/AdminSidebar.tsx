@@ -57,10 +57,11 @@ interface AdminSidebarProps {
   isOpen?: boolean
   onToggle?: () => void
   onClose?: () => void
+  onOpenMenuCustomization?: () => void
 }
 
 function AdminSidebar(props: AdminSidebarProps) {
-  const { collapsed, isCollapsed: isCollapsedProp, isMobile = false, isOpen = false, onToggle, onClose } = props
+  const { collapsed, isCollapsed: isCollapsedProp, isMobile = false, isOpen = false, onToggle, onClose, onOpenMenuCustomization } = props
   const pathname = usePathname()
   const { data: session } = useSession()
 
@@ -312,7 +313,7 @@ function AdminSidebar(props: AdminSidebarProps) {
             })}
           </nav>
 
-          <SidebarFooter collapsed={storeCollapsed} isMobile={isMobile} onClose={onClose} />
+          <SidebarFooter collapsed={storeCollapsed} isMobile={isMobile} onClose={onClose} onOpenMenuCustomization={onOpenMenuCustomization} />
         </div>
 
         {/* Resizer - only on desktop and when not collapsed */}
