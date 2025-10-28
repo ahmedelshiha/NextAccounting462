@@ -127,142 +127,95 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
   if (!isEnabledForCurrentUser || !isOpen) return null
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-gray-900 bg-opacity-25 z-40 transition-opacity duration-200"
-        onClick={handleCancel}
-        aria-hidden="true"
-      />
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-[85vh]" role="dialog" aria-labelledby="menu-modal-title" aria-modal="true">
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
+        <div className="flex-1">
+          <h2 id="menu-modal-title" className="text-base font-semibold text-gray-900">
+            Customize your menu
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Choose what you want to see in your menu, and drag and reorder items to fit the way you work.
+          </p>
+        </div>
+        <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex-shrink-0 ml-4" aria-label="Close menu customization">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
 
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-100"
-          role="dialog"
-          aria-labelledby="menu-modal-title"
-          aria-modal="true"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-100">
-            <div>
-              <h2 id="menu-modal-title" className="text-lg font-bold text-gray-900">
-                Customize your menu
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Browse, hide, and organize your admin menu to fit your workflow
-              </p>
-            </div>
-            <button
-              onClick={handleCancel}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors p-1 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-              aria-label="Close menu customization"
-            >
-              <X className="h-5 w-5" />
-            </button>
+      {/* Tabs */}
+      <MenuCustomizationTabs selectedTab={selectedTab} onTabChange={setSelectedTab} />
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-6 bg-white">
+        {isLoading ? (
+          <div className="space-y-4 animate-pulse">
+            <div className="h-32 bg-gray-200 rounded-lg" />
+            <div className="h-48 bg-gray-200 rounded-lg" />
+            <div className="h-32 bg-gray-200 rounded-lg" />
           </div>
+        ) : draftCustomization ? (
+          <div className="h-full">
+            {selectedTab === 'sections' && <SectionsTab draftCustomization={draftCustomization} />}
 
-          {/* Tabs */}
-          <MenuCustomizationTabs selectedTab={selectedTab} onTabChange={setSelectedTab} />
+            {selectedTab === 'practice' && <YourPracticeTab draftCustomization={draftCustomization} />}
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {isLoading ? (
-              /* Loading Skeleton */
-              <div className="space-y-4 animate-pulse">
-                <div className="h-32 bg-gray-200 rounded-lg"></div>
-                <div className="h-48 bg-gray-200 rounded-lg"></div>
-                <div className="h-32 bg-gray-200 rounded-lg"></div>
-              </div>
-            ) : draftCustomization ? (
-              <div className="h-full">
-                {selectedTab === 'sections' && (
-                  <SectionsTab draftCustomization={draftCustomization} />
-                )}
+            {selectedTab === 'bookmarks' && <BookmarksTab draftCustomization={draftCustomization} />}
 
-                {selectedTab === 'practice' && (
-                  <YourPracticeTab draftCustomization={draftCustomization} />
-                )}
-
-                {selectedTab === 'bookmarks' && (
-                  <BookmarksTab draftCustomization={draftCustomization} />
-                )}
-
-                {selectedTab === 'books' && (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-gray-500 text-sm">
-                      Your Books feature coming soon
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Error State */
+            {selectedTab === 'books' && (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-red-600 text-sm font-medium">
-                  Failed to load customization
-                </p>
-                <p className="text-gray-500 text-sm mt-1">
-                  Please try refreshing the page
-                </p>
-              </div>
-            )}
-
-            {/* Error message from save */}
-            {saveError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 mb-4 animate-in">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg mt-0.5">⚠️</span>
-                  <div className="flex-1">
-                    <p className="font-medium">Error saving changes</p>
-                    <p className="text-red-600 text-xs mt-1">{saveError}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Success message */}
-            {saveSuccess && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 animate-in">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">✓</span>
-                  <p className="font-medium">Menu customization saved successfully!</p>
-                </div>
+                <p className="text-gray-500 text-sm">Your Books feature coming soon</p>
               </div>
             )}
           </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-red-600 text-sm font-medium">Failed to load customization</p>
+            <p className="text-gray-500 text-sm mt-1">Please try refreshing the page</p>
+          </div>
+        )}
 
-          {/* Footer Actions */}
-          <div className="flex items-center justify-between p-6 border-t border-gray-100 bg-white gap-4">
-            <button
-              onClick={handleReset}
-              disabled={isSaving}
-              className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Reset to Defaults
-            </button>
-
-            <div className="flex gap-3 ml-auto">
-              <button
-                onClick={handleCancel}
-                disabled={isSaving}
-                className="px-4 py-2 text-sm font-medium border-2 border-emerald-600 text-emerald-600 bg-white rounded-lg hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleSave}
-                disabled={isSaving || !isDirty}
-                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 border border-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
-              >
-                {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isSaving ? 'Saving...' : 'Save'}
-              </button>
+        {/* Error message from save */}
+        {saveError && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 mb-4 animate-in mt-4">
+            <div className="flex items-start gap-3">
+              <span className="text-lg mt-0.5">⚠️</span>
+              <div className="flex-1">
+                <p className="font-medium">Error saving changes</p>
+                <p className="text-red-600 text-xs mt-1">{saveError}</p>
+              </div>
             </div>
           </div>
+        )}
+
+        {/* Success message */}
+        {saveSuccess && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 animate-in mt-4">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">✓</span>
+              <p className="font-medium">Menu customization saved successfully!</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer Actions */}
+      <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-white gap-4">
+        <button onClick={handleReset} disabled={isSaving} className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          Reset to Defaults
+        </button>
+
+        <div className="flex gap-3 ml-auto">
+          <button onClick={handleCancel} disabled={isSaving} className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 bg-white rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            Cancel
+          </button>
+
+          <button onClick={handleSave} disabled={isSaving || !isDirty} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm">
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isSaving ? 'Saving...' : 'Save'}
+          </button>
         </div>
       </div>
-    </>
+    </div>
   )
 }
