@@ -1,5 +1,3 @@
-"use client"
-
 import { getSessionOrBypass } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import StandardPage from '@/components/dashboard/templates/StandardPage'
