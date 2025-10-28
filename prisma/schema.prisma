@@ -7,6 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Language registry model for data-driven language configuration
+model Language {
+  code          String    @id @default("en") @db.VarChar(10)
+  name          String    @db.VarChar(100)
+  nativeName    String    @db.VarChar(100)
+  direction     String    @default("ltr") @db.VarChar(3) // "ltr" or "rtl"
+  flag          String?   @db.VarChar(5)
+  bcp47Locale   String    @db.VarChar(10) // e.g., "en-US", "ar-SA", "hi-IN"
+  enabled       Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([enabled])
+  @@map("languages")
+}
+
 // User model for authentication and role management
 model User {
   id             String    @id @default(cuid())
@@ -59,11 +75,56 @@ model User {
   expenses Expense[]
   tenantMemberships TenantMembership[]
   auditLogs AuditLog[]
+  settingChangeDiffs SettingChangeDiff[]
+  favoriteSettings   FavoriteSetting[]
+  auditEvents        AuditEvent[]
+  userProfile        UserProfile?
+  menuCustomization  MenuCustomization?
+  permissionAuditsChanged  PermissionAudit[] @relation("AuditChangedBy")
+  templatesCreated   PermissionTemplate[] @relation("TemplateCreatedBy")
+  rolesCreated       CustomRole[] @relation("RoleCreatedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
   @@index([tenantId, createdAt])
   @@map("users")
+}
+
+// User profile model for extended profile data
+model UserProfile {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  organization        String?
+  phoneNumber         String?
+  phoneNumberVerified DateTime?
+  twoFactorEnabled    Boolean   @default(false)
+  twoFactorSecret     String?
+  lastLoginAt         DateTime?
+  lastLoginIp         String?
+  loginAttempts       Int       @default(0)
+  lockoutUntil        DateTime?
+  metadata            Json?
+
+  // Preference fields
+  timezone            String?   @default("UTC")
+  preferredLanguage   String?   @default("en")
+
+  // Booking notification preferences
+  bookingEmailConfirm      Boolean?  @default(true)
+  bookingEmailReminder     Boolean?  @default(true)
+  bookingEmailReschedule   Boolean?  @default(true)
+  bookingEmailCancellation Boolean?  @default(true)
+  bookingSmsReminder       Boolean?  @default(false)
+  bookingSmsConfirmation   Boolean?  @default(false)
+  reminderHours            Int[]     @default([24, 2])
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_profiles")
 }
 
 // NextAuth Account model
@@ -108,10 +169,42 @@ model VerificationToken {
   @@map("verificationtokens")
 }
 
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum PriorityStatus {
+  OPEN
+  IN_PROGRESS
+  BLOCKED
+  DONE
+}
+
 enum TenantStatus {
   ACTIVE
   SUSPENDED
   DECOMMISSIONED
+}
+
+model TranslationPriority {
+  id                String    @id @default(cuid())
+  tenantId          String
+  key               String
+  languageCode      String?   @db.VarChar(10)
+  priority          Priority  @default(MEDIUM)
+  status            PriorityStatus @default(OPEN)
+  dueDate           DateTime?
+  assignedToUserId  String?
+  notes             String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([tenantId, key, languageCode])
+  @@index([tenantId])
+  @@map("translation_priorities")
 }
 
 model Tenant {
@@ -145,8 +238,20 @@ model Tenant {
   integrationSettings  IntegrationSettings?
   communicationSettings CommunicationSettings?
   securitySettings     SecuritySettings?
+  cronTelemetrySettings CronTelemetrySettings?
+  localizationSettings OrganizationLocalizationSettings?
+  regionalFormats      RegionalFormat[]
+  crowdinIntegration   CrowdinIntegration?
   tenantMemberships    TenantMembership[]
   auditLogs            AuditLog[]
+  settingChangeDiffs   SettingChangeDiff[]
+  favoriteSettings     FavoriteSetting[]
+  auditEvents          AuditEvent[]
+  translationKeys      TranslationKey[]
+  translationMetrics   TranslationMetrics[]
+  permissionAudits     PermissionAudit[]
+  permissionTemplates  PermissionTemplate[]
+  customRoles          CustomRole[]
 
   @@index([status])
 }
@@ -413,6 +518,21 @@ model HealthThreshold {
   storageGrowth Float    @default(20.0)   // percent
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+// Admin sidebar preferences per user
+model SidebarPreferences {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  collapsed      Boolean  @default(false)
+  width          Int      @default(256)
+  mobileOpen     Boolean  @default(false)
+  expandedGroups String[] @default(["dashboard", "business"])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@map("sidebar_preferences")
 }
 
 // Currency models for multi-currency support
@@ -1227,6 +1347,62 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+// Settings change diff records for auditing previews and applied changes
+model SettingChangeDiff {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String?
+  category  String
+  resource  String?
+  before    Json?
+  after     Json?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, category, createdAt])
+  @@map("setting_change_diffs")
+}
+
+// Per-user pinned settings shortcuts
+model FavoriteSetting {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String
+  settingKey String
+  route      String
+  label      String
+  createdAt  DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId, settingKey])
+  @@index([tenantId, userId])
+  @@map("favorite_settings")
+}
+
+// Generic audit events (complements audit_logs)
+model AuditEvent {
+  id        String   @id @default(cuid())
+  tenantId  String?
+  userId    String?
+  type      String
+  resource  String?
+  details   Json?
+  createdAt DateTime @default(now())
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([tenantId, createdAt])
+  @@index([type, createdAt])
+  @@map("audit_events")
+}
+
 // Organization settings persisted per-tenant
 model OrganizationSettings {
   id          String   @id @default(cuid())
@@ -1264,6 +1440,68 @@ model OrganizationSettings {
 
   @@index([tenantId])
   @@map("organization_settings")
+}
+
+// Translation key registry for Phase 4 analytics
+model TranslationKey {
+  id           String   @id @default(cuid())
+  tenantId     String
+  key          String   // e.g., "nav.home", "hero.headline"
+  namespace    String?  // e.g., "nav", "hero" (extracted from key prefix)
+  enTranslated Boolean  @default(true)  // English is always baseline
+  arTranslated Boolean  @default(false) // Arabic translation status
+  hiTranslated Boolean  @default(false) // Hindi translation status
+  lastUpdated  DateTime @updatedAt
+  addedAt      DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, key])
+  @@index([tenantId, namespace])
+  @@index([tenantId, enTranslated])
+  @@index([tenantId, arTranslated])
+  @@index([tenantId, hiTranslated])
+  @@index([addedAt])
+  @@map("translation_keys")
+}
+
+// Translation metrics for Phase 4 analytics & trending
+model TranslationMetrics {
+  id                    String   @id @default(cuid())
+  tenantId              String
+  date                  DateTime @db.Date // YYYY-MM-DD snapshot
+
+  // English (always 100%)
+  enTotal               Int      @default(0)
+  enTranslated          Int      @default(0)
+
+  // Arabic
+  arTotal               Int      @default(0)
+  arTranslated          Int      @default(0)
+
+  // Hindi
+  hiTotal               Int      @default(0)
+  hiTranslated          Int      @default(0)
+
+  // Aggregate metrics
+  totalUniqueKeys       Int      @default(0)
+  usersWithArabic       Int      @default(0) // Count from UserProfile.preferredLanguage
+  usersWithHindi        Int      @default(0)
+  usersWithEnglish      Int      @default(0)
+
+  // Calculated fields (for trending)
+  enCoveragePct         Decimal  @default(0) @db.Decimal(5, 2) // 0-100
+  arCoveragePct         Decimal  @default(0) @db.Decimal(5, 2)
+  hiCoveragePct         Decimal  @default(0) @db.Decimal(5, 2)
+
+  createdAt             DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, date]) // One snapshot per day
+  @@index([tenantId, date])
+  @@index([date])
+  @@map("translation_metrics")
 }
 
 // Integration Hub settings per-tenant (no raw secrets stored)
@@ -1324,4 +1562,197 @@ model SecuritySettings {
 
   @@index([tenantId])
   @@map("security_settings")
+}
+
+// Cron Telemetry settings per-tenant
+model CronTelemetrySettings {
+  id        String   @id @default(cuid())
+  tenantId  String   @unique
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  performance  Json?
+  reliability  Json?
+  monitoring   Json?
+  status       Json?
+  scheduling   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("cron_telemetry_settings")
+}
+
+// Organization-wide localization settings per-tenant
+model OrganizationLocalizationSettings {
+  id                          String   @id @default(cuid())
+  tenantId                    String   @unique
+  tenant                      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  defaultLanguage             String   @default("en") @db.VarChar(10)
+  fallbackLanguage            String   @default("en") @db.VarChar(10)
+  showLanguageSwitcher        Boolean  @default(true)
+  persistLanguagePreference   Boolean  @default(true)
+  autoDetectBrowserLanguage   Boolean  @default(true)
+  allowUserLanguageOverride   Boolean  @default(true)
+  enableRtlSupport            Boolean  @default(true)
+  missingTranslationBehavior  String   @default("show-fallback") @db.VarChar(20) // show-key | show-fallback | show-empty
+
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("org_localization_settings")
+}
+
+// Regional format settings per language per-tenant
+model RegionalFormat {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  languageCode        String   @db.VarChar(10)
+  dateFormat          String   @db.VarChar(50)
+  timeFormat          String   @db.VarChar(50)
+  currencyCode        String   @db.VarChar(3)
+  currencySymbol      String   @db.VarChar(10)
+  numberFormat        String   @db.VarChar(50)
+  decimalSeparator    String   @db.VarChar(1)
+  thousandsSeparator  String   @db.VarChar(1)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([tenantId, languageCode])
+  @@index([tenantId])
+  @@index([languageCode])
+  @@map("regional_formats")
+}
+
+// Crowdin integration settings per-tenant
+model CrowdinIntegration {
+  id                  String   @id @default(cuid())
+  tenantId            String   @unique
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  projectId           String   @db.VarChar(100)
+  apiTokenMasked      String   @db.VarChar(20)  // Last 20 chars of token for display
+  apiTokenEncrypted   String   @db.Text         // Encrypted full token
+  autoSyncDaily       Boolean  @default(true)
+  syncOnDeploy        Boolean  @default(false)
+  createPrs           Boolean  @default(true)
+  lastSyncAt          DateTime?
+  lastSyncStatus      String?  @db.VarChar(50)  // success | failed | pending
+  testConnectionOk    Boolean  @default(false)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("crowdin_integrations")
+}
+
+// Menu customization settings per-user
+model MenuCustomization {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sectionOrder    Json     @default("[]")      // String[] - e.g., ["dashboard", "business", ...]
+  hiddenItems     Json     @default("[]")      // String[] - e.g., ["admin/analytics", "admin/reports"]
+  practiceItems   Json     @default("[]")      // PracticeItem[]
+  bookmarks       Json     @default("[]")      // Bookmark[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@map("menu_customizations")
+}
+
+// Permission audit trail for tracking all permission changes
+model PermissionAudit {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  changedBy           String
+  changedByUser       User     @relation("AuditChangedBy", fields: [changedBy], references: [id], onDelete: SetNull)
+
+  oldRole             String?  @db.VarChar(100)
+  newRole             String?  @db.VarChar(100)
+
+  permissionsAdded    Json     @default("[]")  // String[] array of permission keys
+  permissionsRemoved  Json     @default("[]")  // String[] array of permission keys
+
+  reason              String?  @db.Text
+  metadata            Json?
+
+  createdAt           DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([changedBy])
+  @@index([createdAt])
+  @@index([tenantId, createdAt])
+  @@map("permission_audits")
+}
+
+// Permission template for quick role assignment
+model PermissionTemplate {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name                String   @db.VarChar(100)
+  description         String?  @db.Text
+  icon                String?  @db.VarChar(50)
+  color               String?  @db.VarChar(20)
+
+  permissions         Json     @default("[]")  // String[] array of permission keys
+
+  isCustom            Boolean  @default(true)
+  isActive            Boolean  @default(true)
+
+  createdBy           String
+  createdByUser       User     @relation("TemplateCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([isActive])
+  @@index([tenantId, isActive])
+  @@map("permission_templates")
+}
+
+// Custom role definition per tenant
+model CustomRole {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name                String   @db.VarChar(100)
+  description         String?  @db.Text
+  color               String?  @db.VarChar(20)
+  icon                String?  @db.VarChar(50)
+
+  permissions         Json     @default("[]")  // String[] array of permission keys
+
+  isActive            Boolean  @default(true)
+
+  createdBy           String
+  createdByUser       User     @relation("RoleCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("custom_roles")
 }
