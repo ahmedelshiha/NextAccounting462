@@ -13,6 +13,7 @@
 
 import React, { useState, useCallback } from 'react'
 import { X, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
 import { useMenuCustomizationModalStore } from '@/stores/admin/menuCustomizationModal.store'
 import { MenuCustomizationTabs } from './MenuCustomizationTabs'
