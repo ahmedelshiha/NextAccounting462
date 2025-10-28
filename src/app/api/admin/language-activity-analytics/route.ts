@@ -79,7 +79,7 @@ function regionFromProfile(profile: any): string {
   return 'unknown'
 }
 
-export async function handler(request: Request) {
+async function handler(request: Request) {
   try {
     const ctx = requireTenantContext()
 
