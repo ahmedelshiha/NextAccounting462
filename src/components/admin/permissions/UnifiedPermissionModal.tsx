@@ -18,7 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
+import {
   PermissionEngine,
   PermissionDiff,
   ValidationResult,
@@ -30,18 +30,22 @@ import {
   PERMISSION_METADATA,
   RiskLevel,
 } from '@/lib/permissions'
-import { 
-  X, 
-  Check, 
-  AlertCircle, 
+import {
+  X,
+  Check,
+  AlertCircle,
   Save,
   RotateCcw,
   Eye,
   EyeOff,
   FileText,
+  Clock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import PermissionTemplatesTab, { PermissionTemplate } from './PermissionTemplatesTab'
+import SmartSuggestionsPanel from './SmartSuggestionsPanel'
+import ImpactPreviewPanel from './ImpactPreviewPanel'
 
 /**
  * Props for the UnifiedPermissionModal component
