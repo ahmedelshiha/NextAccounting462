@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, memo, useCallback, useRef, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -24,6 +24,7 @@ import {
   PermissionCategory,
   RiskLevel,
 } from '@/lib/permissions'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 /**
  * Props for PermissionTreeView component
@@ -41,24 +42,53 @@ interface PermissionTreeViewProps {
  * 
  * Hierarchical permission selection with:
  * - Collapsible category groups
- * - Search and filtering
+ * - Search and filtering (with debouncing on mobile)
  * - Bulk selection per category
  * - Dependency and conflict indicators
  * - Risk level badges
+ * - Mobile-responsive design with performance optimizations
  */
-export function PermissionTreeView({
+export const PermissionTreeView = memo(function PermissionTreeView({
   selectedPermissions,
   onPermissionChange,
   validation,
   searchQuery = '',
   onSearchChange,
 }: PermissionTreeViewProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
+  
+  // On mobile, default to collapsed categories for better UX
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(Object.values(PermissionCategory))
+    new Set(isMobile ? [] : Object.values(PermissionCategory))
   )
   const [showAdvanced, setShowAdvanced] = useState(false)
+  
+  // Debounce search on mobile devices for better performance
+  const handleSearchChange = useCallback((query: string) => {
+    setLocalSearchQuery(query)
+    
+    if (isMobile && searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+    
+    if (isMobile) {
+      searchTimeoutRef.current = setTimeout(() => {
+        onSearchChange?.(query)
+      }, 300)
+    } else {
+      onSearchChange?.(query)
+    }
+  }, [isMobile, onSearchChange])
+  
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+    }
+  }, [])
 
-  // Group permissions by category
+  // Group permissions by category with memoization
   const groupedPermissions = useMemo(() => {
     const grouped: Record<string, Permission[]> = {}
 
@@ -66,9 +96,10 @@ export function PermissionTreeView({
       const meta = PERMISSION_METADATA[permission]
       const category = meta.category
       
-      // Apply search filter
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase()
+      // Apply search filter (use external searchQuery prop when available)
+      const finalQuery = searchQuery || localSearchQuery
+      if (finalQuery) {
+        const q = finalQuery.toLowerCase()
         const matches = 
           meta.label.toLowerCase().includes(q) ||
           meta.description.toLowerCase().includes(q) ||
@@ -85,12 +116,12 @@ export function PermissionTreeView({
     })
 
     return grouped
-  }, [searchQuery])
+  }, [searchQuery, localSearchQuery])
 
   /**
    * Toggle category expansion
    */
-  const toggleCategory = (category: string) => {
+  const toggleCategory = useCallback((category: string) => {
     const newSet = new Set(expandedCategories)
     if (newSet.has(category)) {
       newSet.delete(category)
@@ -98,23 +129,23 @@ export function PermissionTreeView({
       newSet.add(category)
     }
     setExpandedCategories(newSet)
-  }
+  }, [expandedCategories])
 
   /**
    * Handle permission toggle
    */
-  const handlePermissionToggle = (permission: Permission, checked: boolean) => {
+  const handlePermissionToggle = useCallback((permission: Permission, checked: boolean) => {
     if (checked) {
       onPermissionChange([...new Set([...selectedPermissions, permission])])
     } else {
       onPermissionChange(selectedPermissions.filter(p => p !== permission))
     }
-  }
+  }, [selectedPermissions, onPermissionChange])
 
   /**
    * Handle category select all/none
    */
-  const handleCategoryToggle = (permissions: Permission[]) => {
+  const handleCategoryToggle = useCallback((permissions: Permission[]) => {
     const allSelected = permissions.every(p => selectedPermissions.includes(p))
     
     if (allSelected) {
@@ -124,38 +155,41 @@ export function PermissionTreeView({
       const newPerms = [...new Set([...selectedPermissions, ...permissions])]
       onPermissionChange(newPerms)
     }
-  }
+  }, [selectedPermissions, onPermissionChange])
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="space-y-3 md:space-y-4 h-full flex flex-col">
       {/* Search Bar */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 px-3 md:px-4 lg:px-6 pt-3 md:pt-4 lg:pt-6">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-gray-400" />
           <Input
             type="text"
             placeholder="Search permissions..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange?.(e.target.value)}
-            className="pl-10"
+            value={localSearchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-8 md:pl-10 text-xs md:text-sm py-1.5 md:py-2"
           />
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-        >
-          {showAdvanced ? 'Hide' : 'Show'} Info
-        </Button>
+        {!isMobile && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="text-xs"
+          >
+            {showAdvanced ? 'Hide' : 'Show'} Info
+          </Button>
+        )}
       </div>
 
       {/* Permission Categories */}
-      <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+      <div className="flex-1 overflow-y-auto space-y-2 pr-2 md:pr-3 lg:pr-4 px-3 md:px-4 lg:px-6">
         {Object.entries(groupedPermissions).length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <ZapOff className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">
-              No permissions found matching &quot;{searchQuery}&quot;
+            <ZapOff className="h-6 md:h-8 w-6 md:w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-xs md:text-sm">
+              No permissions found matching &quot;{localSearchQuery || searchQuery}&quot;
             </p>
           </div>
         ) : (
@@ -169,18 +203,19 @@ export function PermissionTreeView({
               onToggleExpand={() => toggleCategory(category)}
               onToggleAll={() => handleCategoryToggle(permissions)}
               onPermissionToggle={handlePermissionToggle}
-              showAdvanced={showAdvanced}
+              showAdvanced={showAdvanced && !isMobile}
               validation={validation}
+              isMobile={isMobile}
             />
           ))
         )}
       </div>
     </div>
   )
-}
+})
 
 /**
- * Permission Category Component
+ * Permission Category Component - Memoized for performance
  */
 interface PermissionCategoryProps {
   category: PermissionCategory
@@ -192,9 +227,10 @@ interface PermissionCategoryProps {
   onPermissionToggle: (permission: Permission, checked: boolean) => void
   showAdvanced: boolean
   validation?: ValidationResult
+  isMobile: boolean
 }
 
-function PermissionCategory({
+const PermissionCategory = memo(function PermissionCategory({
   category,
   permissions,
   selectedPermissions,
@@ -204,6 +240,7 @@ function PermissionCategory({
   onPermissionToggle,
   showAdvanced,
   validation,
+  isMobile,
 }: PermissionCategoryProps) {
   const selectedCount = permissions.filter(p => selectedPermissions.includes(p)).length
   const allSelected = selectedCount === permissions.length
@@ -214,17 +251,28 @@ function PermissionCategory({
       {/* Category Header */}
       <button
         onClick={onToggleExpand}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        className={cn(
+          'w-full flex items-center justify-between hover:bg-gray-50 transition-colors',
+          isMobile ? 'px-3 py-2' : 'px-4 py-3'
+        )}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
           <ChevronRight
             className={cn(
-              'h-4 w-4 transition-transform',
+              'h-3.5 w-3.5 md:h-4 md:w-4 transition-transform flex-shrink-0',
               isExpanded && 'rotate-90'
             )}
           />
-          <span className="font-medium text-sm text-gray-900">{category}</span>
-          <Badge variant="secondary" className="text-xs">
+          <span className={cn(
+            'font-medium text-gray-900 truncate',
+            isMobile ? 'text-xs' : 'text-sm'
+          )}>
+            {category}
+          </span>
+          <Badge variant="secondary" className={cn(
+            'flex-shrink-0',
+            isMobile ? 'text-xs' : 'text-xs'
+          )}>
             {selectedCount}/{permissions.length}
           </Badge>
         </div>
@@ -235,12 +283,16 @@ function PermissionCategory({
           indeterminate={someSelected}
           onCheckedChange={onToggleAll}
           onClick={(e) => e.stopPropagation()}
+          className="flex-shrink-0"
         />
       </button>
 
       {/* Permissions List */}
       {isExpanded && (
-        <div className="border-t p-2 space-y-1 bg-gray-50">
+        <div className={cn(
+          'border-t p-2 space-y-1 bg-gray-50',
+          isMobile ? 'p-1.5' : 'p-2'
+        )}>
           {permissions.map(permission => (
             <PermissionItem
               key={permission}
@@ -249,16 +301,17 @@ function PermissionCategory({
               onToggle={(checked) => onPermissionToggle(permission, checked)}
               showAdvanced={showAdvanced}
               validation={validation}
+              isMobile={isMobile}
             />
           ))}
         </div>
       )}
     </div>
   )
-}
+})
 
 /**
- * Individual Permission Item Component
+ * Individual Permission Item Component - Memoized for performance
  */
 interface PermissionItemProps {
   permission: Permission
@@ -266,14 +319,16 @@ interface PermissionItemProps {
   onToggle: (checked: boolean) => void
   showAdvanced: boolean
   validation?: ValidationResult
+  isMobile: boolean
 }
 
-function PermissionItem({
+const PermissionItem = memo(function PermissionItem({
   permission,
   selected,
   onToggle,
   showAdvanced,
   validation,
+  isMobile,
 }: PermissionItemProps) {
   const [showDetails, setShowDetails] = useState(false)
   const meta = PERMISSION_METADATA[permission]
@@ -292,7 +347,8 @@ function PermissionItem({
   return (
     <div className="group">
       <div className={cn(
-        'flex items-start gap-3 p-3 rounded-md transition-colors',
+        'flex items-start gap-2 md:gap-3 rounded-md transition-colors',
+        isMobile ? 'p-2' : 'p-3',
         selected 
           ? 'bg-blue-50 border border-blue-200'
           : 'hover:bg-white border border-transparent'
@@ -301,22 +357,28 @@ function PermissionItem({
           checked={selected}
           onCheckedChange={onToggle}
           id={permission}
-          className="mt-1"
+          className={cn('flex-shrink-0', isMobile ? 'mt-0.5' : 'mt-1')}
         />
 
         <div className="flex-1 min-w-0">
           <label
             htmlFor={permission}
-            className="font-medium text-sm cursor-pointer text-gray-900 block"
+            className={cn(
+              'font-medium cursor-pointer text-gray-900 block',
+              isMobile ? 'text-xs' : 'text-sm'
+            )}
           >
             {meta.label}
           </label>
-          <p className="text-xs text-gray-600 mt-0.5">
+          <p className={cn(
+            'text-gray-600 mt-0.5',
+            isMobile ? 'text-xs' : 'text-xs'
+          )}>
             {meta.description}
           </p>
 
-          {/* Dependencies */}
-          {meta.dependencies && meta.dependencies.length > 0 && (
+          {/* Dependencies - Only show on non-mobile for space */}
+          {!isMobile && meta.dependencies && meta.dependencies.length > 0 && (
             <div className="flex items-center gap-1 mt-1">
               <AlertCircle className="h-3 w-3 text-amber-500 flex-shrink-0" />
               <span className="text-xs text-amber-700">
@@ -337,8 +399,8 @@ function PermissionItem({
             </div>
           )}
 
-          {/* Warning Badge */}
-          {warning && (
+          {/* Warning Badge - Only show on non-mobile for space */}
+          {!isMobile && warning && (
             <div className="flex items-center gap-1 mt-1">
               <AlertCircle className="h-3 w-3 text-amber-500 flex-shrink-0" />
               <span className="text-xs text-amber-700">
@@ -349,12 +411,15 @@ function PermissionItem({
         </div>
 
         {/* Risk Badge */}
-        <Badge variant="outline" className={cn('text-xs flex-shrink-0', riskColor[meta.risk])}>
+        <Badge variant="outline" className={cn(
+          'text-xs flex-shrink-0',
+          riskColor[meta.risk]
+        )}>
           {meta.risk}
         </Badge>
 
-        {/* Details Button */}
-        {showAdvanced && (
+        {/* Details Button - Only on desktop with advanced mode */}
+        {showAdvanced && !isMobile && (
           <Button
             variant="ghost"
             size="sm"
@@ -366,8 +431,8 @@ function PermissionItem({
         )}
       </div>
 
-      {/* Details Panel */}
-      {showDetails && showAdvanced && (
+      {/* Details Panel - Only on desktop with advanced mode */}
+      {showDetails && showAdvanced && !isMobile && (
         <div className="ml-10 p-3 bg-blue-50 rounded-md text-sm border border-blue-200 mt-1 space-y-2">
           <div>
             <dt className="text-xs font-medium text-gray-600">Permission Key:</dt>
@@ -420,4 +485,4 @@ function PermissionItem({
       )}
     </div>
   )
-}
+})
