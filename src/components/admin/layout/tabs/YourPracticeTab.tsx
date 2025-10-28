@@ -139,7 +139,7 @@ export function YourPracticeTab({ draftCustomization }: YourPracticeTabProps) {
       </div>
 
       {/* Info box */}
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+      <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800">
         <p className="font-medium mb-1">💡 Tip:</p>
         <p>Use the up/down arrows to reorder items, eye icon to toggle visibility, and trash icon to remove items from your practice menu.</p>
       </div>
