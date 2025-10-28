@@ -101,7 +101,7 @@ export function BookmarksTab({ draftCustomization }: BookmarksTabProps) {
           placeholder="Search pages to bookmark..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-sm placeholder-gray-400 transition-colors"
         />
       </div>
 
@@ -123,15 +123,15 @@ export function BookmarksTab({ draftCustomization }: BookmarksTabProps) {
                 <button
                   key={item.id}
                   onClick={() => handleAddBookmark(item)}
-                  className="w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors flex items-center gap-2 group"
+                  className="w-full px-4 py-2 text-left hover:bg-emerald-50 transition-colors flex items-center gap-2 group"
                 >
                   <span className="text-lg flex-shrink-0">
                     {item.icon || '📄'}
                   </span>
-                  <span className="text-sm text-gray-900 group-hover:text-blue-600 flex-1 truncate">
+                  <span className="text-sm text-gray-900 group-hover:text-emerald-600 flex-1 truncate">
                     {item.name}
                   </span>
-                  <span className="text-blue-600 opacity-0 group-hover:opacity-100 text-sm font-medium">
+                  <span className="text-emerald-600 opacity-0 group-hover:opacity-100 text-sm font-medium">
                     +
                   </span>
                 </button>
@@ -200,7 +200,7 @@ export function BookmarksTab({ draftCustomization }: BookmarksTabProps) {
       </div>
 
       {/* Info box */}
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+      <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800">
         <p className="font-medium mb-1">💡 Tip:</p>
         <p>Click on available pages to add them to your bookmarks. Use the arrow buttons to reorder, or trash icon to remove.</p>
       </div>
