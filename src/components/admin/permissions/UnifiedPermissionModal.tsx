@@ -205,6 +205,38 @@ export default function UnifiedPermissionModal({
   }, [changeHistory, currentRole, currentPermissions])
 
   /**
+   * Dismiss a suggestion
+   */
+  const handleDismissSuggestion = useCallback((suggestion: PermissionSuggestion) => {
+    setDismissedSuggestions(prev => [...prev, suggestion.permission])
+  }, [])
+
+  /**
+   * Dismiss all suggestions
+   */
+  const handleDismissAllSuggestions = useCallback(() => {
+    const allSuggestions = PermissionEngine.getSuggestions(selectedRole || currentRole || 'CLIENT', selectedPermissions)
+    setDismissedSuggestions(prev => [
+      ...new Set([...prev, ...allSuggestions.map(s => s.permission)])
+    ])
+  }, [selectedRole, currentRole, selectedPermissions])
+
+  /**
+   * Apply a permission template
+   */
+  const handleApplyTemplate = useCallback((template: PermissionTemplate) => {
+    setSelectedPermissions(template.permissions)
+    // Add to history
+    setChangeHistory(prev => [...prev, {
+      targetIds: Array.isArray(targetId) ? targetId : [targetId],
+      permissionChanges: {
+        added: template.permissions.filter(p => !selectedPermissions.includes(p)),
+        removed: selectedPermissions.filter(p => !template.permissions.includes(p)),
+      },
+    }])
+  }, [targetId, selectedPermissions])
+
+  /**
    * Reset to original state
    */
   const handleReset = useCallback(() => {
