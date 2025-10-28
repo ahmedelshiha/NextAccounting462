@@ -37,26 +37,33 @@
   - `src/app/api/admin/permissions/suggestions/route.ts` - Smart suggestions endpoint
   - `src/app/api/admin/permissions/templates/route.ts` - Template CRUD operations
 
-### Phase 2: Visual Components (60% COMPLETE)
+### Phase 2: Visual Components (70% COMPLETE)
 - ✅ 2.1: Built RoleSelectionCards component in `src/components/admin/permissions/RoleSelectionCards.tsx`
-  - Color-coded role cards with visual design
-  - Permission counts and role descriptions
-  - Current role indicator
-  - Selection state with checkmark
-  - Change preview with risk assessment
+  - Color-coded role cards (pink, gray, green, blue, purple) with tailwind styling
+  - Permission counts and role descriptions with icons
+  - Current role indicator badge
+  - Selection state with green checkmark
+  - Change preview section with permission diff visualization
+  - Risk level assessment (low/medium/high indicators)
+  - Responsive grid layout (1 col mobile, 2 col tablet, 3 col desktop)
+
 - ✅ 2.2: Built PermissionTreeView component in `src/components/admin/permissions/PermissionTreeView.tsx`
-  - Collapsible category groups
-  - Search/filter functionality
-  - Bulk selection per category
-  - Dependency indicators with warnings
-  - Conflict warnings
-  - Risk level badges (color-coded)
-  - Advanced details panel (optional)
-- 🚧 2.3: Build ImpactPreviewPanel component - IN PROGRESS
+  - Collapsible category groups with expand/collapse animation
+  - Real-time search/filter functionality with visual feedback
+  - Bulk selection per category with checkbox
+  - Permission checkboxes with indeterminate state for partial selection
+  - Dependency indicators with warning icons and linked permission names
+  - Conflict warnings with clear messaging
+  - Risk level badges color-coded (red=critical, orange=high, yellow=medium, green=low)
+  - Advanced details panel with permission metadata (key, category, dependencies, conflicts, tags)
+  - No-results state with helpful messaging
+
+- ⏳ 2.3: ImpactPreviewPanel component - TODO
   - Real-time change summary display
   - Added/removed permissions lists
-  - Validation warnings/errors
+  - Validation warnings/errors integration
   - Risk assessment indicator
+  - Before/after role comparison
 
 ---
 
@@ -349,9 +356,9 @@ export class PermissionEngine {
 
 **Visual Design:**
 ```
-┌─────────────────────────────────────────────────────────┐
+┌─────────────────────────��───────────────────────────────┐
 │ Select Role                                             │
-├─────────────────────────────────────────────────────────┤
+├───────────────────────��─────────────────────────────────┤
 │ ┌────────────┐  ┌────────────┐  ┌────────────┐        │
 │ │   👑       │  │    🛡️      │  │    👤      │        │
 │ │SUPER_ADMIN │  │   ADMIN    │  │ TEAM_LEAD  │        │
@@ -362,7 +369,7 @@ export class PermissionEngine {
 │                                                         │
 │ ┌────────────┐  ┌────────────┐  ┌────────────┐        │
 │ │    👥      │  │    📋      │  │    👤      │        │
-│ │TEAM_MEMBER │  │   STAFF    │  ��   CLIENT   │        │
+│ │TEAM_MEMBER │  │   STAFF    │  │   CLIENT   │        │
 │ │            │  │            │  │            │        │
 │ │  25 perms  │  │  30 perms  │  │   5 perms  │        │
 │ └────────────┘  └────────────┘  └────────────┘        │
@@ -407,7 +414,7 @@ export class PermissionEngine {
 │ ▶ 💰 Financial Operations (0/6 selected)               │
 │ ▶ ⚙️ System Settings (0/15 selected)                   │
 │ ▶ 👥 User Management (2/10 selected)                   │
-└──────���──────────────────────────────────────────────────┘
+└──────────��──────────────────────────────────────────────┘
 ```
 
 **Features:**
@@ -477,7 +484,7 @@ export class PermissionEngine {
 │ │ Create dashboards│  │ Service config  │               │
 │ │                  │  │                 │               │
 │ │ [Apply Template] │  │ [Apply Template]│               │
-│ └─────────────────┘  └─────────────────┘               │
+│ └─────────────────┘  └───────���─────────┘               │
 │                                                         │
 │ ┌─────────────────┐  ┌─────────────────┐               │
 │ │ 👥 HR Specialist │  │ 📱 Support      │               │
@@ -587,7 +594,7 @@ class SmartSuggestionEngine {
 │                                                         │
 │ ☐ Add "View Team Reports" permission                   │
 │   87% of Team Leads have this                  [Add]   │
-��                                                         │
+│                                                         │
 │ ☐ Add "Edit Team Schedule" permission                  │
 │   User accessed this 3 times last week        [Add]   │
 │                                                         │
@@ -623,10 +630,10 @@ class SmartSuggestionEngine {
 │ │ Added permission: View Analytics          │           │
 │ │ Reason: Requested by manager              │           │
 │ │ [View Details] [Revert]                   │           │
-│ └──────────────────────────────────���───────┘           │
+│ └──────────────────────────────────────��───┘           │
 │                                                         │
 │ [Load More]                                             │
-└─────────────────────────────────────────────────────────┘
+└─────────────────────────���───────────────────────────────┘
 ```
 
 ### 3.4 Permission Conflict Resolution
