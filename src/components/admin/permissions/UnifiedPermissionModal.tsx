@@ -367,6 +367,9 @@ export default function UnifiedPermissionModal({
               showAdvanced={showAdvanced}
               onToggleAdvanced={setShowAdvanced}
               isMobile={isMobile}
+              suggestions={suggestions}
+              onApplySuggestion={applySuggestion}
+              onDismissSuggestion={handleDismissSuggestion}
             />
           </TabsContent>
         )}
