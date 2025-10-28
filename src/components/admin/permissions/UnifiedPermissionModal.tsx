@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,17 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
+import {
   PermissionEngine,
   PermissionDiff,
   ValidationResult,
@@ -24,10 +31,10 @@ import {
   PERMISSION_METADATA,
   RiskLevel,
 } from '@/lib/permissions'
-import { 
-  X, 
-  Check, 
-  AlertCircle, 
+import {
+  X,
+  Check,
+  AlertCircle,
   Save,
   RotateCcw,
   Eye,
@@ -35,6 +42,7 @@ import {
   FileText,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 /**
  * Props for the UnifiedPermissionModal component
