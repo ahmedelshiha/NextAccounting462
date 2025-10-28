@@ -70,23 +70,23 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
 
     setIsSaving(true)
     setSaveError(null)
-    setSaveSuccess(false)
 
     try {
       await applyCustomization(draftCustomization)
-      setSaveSuccess(true)
       clearDraft()
 
-      // Show success message briefly before closing
-      setTimeout(() => {
-        onClose()
-      }, 500)
+      // Show success toast notification
+      toast.success('Menu changes saved.')
+
+      // Close modal after successful save
+      onClose()
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : 'Failed to save menu customization. Please try again.'
       setSaveError(message)
+      toast.error(message)
       setIsSaving(false)
     }
   }, [draftCustomization, applyCustomization, clearDraft, onClose])
