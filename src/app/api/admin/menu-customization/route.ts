@@ -115,8 +115,14 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
     // Validate the customization data
     const validation = validateMenuCustomization(body)
     if (!validation.isValid) {
+      const errorMessage = validation.errors.length > 0
+        ? validation.errors[0]
+        : 'Menu customization data is invalid'
       return NextResponse.json(
-        { error: 'Validation failed', details: validation.errors },
+        {
+          error: errorMessage,
+          details: validation.errors
+        },
         { status: 400 }
       )
     }
