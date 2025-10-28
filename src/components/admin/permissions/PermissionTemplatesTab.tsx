@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Permission, PERMISSIONS, PERMISSION_METADATA } from '@/lib/permissions'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 export interface PermissionTemplate {
   id: string
@@ -123,7 +122,7 @@ export default function PermissionTemplatesTab({
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
           {/* Preset Templates */}
           <div>
@@ -163,7 +162,7 @@ export default function PermissionTemplatesTab({
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Footer */}
       <div className="p-4 border-t">

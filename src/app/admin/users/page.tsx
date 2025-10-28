@@ -1192,7 +1192,7 @@ export default function AdminUsersPage() {
           mode="user"
           targetId={selectedUser.id}
           currentRole={selectedUser.role}
-          currentPermissions={selectedUser.permissions || []}
+          currentPermissions={(selectedUser.permissions || []) as any}
           onSave={handleSavePermissions}
           onClose={() => setPermissionModalOpen(false)}
           targetName={selectedUser.name || selectedUser.email}

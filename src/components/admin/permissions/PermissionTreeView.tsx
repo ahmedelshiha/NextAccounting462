@@ -39,7 +39,7 @@ interface PermissionTreeViewProps {
 
 /**
  * PermissionTreeView Component
- * 
+ *
  * Hierarchical permission selection with:
  * - Collapsible category groups
  * - Search and filtering (with debouncing on mobile)
@@ -58,11 +58,11 @@ export const PermissionTreeView = memo(function PermissionTreeView({
   const isMobile = useMediaQuery('(max-width: 768px)')
   const searchTimeoutRef = useRef<NodeJS.Timeout>()
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
-  
+
   // On mobile, default to collapsed categories for better UX
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(isMobile ? [] : Object.values(PermissionCategory))
-  )
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(() => {
+    return new Set(isMobile ? [] : Object.values(PermissionCategory))
+  })
   const [showAdvanced, setShowAdvanced] = useState(false)
   
   // Debounce search on mobile devices for better performance
@@ -279,8 +279,7 @@ const PermissionCategory = memo(function PermissionCategory({
 
         {/* Select All Checkbox */}
         <Checkbox
-          checked={allSelected}
-          indeterminate={someSelected}
+          checked={someSelected ? 'indeterminate' : allSelected}
           onCheckedChange={onToggleAll}
           onClick={(e) => e.stopPropagation()}
           className="flex-shrink-0"

@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 export interface BulkUser {
   id: string
@@ -80,7 +79,7 @@ export default function BulkOperationsMode({
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-6 space-y-6">
           {/* Selected Users */}
           <div>
@@ -110,8 +109,8 @@ export default function BulkOperationsMode({
 
           {/* Warning */}
           {hasMultipleRoles && (
-            <Alert variant="warning">
-              <AlertTriangle className="h-4 w-4" />
+            <Alert className="border-yellow-200 bg-yellow-50">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
               <AlertDescription>
                 <div>
                   <p className="font-medium text-sm">
@@ -173,7 +172,7 @@ export default function BulkOperationsMode({
             </Alert>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Footer */}
       <div className="p-6 border-t bg-gray-50 flex gap-2 justify-end">

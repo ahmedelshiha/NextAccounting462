@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import prisma from '@/lib/prisma'
 import { PermissionEngine } from '@/lib/permission-engine'
 import { Permission } from '@/lib/permissions'
 
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Parse permissions JSON
     const parsedTemplates = templates.map(t => ({
       ...t,
-      permissions: Array.isArray(t.permissions) ? t.permissions : JSON.parse(t.permissions || '[]'),
+      permissions: Array.isArray(t.permissions) ? t.permissions : JSON.parse(typeof t.permissions === 'string' ? t.permissions : '[]'),
     }))
 
     return NextResponse.json({
