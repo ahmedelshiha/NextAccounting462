@@ -1663,3 +1663,90 @@ model MenuCustomization {
   @@index([userId])
   @@map("menu_customizations")
 }
+
+// Permission audit trail for tracking all permission changes
+model PermissionAudit {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  changedBy           String
+  changedByUser       User     @relation("AuditChangedBy", fields: [changedBy], references: [id], onDelete: SetNull)
+
+  oldRole             String?  @db.VarChar(100)
+  newRole             String?  @db.VarChar(100)
+
+  permissionsAdded    Json     @default("[]")  // String[] array of permission keys
+  permissionsRemoved  Json     @default("[]")  // String[] array of permission keys
+
+  reason              String?  @db.Text
+  metadata            Json?
+
+  createdAt           DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([changedBy])
+  @@index([createdAt])
+  @@index([tenantId, createdAt])
+  @@map("permission_audits")
+}
+
+// Permission template for quick role assignment
+model PermissionTemplate {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name                String   @db.VarChar(100)
+  description         String?  @db.Text
+  icon                String?  @db.VarChar(50)
+  color               String?  @db.VarChar(20)
+
+  permissions         Json     @default("[]")  // String[] array of permission keys
+
+  isCustom            Boolean  @default(true)
+  isActive            Boolean  @default(true)
+
+  createdBy           String
+  createdByUser       User     @relation("TemplateCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([isActive])
+  @@index([tenantId, isActive])
+  @@map("permission_templates")
+}
+
+// Custom role definition per tenant
+model CustomRole {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name                String   @db.VarChar(100)
+  description         String?  @db.Text
+  color               String?  @db.VarChar(20)
+  icon                String?  @db.VarChar(50)
+
+  permissions         Json     @default("[]")  // String[] array of permission keys
+
+  isActive            Boolean  @default(true)
+
+  createdBy           String
+  createdByUser       User     @relation("RoleCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("custom_roles")
+}
