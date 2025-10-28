@@ -61,6 +61,27 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
     }
   }, [isOpen, customization, initializeDraft])
 
+  // Handle backdrop click
+  const handleBackdropClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      handleCancel()
+    }
+  }, [])
+
+  // Handle escape key
+  React.useEffect(() => {
+    if (!isOpen) return
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCancel()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen])
+
   /**
    * Handle save - persist changes to server and update global store
    */
@@ -133,7 +154,8 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
   if (!isEnabledForCurrentUser || !isOpen) return null
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-[85vh]" role="dialog" aria-labelledby="menu-modal-title" aria-modal="true">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="presentation" onClick={handleBackdropClick} aria-hidden="true">
+      <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden flex flex-col max-h-[85vh]" role="dialog" aria-labelledby="menu-modal-title" aria-modal="true">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
         <div className="flex-1">
@@ -182,21 +204,22 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
         )}
       </div>
 
-      {/* Footer Actions */}
-      <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-white gap-4">
-        <button onClick={handleReset} disabled={isSaving} className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-          Reset to Defaults
-        </button>
-
-        <div className="flex gap-3 ml-auto">
-          <button onClick={handleCancel} disabled={isSaving} className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 bg-white rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-            Cancel
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-white gap-4">
+          <button onClick={handleReset} disabled={isSaving} className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            Reset to Defaults
           </button>
 
-          <button onClick={handleSave} disabled={isSaving || !isDirty} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm">
-            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
+          <div className="flex gap-3 ml-auto">
+            <button onClick={handleCancel} disabled={isSaving} className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 bg-white rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              Cancel
+            </button>
+
+            <button onClick={handleSave} disabled={isSaving || !isDirty} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm">
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
