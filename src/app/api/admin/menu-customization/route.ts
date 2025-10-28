@@ -157,8 +157,9 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
     console.error('[menu-customization:POST] Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to save menu customization'
     return NextResponse.json(
-      { error: 'Failed to save menu customization' },
+      { error: errorMessage, message: 'Failed to save menu customization' },
       { status: 500 }
     )
   }
