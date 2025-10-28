@@ -60,13 +60,13 @@ function SortableSection({ section, expandedSections, toggleSectionExpanded, tog
         <div className="flex items-center gap-2">
           <button
             onClick={() => toggleSectionExpanded(section.id)}
-            className="p-1 rounded hover:bg-gray-200"
+            className="p-1.5 rounded-lg hover:bg-blue-100 transition-colors text-gray-600 hover:text-blue-600"
             title={isExpanded ? 'Collapse section' : 'Expand section'}
           >
             {isExpanded ? (
-              <ChevronUp className="h-4 w-4 text-gray-600" />
+              <ChevronUp className="h-5 w-5" />
             ) : (
-              <ChevronDown className="h-4 w-4 text-gray-600" />
+              <ChevronDown className="h-5 w-5" />
             )}
           </button>
         </div>
