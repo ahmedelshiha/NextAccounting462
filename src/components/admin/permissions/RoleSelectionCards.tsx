@@ -320,7 +320,7 @@ function ChangePreview({
           <div className="mt-3 flex items-center gap-2">
             <div className={cn(
               'h-2 w-2 rounded-full',
-              riskLevel === 'high' ? 'bg-red-500' : 'bg-green-500'
+              riskLevel === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
             )} />
             <span className="text-xs text-blue-700">
               Risk level: <span className="font-medium capitalize">{riskLevel}</span>
