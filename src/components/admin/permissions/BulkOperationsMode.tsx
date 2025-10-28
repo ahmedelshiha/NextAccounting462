@@ -79,7 +79,7 @@ export default function BulkOperationsMode({
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-6 space-y-6">
           {/* Selected Users */}
           <div>
@@ -172,7 +172,7 @@ export default function BulkOperationsMode({
             </Alert>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Footer */}
       <div className="p-6 border-t bg-gray-50 flex gap-2 justify-end">
