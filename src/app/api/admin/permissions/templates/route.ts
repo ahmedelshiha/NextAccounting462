@@ -58,7 +58,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Parse permissions JSON
     const parsedTemplates = templates.map(t => ({
       ...t,
-      permissions: Array.isArray(t.permissions) ? t.permissions : JSON.parse(t.permissions || '[]'),
+      permissions: Array.isArray(t.permissions) ? t.permissions : JSON.parse(typeof t.permissions === 'string' ? t.permissions : '[]'),
     }))
 
     return NextResponse.json({
