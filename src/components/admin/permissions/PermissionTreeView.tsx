@@ -196,7 +196,7 @@ export const PermissionTreeView = memo(function PermissionTreeView({
           Object.entries(groupedPermissions).map(([category, permissions]) => (
             <PermissionCategory
               key={category}
-              category={category as typeof PermissionCategoryEnum}
+              category={category}
               permissions={permissions}
               selectedPermissions={selectedPermissions}
               isExpanded={expandedCategories.has(category)}
@@ -218,7 +218,7 @@ export const PermissionTreeView = memo(function PermissionTreeView({
  * Permission Category Component - Memoized for performance
  */
 interface PermissionCategoryProps {
-  category: typeof PermissionCategoryEnum
+  category: string
   permissions: Permission[]
   selectedPermissions: Permission[]
   isExpanded: boolean
