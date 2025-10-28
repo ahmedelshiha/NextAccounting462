@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
+import {
   Users,
   Search,
   Download,
@@ -33,6 +33,8 @@ import {
   Ban
 } from 'lucide-react'
 import { usePermissions } from '@/lib/use-permissions'
+import UnifiedPermissionModal, { PermissionChangeSet } from '@/components/admin/permissions/UnifiedPermissionModal'
+import { toast } from 'sonner'
 
 // Enhanced types
 interface UserStats {
