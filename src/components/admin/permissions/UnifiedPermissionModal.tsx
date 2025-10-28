@@ -609,7 +609,7 @@ function CustomPermissionsContent({
         <div className="space-y-2">
           {filtered.length === 0 ? (
             <p className="text-sm text-gray-500 py-8 text-center">
-              No permissions found matching "{searchQuery}"
+              No permissions found matching &quot;{searchQuery}&quot;
             </p>
           ) : (
             filtered.map(permission => {
