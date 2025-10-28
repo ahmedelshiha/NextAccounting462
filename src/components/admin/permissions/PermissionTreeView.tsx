@@ -279,8 +279,7 @@ const PermissionCategory = memo(function PermissionCategory({
 
         {/* Select All Checkbox */}
         <Checkbox
-          checked={allSelected}
-          indeterminate={someSelected}
+          checked={someSelected ? 'indeterminate' : allSelected}
           onCheckedChange={onToggleAll}
           onClick={(e) => e.stopPropagation()}
           className="flex-shrink-0"
