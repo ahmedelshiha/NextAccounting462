@@ -747,16 +747,20 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
 /**
  * Templates Tab Content
  */
-function TemplatesContent() {
+const TemplatesContent = memo(function TemplatesContent({
+  selectedPermissions,
+  onApplyTemplate,
+}: {
+  selectedPermissions: Permission[]
+  onApplyTemplate: (template: PermissionTemplate) => void
+}) {
   return (
-    <div className="h-full overflow-y-auto p-4 md:p-6">
-      <div className="text-center py-8 md:py-12">
-        <FileText className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-2 md:mb-3" />
-        <p className="text-gray-600 text-xs md:text-sm">Permission templates coming soon</p>
-      </div>
-    </div>
+    <PermissionTemplatesTab
+      currentPermissions={selectedPermissions}
+      onApplyTemplate={onApplyTemplate}
+    />
   )
-}
+})
 
 /**
  * History Tab Content
