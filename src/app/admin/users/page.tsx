@@ -298,9 +298,41 @@ export default function AdminUsersPage() {
     }
   }, [selectedUser, editForm])
 
+  const handleSavePermissions = useCallback(async (changes: PermissionChangeSet) => {
+    setPermissionsSaving(true)
+    try {
+      const response = await apiFetch('/api/admin/permissions/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changes)
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(error.error || 'Failed to update permissions')
+      }
+
+      const result = await response.json()
+
+      // Update local state - refresh user data
+      if (selectedUser && changes.targetIds.includes(selectedUser.id)) {
+        await loadUsers()
+      }
+
+      setPermissionModalOpen(false)
+      toast.success(`Updated ${changes.targetIds.length} user(s) successfully`)
+    } catch (error) {
+      console.error('Permission update failed', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update permissions')
+      setErrorMsg('Failed to update permissions')
+    } finally {
+      setPermissionsSaving(false)
+    }
+  }, [selectedUser, loadUsers])
+
   const handleStatusChange = useCallback(async () => {
     if (!statusAction) return
-    
+
     const { action, user } = statusAction
     let newStatus: string
     
