@@ -175,16 +175,6 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
             aria-label="Admin dashboard content"
           >
             <div className="max-w-7xl mx-auto">
-              {/* Menu Customization Modal - Display inline on page */}
-              {isMenuModalOpen && (
-                <div className="mb-6">
-                  <MenuCustomizationModal
-                    isOpen={isMenuModalOpen}
-                    onClose={() => setIsMenuModalOpen(false)}
-                  />
-                </div>
-              )}
-
               {/* Main Content */}
               {children}
             </div>
@@ -193,6 +183,14 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
           {/* Admin Footer */}
           <AdminFooter />
         </div>
+
+        {/* Menu Customization Modal - Fixed positioning overlay */}
+        {isMenuModalOpen && (
+          <MenuCustomizationModal
+            isOpen={isMenuModalOpen}
+            onClose={() => setIsMenuModalOpen(false)}
+          />
+        )}
       </div>
     </AdminErrorBoundary>
   )
