@@ -114,10 +114,16 @@ export function MenuCustomizationModal({ isOpen, onClose }: MenuCustomizationMod
     try {
       await resetCustomization()
       clearDraft()
+
+      // Show success toast notification
+      toast.success('Menu reset to defaults.')
+
+      // Close modal after successful reset
       onClose()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to reset customization'
       setSaveError(message)
+      toast.error(message)
       setIsSaving(false)
     }
   }, [resetCustomization, clearDraft, onClose])
