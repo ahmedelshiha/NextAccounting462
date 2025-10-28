@@ -39,19 +39,19 @@ function SortableSection({ section, expandedSections, toggleSectionExpanded, tog
   const hiddenCount = section.items.length - visibleItems.length
 
   return (
-    <div ref={setNodeRef} style={style} className="border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white hover:shadow-sm transition-shadow">
+    <div ref={setNodeRef} style={style} className="border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white hover:shadow-md transition-shadow">
       {/* Section Header */}
       <div
-        className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between bg-gradient-to-r from-blue-50 to-transparent hover:from-blue-100 transition-colors border-b border-gray-200"
       >
-        <div {...attributes} {...listeners} className="flex items-center gap-3 flex-1 cursor-grab">
-          <GripVertical className="h-5 w-5 text-gray-400" />
-          <span className="font-medium text-gray-900">{section.name}</span>
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-            {visibleItems.length} visible
+        <div {...attributes} {...listeners} className="flex items-center gap-3 flex-1 cursor-grab active:cursor-grabbing">
+          <GripVertical className="h-5 w-5 text-blue-400" />
+          <span className="font-semibold text-gray-900">{section.name}</span>
+          <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-medium">
+            {visibleItems.length}
           </span>
           {hiddenCount > 0 && (
-            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">
+            <span className="text-xs bg-gray-200 text-gray-600 px-2.5 py-0.5 rounded-full font-medium">
               {hiddenCount} hidden
             </span>
           )}
