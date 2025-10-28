@@ -186,7 +186,7 @@ const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'User ID not found in context' },
+        { error: 'User not authenticated', message: 'User ID not found in context' },
         { status: 401 }
       )
     }
@@ -203,8 +203,9 @@ const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(defaultConfig, { status: 200 })
   } catch (error) {
     console.error('[menu-customization:DELETE] Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to reset menu customization'
     return NextResponse.json(
-      { error: 'Failed to reset menu customization' },
+      { error: errorMessage, message: 'Failed to reset menu customization' },
       { status: 500 }
     )
   }
