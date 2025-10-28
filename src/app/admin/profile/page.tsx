@@ -1,6 +1,6 @@
 import ProfileManagementPanel from '@/components/admin/profile/ProfileManagementPanel'
 
-export default async function AdminProfilePage({ searchParams }: { searchParams?: Record<string, any> | Promise<Record<string, any>> }) {
+export default async function AdminProfilePage({ searchParams }: any) {
   // Normalize searchParams which may be a Promise in Next's routing
   const resolvedSearchParams = (await Promise.resolve(searchParams)) as Record<string, any> | undefined
   const tabParam = String(resolvedSearchParams?.tab ?? '').toLowerCase()
