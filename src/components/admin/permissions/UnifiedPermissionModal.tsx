@@ -18,7 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
+import {
   PermissionEngine,
   PermissionDiff,
   ValidationResult,
@@ -30,18 +30,22 @@ import {
   PERMISSION_METADATA,
   RiskLevel,
 } from '@/lib/permissions'
-import { 
-  X, 
-  Check, 
-  AlertCircle, 
+import {
+  X,
+  Check,
+  AlertCircle,
   Save,
   RotateCcw,
   Eye,
   EyeOff,
   FileText,
+  Clock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import PermissionTemplatesTab, { PermissionTemplate } from './PermissionTemplatesTab'
+import SmartSuggestionsPanel from './SmartSuggestionsPanel'
+import ImpactPreviewPanel from './ImpactPreviewPanel'
 
 /**
  * Props for the UnifiedPermissionModal component
@@ -112,6 +116,7 @@ export default function UnifiedPermissionModal({
   const [changeHistory, setChangeHistory] = useState<PermissionChangeSet[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [dismissedSuggestions, setDismissedSuggestions] = useState<Permission[]>([])
 
   // Calculate changes in real-time
   const changes = useMemo(() => {
@@ -123,10 +128,11 @@ export default function UnifiedPermissionModal({
     return PermissionEngine.validate(selectedPermissions)
   }, [selectedPermissions])
 
-  // Get smart suggestions
+  // Get smart suggestions (excluding dismissed ones)
   const suggestions = useMemo(() => {
-    return PermissionEngine.getSuggestions(selectedRole || currentRole || 'CLIENT', selectedPermissions)
-  }, [selectedRole, currentRole, selectedPermissions])
+    const allSuggestions = PermissionEngine.getSuggestions(selectedRole || currentRole || 'CLIENT', selectedPermissions)
+    return allSuggestions.filter(s => !dismissedSuggestions.includes(s.permission))
+  }, [selectedRole, currentRole, selectedPermissions, dismissedSuggestions])
 
   // Count of pending changes
   const changeCount = changes.added.length + changes.removed.length
@@ -197,6 +203,38 @@ export default function UnifiedPermissionModal({
       setChangeHistory(prev => prev.slice(0, -1))
     }
   }, [changeHistory, currentRole, currentPermissions])
+
+  /**
+   * Dismiss a suggestion
+   */
+  const handleDismissSuggestion = useCallback((suggestion: PermissionSuggestion) => {
+    setDismissedSuggestions(prev => [...prev, suggestion.permission])
+  }, [])
+
+  /**
+   * Dismiss all suggestions
+   */
+  const handleDismissAllSuggestions = useCallback(() => {
+    const allSuggestions = PermissionEngine.getSuggestions(selectedRole || currentRole || 'CLIENT', selectedPermissions)
+    setDismissedSuggestions(prev => [
+      ...new Set([...prev, ...allSuggestions.map(s => s.permission)])
+    ])
+  }, [selectedRole, currentRole, selectedPermissions])
+
+  /**
+   * Apply a permission template
+   */
+  const handleApplyTemplate = useCallback((template: PermissionTemplate) => {
+    setSelectedPermissions(template.permissions)
+    // Add to history
+    setChangeHistory(prev => [...prev, {
+      targetIds: Array.isArray(targetId) ? targetId : [targetId],
+      permissionChanges: {
+        added: template.permissions.filter(p => !selectedPermissions.includes(p)),
+        removed: selectedPermissions.filter(p => !template.permissions.includes(p)),
+      },
+    }])
+  }, [targetId, selectedPermissions])
 
   /**
    * Reset to original state
@@ -329,19 +367,25 @@ export default function UnifiedPermissionModal({
               showAdvanced={showAdvanced}
               onToggleAdvanced={setShowAdvanced}
               isMobile={isMobile}
+              suggestions={suggestions}
+              onApplySuggestion={applySuggestion}
+              onDismissSuggestion={handleDismissSuggestion}
             />
           </TabsContent>
         )}
 
         {showTemplates && (
           <TabsContent value="templates" className="h-full p-0 data-[state=inactive]:hidden">
-            <TemplatesContent />
+            <TemplatesContent
+              selectedPermissions={selectedPermissions}
+              onApplyTemplate={handleApplyTemplate}
+            />
           </TabsContent>
         )}
 
         {showHistory && (
           <TabsContent value="history" className="h-full p-0 data-[state=inactive]:hidden">
-            <HistoryContent />
+            <HistoryContent changeHistory={changeHistory} />
           </TabsContent>
         )}
       </div>
@@ -629,6 +673,9 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
   showAdvanced,
   onToggleAdvanced,
   isMobile,
+  suggestions,
+  onApplySuggestion,
+  onDismissSuggestion,
 }: {
   selectedPermissions: Permission[]
   onPermissionToggle: (permission: Permission, checked: boolean) => void
@@ -638,6 +685,9 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
   showAdvanced: boolean
   onToggleAdvanced: (show: boolean) => void
   isMobile: boolean
+  suggestions: PermissionSuggestion[]
+  onApplySuggestion: (suggestion: PermissionSuggestion) => void
+  onDismissSuggestion: (suggestion: PermissionSuggestion) => void
 }) {
   const filtered = useMemo(() => {
     return PermissionEngine.searchPermissions(searchQuery)
@@ -646,6 +696,16 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
   return (
     <div className="h-full overflow-y-auto p-4 md:p-6">
       <div className="space-y-3 md:space-y-4">
+        {/* Suggestions Panel */}
+        {!isMobile && suggestions.length > 0 && (
+          <SmartSuggestionsPanel
+            suggestions={suggestions}
+            onApply={onApplySuggestion}
+            onDismiss={onDismissSuggestion}
+          />
+        )}
+
+        {/* Search Bar */}
         <div className="flex gap-2">
           <input
             type="text"
@@ -663,6 +723,7 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
           </Button>
         </div>
 
+        {/* Permissions List */}
         <div className="space-y-1.5 md:space-y-2">
           {filtered.length === 0 ? (
             <p className="text-xs md:text-sm text-gray-500 py-6 md:py-8 text-center">
@@ -709,27 +770,83 @@ const CustomPermissionsContent = memo(function CustomPermissionsContent({
 /**
  * Templates Tab Content
  */
-function TemplatesContent() {
+const TemplatesContent = memo(function TemplatesContent({
+  selectedPermissions,
+  onApplyTemplate,
+}: {
+  selectedPermissions: Permission[]
+  onApplyTemplate: (template: PermissionTemplate) => void
+}) {
   return (
-    <div className="h-full overflow-y-auto p-4 md:p-6">
-      <div className="text-center py-8 md:py-12">
-        <FileText className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-2 md:mb-3" />
-        <p className="text-gray-600 text-xs md:text-sm">Permission templates coming soon</p>
-      </div>
-    </div>
+    <PermissionTemplatesTab
+      currentPermissions={selectedPermissions}
+      onApplyTemplate={onApplyTemplate}
+    />
   )
-}
+})
 
 /**
  * History Tab Content
  */
-function HistoryContent() {
+const HistoryContent = memo(function HistoryContent({
+  changeHistory,
+}: {
+  changeHistory: PermissionChangeSet[]
+}) {
+  if (changeHistory.length === 0) {
+    return (
+      <div className="h-full overflow-y-auto p-4 md:p-6">
+        <div className="text-center py-8 md:py-12">
+          <Clock className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-2 md:mb-3" />
+          <p className="text-gray-600 text-xs md:text-sm">No changes yet</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="h-full overflow-y-auto p-4 md:p-6">
-      <div className="text-center py-8 md:py-12">
-        <FileText className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-2 md:mb-3" />
-        <p className="text-gray-600 text-xs md:text-sm">Permission history coming soon</p>
+      <div className="space-y-3 md:space-y-4">
+        {changeHistory.map((change, index) => (
+          <div
+            key={index}
+            className="p-3 md:p-4 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                {change.roleChange && (
+                  <p className="text-xs md:text-sm font-medium">
+                    Role change: <span className="text-blue-600">{change.roleChange.from}</span>
+                    {' → '}
+                    <span className="text-blue-600">{change.roleChange.to}</span>
+                  </p>
+                )}
+                {change.permissionChanges && (
+                  <div className="mt-2 space-y-1">
+                    {change.permissionChanges.added.length > 0 && (
+                      <p className="text-xs text-gray-700">
+                        <span className="inline-block bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">
+                          +{change.permissionChanges.added.length} permissions
+                        </span>
+                      </p>
+                    )}
+                    {change.permissionChanges.removed.length > 0 && (
+                      <p className="text-xs text-gray-700">
+                        <span className="inline-block bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">
+                          -{change.permissionChanges.removed.length} permissions
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <Badge variant="secondary" className="text-xs flex-shrink-0">
+                Step {index + 1}
+              </Badge>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
-}
+})
