@@ -37,10 +37,26 @@
   - `src/app/api/admin/permissions/suggestions/route.ts` - Smart suggestions endpoint
   - `src/app/api/admin/permissions/templates/route.ts` - Template CRUD operations
 
-### Phase 2: Visual Components (IN PROGRESS)
-- 🚧 2.1: Build RoleSelectionCards component - NEXT TASK
-- ⏳ 2.2: Build PermissionTreeView component
-- ⏳ 2.3: Build ImpactPreviewPanel component
+### Phase 2: Visual Components (60% COMPLETE)
+- ✅ 2.1: Built RoleSelectionCards component in `src/components/admin/permissions/RoleSelectionCards.tsx`
+  - Color-coded role cards with visual design
+  - Permission counts and role descriptions
+  - Current role indicator
+  - Selection state with checkmark
+  - Change preview with risk assessment
+- ✅ 2.2: Built PermissionTreeView component in `src/components/admin/permissions/PermissionTreeView.tsx`
+  - Collapsible category groups
+  - Search/filter functionality
+  - Bulk selection per category
+  - Dependency indicators with warnings
+  - Conflict warnings
+  - Risk level badges (color-coded)
+  - Advanced details panel (optional)
+- 🚧 2.3: Build ImpactPreviewPanel component - IN PROGRESS
+  - Real-time change summary display
+  - Added/removed permissions lists
+  - Validation warnings/errors
+  - Risk assessment indicator
 
 ---
 
@@ -117,7 +133,7 @@ UnifiedPermissionModal
 **Features:**
 - ✅ Full-screen overlay with backdrop blur
 - ✅ Responsive (desktop: 90vw, mobile: 100vw)
-- �� Smooth animations (slide up + fade)
+- ✅ Smooth animations (slide up + fade)
 - ✅ Keyboard shortcuts (ESC to close, ⌘+S to save)
 - ✅ Focus trap for accessibility
 - ✅ Mobile-optimized touch interactions
@@ -346,7 +362,7 @@ export class PermissionEngine {
 │                                                         │
 │ ┌────────────┐  ┌────────────┐  ┌────────────┐        │
 │ │    👥      │  │    📋      │  │    👤      │        │
-│ │TEAM_MEMBER │  │   STAFF    │  │   CLIENT   │        │
+│ │TEAM_MEMBER │  │   STAFF    │  ��   CLIENT   │        │
 │ │            │  │            │  │            │        │
 │ │  25 perms  │  │  30 perms  │  │   5 perms  │        │
 │ └────────────┘  └────────────┘  └────────────┘        │
@@ -391,7 +407,7 @@ export class PermissionEngine {
 │ ▶ 💰 Financial Operations (0/6 selected)               │
 │ ▶ ⚙️ System Settings (0/15 selected)                   │
 │ ▶ 👥 User Management (2/10 selected)                   │
-└─────────────────────────────────────────────────────────┘
+└──────���──────────────────────────────────────────────────┘
 ```
 
 **Features:**
@@ -410,7 +426,7 @@ export class PermissionEngine {
 
 **Design:**
 ```
-┌──────────────────────────────────────────────���──────────┐
+┌─────────────────────────────────────────────────────────┐
 │ 📝 Change Summary                                       │
 ├─────────────────────────────────────────────────────────┤
 │ Role Change:                                            │
@@ -563,7 +579,7 @@ class SmartSuggestionEngine {
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ 💡 Suggested Changes                                    │
-├───────���─────────────────────────────────────────────────┤
+├─────────────────────────────────────────────────────────┤
 │ Based on similar Team Lead users:                      │
 │                                                         │
 │ ☐ Add "Approve Time Off" permission                    │
@@ -571,7 +587,7 @@ class SmartSuggestionEngine {
 │                                                         │
 │ ☐ Add "View Team Reports" permission                   │
 │   87% of Team Leads have this                  [Add]   │
-│                                                         │
+��                                                         │
 │ ☐ Add "Edit Team Schedule" permission                  │
 │   User accessed this 3 times last week        [Add]   │
 │                                                         │
@@ -585,7 +601,7 @@ class SmartSuggestionEngine {
 
 **Timeline View:**
 ```
-┌────────────────────────────────────���────────────────────┐
+┌─────────────────────────────────────────────────────────┐
 │ Permission History                                      │
 ├─────────────────────────────────────────────────────────┤
 │ Filter: [Last 30 days ▾] [All changes ▾]               │
@@ -607,7 +623,7 @@ class SmartSuggestionEngine {
 │ │ Added permission: View Analytics          │           │
 │ │ Reason: Requested by manager              │           │
 │ │ [View Details] [Revert]                   │           │
-│ └──────────────────────────────────────────┘           │
+│ └──────────────────────────────────���───────┘           │
 │                                                         │
 │ [Load More]                                             │
 └─────────────────────────────────────────────────────────┘
