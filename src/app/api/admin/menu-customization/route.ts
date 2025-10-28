@@ -97,7 +97,7 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'User ID not found in context' },
+        { error: 'User not authenticated', message: 'User ID not found in context' },
         { status: 401 }
       )
     }
@@ -108,7 +108,7 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
       body = await request.json()
     } catch (error) {
       return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
+        { error: 'Invalid request format', message: 'Request body must be valid JSON' },
         { status: 400 }
       )
     }
