@@ -94,7 +94,22 @@ export const useMenuCustomizationStore = create<MenuCustomizationStore>(
         })
 
         if (!response.ok) {
-          throw new Error(`Failed to save customization: ${response.statusText}`)
+          let errorMessage = 'Failed to save customization'
+          try {
+            const errorData = await response.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
+              if (errorData.details && Array.isArray(errorData.details)) {
+                errorMessage += ': ' + errorData.details.join(', ')
+              }
+            }
+          } catch {
+            // If response body is not JSON, use status text
+            if (response.statusText) {
+              errorMessage += ': ' + response.statusText
+            }
+          }
+          throw new Error(errorMessage)
         }
 
         const savedData: MenuCustomizationData = await response.json()
