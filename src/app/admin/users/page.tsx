@@ -135,7 +135,11 @@ export default function AdminUsersPage() {
   // Status change state
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
   const [statusAction, setStatusAction] = useState<{ action: 'activate' | 'deactivate' | 'suspend', user: UserItem } | null>(null)
-  
+
+  // Permission modal state
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false)
+  const [permissionsSaving, setPermissionsSaving] = useState(false)
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   // Loaders
