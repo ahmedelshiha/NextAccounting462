@@ -67,7 +67,7 @@ export function MenuCustomizationTabs({
                 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
                 ${
                   isSelected
-                    ? 'border-blue-500 text-blue-600 bg-white'
+                    ? 'border-emerald-600 text-emerald-600 bg-white'
                     : 'border-transparent text-gray-600 hover:text-gray-900 bg-gray-50'
                 }
               `}
