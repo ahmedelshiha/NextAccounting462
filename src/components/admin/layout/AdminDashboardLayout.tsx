@@ -183,6 +183,14 @@ const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
           {/* Admin Footer */}
           <AdminFooter />
         </div>
+
+        {/* Menu Customization Modal - Fixed positioning overlay */}
+        {isMenuModalOpen && (
+          <MenuCustomizationModal
+            isOpen={isMenuModalOpen}
+            onClose={() => setIsMenuModalOpen(false)}
+          />
+        )}
       </div>
     </AdminErrorBoundary>
   )
