@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { PermissionEngine, ValidationError } from '@/lib/permission-engine'
-import { PERMISSIONS, getRolePermissions } from '@/lib/permissions'
+import { PERMISSIONS, getRolePermissions, Permission } from '@/lib/permissions'
 
 /**
  * Request body for batch permission update

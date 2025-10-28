@@ -288,7 +288,7 @@ export class PermissionEngine {
 
     // Filter out those that would fail validation
     const validSuggestions = uniqueSuggestions.filter(s => {
-      const testPerms = [...currentPermissions]
+      let testPerms = [...currentPermissions]
       if (s.action === 'add' && !testPerms.includes(s.permission)) {
         testPerms.push(s.permission)
       } else if (s.action === 'remove') {
