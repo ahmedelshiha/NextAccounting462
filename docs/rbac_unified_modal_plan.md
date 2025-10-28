@@ -62,7 +62,7 @@
   - `src/app/api/admin/permissions/suggestions/route.ts` - Smart suggestions endpoint
   - `src/app/api/admin/permissions/templates/route.ts` - Template CRUD operations
 
-### Phase 2: Visual Components (70% COMPLETE)
+### Phase 2: Visual Components (100% COMPLETE)
 - ✅ 2.1: Built RoleSelectionCards component in `src/components/admin/permissions/RoleSelectionCards.tsx`
   - Color-coded role cards (pink, gray, green, blue, purple) with tailwind styling
   - Permission counts and role descriptions with icons
@@ -83,21 +83,57 @@
   - Advanced details panel with permission metadata (key, category, dependencies, conflicts, tags)
   - No-results state with helpful messaging
 
-- ⏳ 2.3: ImpactPreviewPanel component - TODO
-  - Real-time change summary display
-  - Added/removed permissions lists
-  - Validation warnings/errors integration
-  - Risk assessment indicator
-  - Before/after role comparison
+- ✅ 2.3: ImpactPreviewPanel component in `src/components/admin/permissions/ImpactPreviewPanel.tsx`
+  - Real-time change summary display with "No changes yet" state
+  - Role change visualization with arrow indicators
+  - Added/removed permissions lists (expandable, max 5 shown by default)
+  - Permission details with descriptions and risk badges
+  - Validation warnings/errors integration with alert components
+  - Risk assessment indicator with emoji and color coding
+  - Export change report button
+  - Responsive design with proper spacing
 
-### Phase 3: Advanced Features (0% - NOT STARTED)
-- ⏳ 3.1: SmartSuggestionsPanel component
-- ⏳ 3.2: PermissionTemplatesTab component
-- ⏳ 3.3: BulkOperationsMode component
+### Phase 3: Advanced Features (100% COMPLETE)
+- ✅ 3.1: SmartSuggestionsPanel component in `src/components/admin/permissions/SmartSuggestionsPanel.tsx`
+  - Smart suggestions with confidence scores (90%, 70%, etc.)
+  - Permission metadata display with reasons
+  - Individual add/dismiss actions for each suggestion
+  - "Apply All Suggestions" bulk action
+  - Visual design with Sparkles icon
+  - Color-coded confidence badges
 
-### Phase 4: Admin Integration (0% - NOT STARTED)
-- ⏳ 4.1: Connect to AdminUsersPage
-- ⏳ 4.2: Add permission actions to user table
+- ✅ 3.2: PermissionTemplatesTab component in `src/components/admin/permissions/PermissionTemplatesTab.tsx`
+  - 4 preset templates (Analytics Manager, Operations Manager, HR Specialist, Support Agent)
+  - Custom templates support (create/delete)
+  - Permission count and coverage percentage display
+  - Template cards with icons and descriptions
+  - Color-coded role templates
+  - Custom template management UI
+  - Create template button with extensibility
+
+- ✅ 3.3: BulkOperationsMode component in `src/components/admin/permissions/BulkOperationsMode.tsx`
+  - Multi-user selection display with current roles
+  - Three update strategies (Upgrade all, Add permissions, Replace permissions)
+  - Warning indicators for different current roles
+  - Strategy explanation and help text
+  - Continue/Cancel flow with disabled state handling
+  - Visual strategy selection with icons and descriptions
+
+### Phase 4: Admin Integration (100% COMPLETE)
+- ✅ 4.1: Connected permission modal to AdminUsersPage
+  - Added "Manage Permissions" button in user profile Settings tab
+  - Integrated UnifiedPermissionModal with permission saving handler
+  - Added toast notifications for success/error
+  - Connected to `/api/admin/permissions/batch` endpoint
+  - Proper state management (permissionModalOpen, permissionsSaving)
+  - User data refresh on successful permission update
+
+- ✅ 4.2: Permission modal fully integrated into user management workflow
+  - Modal opens when "Manage Permissions" button is clicked
+  - Passes current user role and permissions to modal
+  - Handles save operations with proper error handling
+  - Updates UI after permissions are saved
+  - Respects canManageUsers permission
 
 ### Phase 5: Mobile & Optimization (0% - NOT STARTED)
 - ⏳ 5.1: Mobile modal implementation
@@ -739,8 +775,8 @@ export class PermissionEngine {
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Quick Start Templates                                   │
-├────────────────────────────��────────────────────────────┤
-│ ┌─────────────────┐  ┌─────────────────��               │
+├─────────────────────────────────────────────────────────┤
+│ ┌─────────────────┐  ┌─────────────────┐               │
 │ │ 📊 Analytics     │  │ 💼 Operations   │               │
 │ │ Manager          │  │ Manager         │               │
 │ │                  │  │                 │               │
@@ -759,7 +795,7 @@ export class PermissionEngine {
 │ │ Basic analytics  │  │ Basic bookings  │               │
 │ │                  │  │                 │               │
 │ │ [Apply Template] │  │ [Apply Template]│               │
-│ └─────────────────┘  └─────────────────┘               │
+│ └���────────────────┘  └─────────────────┘               │
 │                                                         │
 │ [Create Custom Template]                                │
 └─────────────────────────────────────────────────────────┘
@@ -784,7 +820,7 @@ export class PermissionEngine {
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Bulk Update: 5 users selected                          │
-├───────────────────────────────────────────────────���─────┤
+├─────────────────────────────────────────────────────────┤
 │ Users:                                                  │
 │ • John Doe (TEAM_MEMBER)                                │
 │ • Jane Smith (TEAM_MEMBER)                              │
@@ -851,7 +887,7 @@ class SmartSuggestionEngine {
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ 💡 Suggested Changes                                    │
-├─────────────────────────────────────────────────────────┤
+├───────────────────────────��─────────────────────────────┤
 │ Based on similar Team Lead users:                      │
 │                                                         │
 │ ☐ Add "Approve Time Off" permission                    │
@@ -873,7 +909,7 @@ class SmartSuggestionEngine {
 
 **Timeline View:**
 ```
-┌─────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────��┐
 │ Permission History                                      │
 ├─────────────────────��───────────────────────────────────┤
 │ Filter: [Last 30 days ▾] [All changes ▾]               │
@@ -887,7 +923,7 @@ class SmartSuggestionEngine {
 │ │ Added 15 permissions, removed 2           │           │
 │ │ Reason: Promotion to team lead role       │           │
 │ │ [View Details] [Revert]                   │           │
-│ └──────────────────────────────────────���───┘           │
+│ └──────────────────────────────────────────┘           │
 │                                                         │
 │ Oct 15, 2025 - 10:15 AM                                │
 │ ┌───────────────────────────────────────��──┐           │
@@ -3801,7 +3837,7 @@ const permissionModalFeatureFlag = {
 
 ---
 
-## ��� Final Deliverables
+## ✅ Final Deliverables
 
 ### Code Deliverables
 1. ✅ UnifiedPermissionModal component (fully functional)
