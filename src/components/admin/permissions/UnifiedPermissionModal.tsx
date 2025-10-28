@@ -128,10 +128,11 @@ export default function UnifiedPermissionModal({
     return PermissionEngine.validate(selectedPermissions)
   }, [selectedPermissions])
 
-  // Get smart suggestions
+  // Get smart suggestions (excluding dismissed ones)
   const suggestions = useMemo(() => {
-    return PermissionEngine.getSuggestions(selectedRole || currentRole || 'CLIENT', selectedPermissions)
-  }, [selectedRole, currentRole, selectedPermissions])
+    const allSuggestions = PermissionEngine.getSuggestions(selectedRole || currentRole || 'CLIENT', selectedPermissions)
+    return allSuggestions.filter(s => !dismissedSuggestions.includes(s.permission))
+  }, [selectedRole, currentRole, selectedPermissions, dismissedSuggestions])
 
   // Count of pending changes
   const changeCount = changes.added.length + changes.removed.length
