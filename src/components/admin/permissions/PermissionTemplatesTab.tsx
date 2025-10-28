@@ -122,7 +122,7 @@ export default function PermissionTemplatesTab({
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
           {/* Preset Templates */}
           <div>
@@ -162,7 +162,7 @@ export default function PermissionTemplatesTab({
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Footer */}
       <div className="p-4 border-t">
