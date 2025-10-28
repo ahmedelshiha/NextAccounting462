@@ -385,7 +385,7 @@ export default function UnifiedPermissionModal({
 
         {showHistory && (
           <TabsContent value="history" className="h-full p-0 data-[state=inactive]:hidden">
-            <HistoryContent />
+            <HistoryContent changeHistory={changeHistory} />
           </TabsContent>
         )}
       </div>
