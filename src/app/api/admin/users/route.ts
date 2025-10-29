@@ -85,8 +85,7 @@ export const GET = withTenantContext(async (request: Request) => {
           createdAt: true
         },
         skip,
-        take: limit,
-        timeout: 5000 // 5 second timeout
+        take: limit
       })
 
       const mapped = (Array.isArray(users) ? users : []).map((u) => ({
