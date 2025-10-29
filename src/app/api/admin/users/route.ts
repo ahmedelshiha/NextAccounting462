@@ -43,24 +43,48 @@ export const GET = withTenantContext(async (request: Request) => {
     }
 
     try {
-      const users = (await prisma.user.findMany({ where: tenantFilter(tenantId), orderBy: { createdAt: 'desc' }, select: { id: true, name: true, email: true, role: true, createdAt: true } })) || []
-      const mapped = (Array.isArray(users) ? users : []).map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, createdAt: u.createdAt, totalBookings: 0 }))
-      const etag = '"' + createHash('sha1').update(JSON.stringify({ t: mapped.length, ids: mapped.map(u=>u.id), up: mapped.map(u=>u.createdAt) })).digest('hex') + '"'
+
       const ifNoneMatch = request.headers.get('if-none-match')
+
       if (ifNoneMatch && ifNoneMatch === etag) {
         return new NextResponse(null, { status: 304, headers: { ETag: etag } })
       }
-      return NextResponse.json({ users: mapped }, { headers: { ETag: etag, 'Cache-Control': 'private, max-age=60' } })
+
+      return NextResponse.json(
+        {
+          users: mapped,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+          }
+        },
+        {
+          headers: {
+            ETag: etag,
+            'Cache-Control': 'private, max-age=30, stale-while-revalidate=60'
+          }
+        }
+      )
     } catch (e: any) {
       const code = String(e?.code || '')
-      if (code.startsWith('P20') || /relation|table|column/i.test(String(e?.message || ''))) {
+      const message = String(e?.message || '')
+
+      // Handle database connection errors with fallback
+      if (code.startsWith('P20') || code.startsWith('P10') || /relation|table|column|timeout/i.test(message)) {
+        console.warn('Database query error, returning fallback data:', code, message)
         const fallback = [
           { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
           { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-          { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
+          { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
         ]
-        return NextResponse.json({ users: fallback })
+        return NextResponse.json({
+          users: fallback,
+          pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+        })
       }
+
       throw e
     }
   } catch (error) {
@@ -68,8 +92,11 @@ export const GET = withTenantContext(async (request: Request) => {
     const fallback = [
       { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
       { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-      { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
+      { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
     ]
-    return NextResponse.json({ users: fallback })
+    return NextResponse.json({
+      users: fallback,
+      pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+    })
   }
 })

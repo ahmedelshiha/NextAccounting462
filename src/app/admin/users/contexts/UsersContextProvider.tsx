@@ -8,17 +8,19 @@ export interface UserStats {
   clients: number
   staff: number
   admins: number
-  newThisMonth?: number
-  growth?: number
-  activeUsers?: number
-  topUsers?: Array<{
+  newThisMonth: number
+  newLastMonth: number
+  growth: number
+  activeUsers: number
+  registrationTrends: Array<{ month: string; count: number }>
+  topUsers: Array<{
     id: string
     name: string | null
     email: string
-    bookings?: number
-    bookingsCount?: number
-    createdAt?: string
+    bookingsCount: number
+    createdAt: Date | string
   }>
+  range?: { range?: string; newUsers?: number; growth?: number }
 }
 
 export interface UserItem {
@@ -157,8 +159,10 @@ export function UsersContextProvider({ children }: UsersContextProviderProps) {
 
   // Filters
   const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState<typeof roleFilter>('ALL')
-  const [statusFilter, setStatusFilter] = useState<typeof statusFilter>('ALL')
+  type RoleFilter = 'ALL' | 'ADMIN' | 'TEAM_LEAD' | 'TEAM_MEMBER' | 'STAFF' | 'CLIENT'
+  type StatusFilter = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
 
   // Profile dialog state
   const [profileOpen, setProfileOpen] = useState(false)

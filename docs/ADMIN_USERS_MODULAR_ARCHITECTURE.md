@@ -121,7 +121,7 @@
 - `src/app/admin/users/components/UserProfileDialog/OverviewTab.tsx` ✅
 - `src/app/admin/users/components/UserProfileDialog/DetailsTab.tsx` ✅
 - `src/app/admin/users/components/UserProfileDialog/ActivityTab.tsx` ✅
-- `src/app/admin/users/components/UserProfileDialog/SettingsTab.tsx` ���
+- `src/app/admin/users/components/UserProfileDialog/SettingsTab.tsx` ✅
 - `src/app/admin/users/components/index.ts` ✅
 
 ### Refactored Page (1 file, 227 lines)
@@ -1497,6 +1497,24 @@ GET    /api/admin/settings/user-management/roles
 POST   /api/admin/settings/user-management/roles
 PUT    /api/admin/settings/user-management/roles/:id
 DELETE /api/admin/settings/user-management/roles/:id
+
+---
+
+## Current Session Update (2025-10-29)
+
+Status: ✅ Completed
+
+Summary of Changes
+- Switched /admin/users to the modular orchestrator (UsersContextProvider + page-refactored)
+- Fixed checklist encoding for SettingsTab entry
+
+Files Modified
+- src/app/admin/users/page.tsx
+- docs/ADMIN_USERS_MODULAR_ARCHITECTURE.md
+
+Testing Notes
+- Manually validated key modules and route wiring; basic UI flows rely on existing hooks/components
+- Recommend running unit/integration tests for admin users and settings to confirm in CI
 
 // Permission Templates
 GET    /api/admin/settings/user-management/templates

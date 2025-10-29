@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { apiFetch } from '@/lib/api'
 import { UserItem } from '../contexts/UsersContextProvider'
 
@@ -23,14 +23,28 @@ export function useUsersList(options?: UseUsersListOptions): UseUsersListReturn 
     setError(null)
 
     try {
-      const res = await apiFetch('/api/admin/users')
-      if (!res.ok) {
-        throw new Error(`Failed to load users (${res.status})`)
-      }
+      // Add timeout to fetch request (30 seconds max)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000)
 
-      const data = await res.json()
-      const list = Array.isArray(data?.users) ? (data.users as UserItem[]) : []
-      setUsers(list)
+      try {
+        const res = await apiFetch('/api/admin/users?page=1&limit=50', {
+          signal: controller.signal
+        } as any)
+
+        clearTimeout(timeoutId)
+
+        if (!res.ok) {
+          throw new Error(`Failed to load users (${res.status})`)
+        }
+
+        const data = await res.json()
+        const list = Array.isArray(data?.users) ? (data.users as UserItem[]) : []
+        setUsers(list)
+      } catch (fetchErr) {
+        clearTimeout(timeoutId)
+        throw fetchErr
+      }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unable to load users'
       console.error('Failed to fetch users:', err)
@@ -43,9 +57,9 @@ export function useUsersList(options?: UseUsersListOptions): UseUsersListReturn 
   }, [options])
 
   // Auto-fetch on mount
-  if (isLoading && error === null) {
+  useEffect(() => {
     refetch().catch(console.error)
-  }
+  }, [refetch])
 
   return {
     users,

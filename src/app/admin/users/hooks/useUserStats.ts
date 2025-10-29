@@ -9,17 +9,31 @@ interface UseUserStatsOptions {
 }
 
 interface UseUserStatsReturn {
-  stats: UserStats | null
+  stats: UserStats
   isLoading: boolean
   error: string | null
   refetch: () => Promise<void>
 }
 
-let cachedStats: UserStats | null = null
+// Default empty stats object
+const DEFAULT_STATS: UserStats = {
+  total: 0,
+  clients: 0,
+  staff: 0,
+  admins: 0,
+  newThisMonth: 0,
+  newLastMonth: 0,
+  growth: 0,
+  activeUsers: 0,
+  registrationTrends: [],
+  topUsers: []
+}
+
+let cachedStats: UserStats = DEFAULT_STATS
 let cacheTimestamp: number = 0
 
 export function useUserStats(options?: UseUserStatsOptions): UseUserStatsReturn {
-  const [stats, setStats] = useState<UserStats | null>(null)
+  const [stats, setStats] = useState<UserStats>(DEFAULT_STATS)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,15 +56,30 @@ export function useUserStats(options?: UseUserStatsOptions): UseUserStatsReturn 
       }
 
       const data = (await res.json()) as UserStats
-      cachedStats = data
+      // Ensure all required properties exist
+      const validatedData: UserStats = {
+        total: data.total ?? 0,
+        clients: data.clients ?? 0,
+        staff: data.staff ?? 0,
+        admins: data.admins ?? 0,
+        newThisMonth: data.newThisMonth ?? 0,
+        newLastMonth: data.newLastMonth ?? 0,
+        growth: data.growth ?? 0,
+        activeUsers: data.activeUsers ?? 0,
+        registrationTrends: Array.isArray(data.registrationTrends) ? data.registrationTrends : [],
+        topUsers: Array.isArray(data.topUsers) ? data.topUsers : [],
+        range: data.range
+      }
+      cachedStats = validatedData
       cacheTimestamp = now
-      setStats(data)
+      setStats(validatedData)
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unable to load user statistics'
       console.error('Failed to fetch stats:', err)
       setError(errorMsg)
       options?.onError?.(errorMsg)
-      setStats({ total: 0, clients: 0, staff: 0, admins: 0 })
+      // Always set to default stats, never null
+      setStats(DEFAULT_STATS)
     } finally {
       setIsLoading(false)
     }
@@ -71,6 +100,6 @@ export function useUserStats(options?: UseUserStatsOptions): UseUserStatsReturn 
 
 // Utility to invalidate stats cache
 export function invalidateStatsCache() {
-  cachedStats = null
+  cachedStats = DEFAULT_STATS
   cacheTimestamp = 0
 }

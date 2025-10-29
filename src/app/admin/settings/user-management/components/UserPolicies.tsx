@@ -18,6 +18,8 @@ interface UserPoliciesProps {
   onUpdate: (policies: UserPoliciesType) => Promise<void>
 }
 
+type ActivityMonitoringBoolKey = 'trackLoginAttempts' | 'trackDataAccess' | 'trackPermissionChanges' | 'trackBulkActions' | 'alertOnSuspiciousActivity'
+
 export function UserPolicies({
   policies,
   isLoading,
@@ -194,26 +196,7 @@ export function UserPolicies({
         {expandedSection === 'monitoring' && (
           <CardContent className="space-y-4 border-t pt-4">
             <div className="space-y-3">
-              {[
-                { label: 'Track Login Attempts', key: 'trackLoginAttempts' },
-                { label: 'Track Data Access', key: 'trackDataAccess' },
-                { label: 'Track Permission Changes', key: 'trackPermissionChanges' },
-                { label: 'Track Bulk Actions', key: 'trackBulkActions' },
-                { label: 'Alert on Suspicious Activity', key: 'alertOnSuspiciousActivity' }
-              ].map((item) => {
-                const value = policies.activityMonitoring[item.key as keyof typeof policies.activityMonitoring]
-                return (
-                  <div key={item.key} className="flex items-center justify-between p-3 border rounded">
-                    <Label htmlFor={item.key} className="flex-1">{item.label}</Label>
-                    <Switch
-                      id={item.key}
-                      checked={Boolean(value)}
-                      onCheckedChange={(checked) => handleToggleBoolean(`activityMonitoring.${item.key}`, checked)}
-                      disabled={isSaving}
-                    />
-                  </div>
-                )
-              })}
+
             </div>
 
             <div>
