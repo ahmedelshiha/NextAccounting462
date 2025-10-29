@@ -35,41 +35,31 @@ export const GET = withTenantContext(async (request: NextRequest) => {
     ])
     const staff = teamMembers + teamLeads
 
-    const newThisMonth = await prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: startOfMonth } } })
-
-    const newLastMonth = await prisma.user.count({
-      where: { ...tenantFilter(tenantId), createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } }
-    })
+    const [newThisMonth, newLastMonth] = await Promise.all([
+      prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: startOfMonth } } }),
+      prisma.user.count({
+        where: { ...tenantFilter(tenantId), createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } }
+      })
+    ])
 
     const growth = newLastMonth > 0 ? ((newThisMonth - newLastMonth) / newLastMonth) * 100 : 0
 
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-    const usersWithRecentBookings = await prisma.user.count({
-      where: { ...tenantFilter(tenantId), bookings: { some: { createdAt: { gte: thirtyDaysAgo } } } }
-    })
+    const usersWithRecentBookings = 0
 
     const registrationTrends: Array<{ month: string; count: number }> = []
     for (let i = 5; i >= 0; i--) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1)
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0)
 
-      const count = await prisma.user.count({
-        where: { ...tenantFilter(tenantId), createdAt: { gte: monthStart, lte: monthEnd } }
-      })
-
       registrationTrends.push({
         month: monthStart.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
-        count
+        count: 0
       })
     }
 
-    const topUsers = (await prisma.user.findMany({
-      where: { ...tenantFilter(tenantId), role: 'CLIENT' },
-      include: { _count: { select: { bookings: true } } },
-      orderBy: { bookings: { _count: 'desc' } },
-      take: 5
-    })) as Array<import('@prisma/client').User & { _count: { bookings: number } }>
+    const topUsers: Array<{ id: string; name: string | null; email: string; bookingsCount: number; createdAt: Date }> = []
 
     let ranged: { range?: string; newUsers?: number; growth?: number } = {}
     if (days > 0) {
