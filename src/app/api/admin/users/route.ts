@@ -43,6 +43,44 @@ export const GET = withTenantContext(async (request: Request) => {
     }
 
     try {
+      // Parse pagination parameters
+      const { searchParams } = new URL(request.url)
+      const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+      const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
+      const skip = (page - 1) * limit
+
+      // Get total count and users
+      const [total, users] = await Promise.all([
+        prisma.user.count({ where: tenantFilter(tenantId) }),
+        prisma.user.findMany({
+          where: tenantFilter(tenantId),
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true
+          },
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' }
+        })
+      ])
+
+      // Map users to response format
+      const mapped = users.map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt?.toISOString() || user.createdAt.toISOString()
+      }))
+
+      // Generate ETag from users data
+      const etagData = JSON.stringify(mapped)
+      const etag = `"${createHash('sha256').update(etagData).digest('hex')}"`
 
       const ifNoneMatch = request.headers.get('if-none-match')
 
