@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { UserManagementSettings, ApiResponse } from '../types'
+import { UserManagementSettings } from '../types'
 import { apiFetch } from '@/lib/api'
 import { toast } from 'sonner'
 
@@ -25,12 +25,15 @@ export function useUserManagementSettings(): UseUserManagementSettingsReturn {
     try {
       setIsLoading(true)
       setError(null)
-      const response = await apiFetch<UserManagementSettings>(
+      const response = await apiFetch(
         '/api/admin/settings/user-management',
         { method: 'GET' }
       )
-      if (response) {
-        setSettings(response)
+      if (response.ok) {
+        const data = await response.json() as UserManagementSettings
+        setSettings(data)
+      } else {
+        throw new Error(`Failed to load settings: ${response.statusText}`)
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to load settings'
@@ -45,16 +48,19 @@ export function useUserManagementSettings(): UseUserManagementSettingsReturn {
     try {
       setIsSaving(true)
       setError(null)
-      const response = await apiFetch<UserManagementSettings>(
+      const response = await apiFetch(
         '/api/admin/settings/user-management',
         {
           method: 'PUT',
           body: JSON.stringify(updates)
         }
       )
-      if (response) {
-        setSettings(response)
+      if (response.ok) {
+        const data = await response.json() as UserManagementSettings
+        setSettings(data)
         toast.success('Settings updated successfully')
+      } else {
+        throw new Error(`Failed to update settings: ${response.statusText}`)
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to update settings'
