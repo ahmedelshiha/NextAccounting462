@@ -126,20 +126,14 @@ export const GET = withTenantContext(async (request: NextRequest) => {
     const admins = roleCounts['ADMIN'] || 0
     const staff = teamMembers + teamLeads
 
-    // Calculate growth metrics
-    const newThisMonth = allUsers
-      .filter(
-        (u) =>
-          u.createdAt && new Date(u.createdAt as any) >= startOfMonth
-      )
-      .reduce((sum, g) => sum + g._count.id, 0)
+    // Calculate growth metrics with proper date-based queries
+    const newThisMonth = await prisma.user.count({
+      where: { ...tenantFilter(tenantId), createdAt: { gte: startOfMonth } }
+    })
 
-    const newLastMonth = allUsers
-      .filter(
-        (u) =>
-          u.createdAt && new Date(u.createdAt as any) >= startOfLastMonth && new Date(u.createdAt as any) <= endOfLastMonth
-      )
-      .reduce((sum, g) => sum + g._count.id, 0)
+    const newLastMonth = await prisma.user.count({
+      where: { ...tenantFilter(tenantId), createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } }
+    })
 
     const growth = newLastMonth > 0 ? ((newThisMonth - newLastMonth) / newLastMonth) * 100 : 0
 
