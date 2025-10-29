@@ -23,7 +23,7 @@ export const UserActions = memo(function UserActions({
     onViewProfile(user)
   }, [user, onViewProfile])
 
-  if (!perms.canManageUsers && !perms.canViewUsers) {
+  if (!perms.canManageUsers) {
     return null
   }
 
