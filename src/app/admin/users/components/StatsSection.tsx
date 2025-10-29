@@ -70,6 +70,20 @@ export const StatsSection = memo(function StatsSection({ stats, isLoading = fals
     )
   }
 
+  // Provide default values to avoid "Expression not available" errors
+  const safeStats = stats || {
+    total: 0,
+    clients: 0,
+    staff: 0,
+    admins: 0,
+    newThisMonth: 0,
+    newLastMonth: 0,
+    growth: 0,
+    activeUsers: 0,
+    registrationTrends: [],
+    topUsers: []
+  }
+
   return (
     <div className="space-y-6">
       {/* Main Stats Cards */}
@@ -80,10 +94,10 @@ export const StatsSection = memo(function StatsSection({ stats, isLoading = fals
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.total ?? 0}</div>
-            {typeof stats?.growth === 'number' && (
+            <div className="text-2xl font-bold">{safeStats.total}</div>
+            {typeof safeStats.growth === 'number' && safeStats.growth !== 0 && (
               <p className="text-xs text-muted-foreground">
-                {stats.growth >= 0 ? `+${stats.growth}%` : `${stats.growth}%`} MoM
+                {safeStats.growth >= 0 ? `+${safeStats.growth}%` : `${safeStats.growth}%`} MoM
               </p>
             )}
           </CardContent>
@@ -95,7 +109,7 @@ export const StatsSection = memo(function StatsSection({ stats, isLoading = fals
             <CardTitle className="text-sm font-medium">Clients</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.clients ?? 0}</div>
+            <div className="text-2xl font-bold">{safeStats.clients}</div>
             <p className="text-xs text-muted-foreground">Active clients</p>
           </CardContent>
         </Card>
@@ -106,7 +120,7 @@ export const StatsSection = memo(function StatsSection({ stats, isLoading = fals
             <CardTitle className="text-sm font-medium">Staff</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.staff ?? 0}</div>
+            <div className="text-2xl font-bold">{safeStats.staff}</div>
             <p className="text-xs text-muted-foreground">Team members</p>
           </CardContent>
         </Card>
@@ -117,7 +131,7 @@ export const StatsSection = memo(function StatsSection({ stats, isLoading = fals
             <CardTitle className="text-sm font-medium">Admins</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.admins ?? 0}</div>
+            <div className="text-2xl font-bold">{safeStats.admins}</div>
             <p className="text-xs text-muted-foreground">Full access</p>
           </CardContent>
         </Card>
@@ -128,14 +142,14 @@ export const StatsSection = memo(function StatsSection({ stats, isLoading = fals
             <CardTitle className="text-sm font-medium">New This Month</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.newThisMonth ?? 0}</div>
+            <div className="text-2xl font-bold">{safeStats.newThisMonth}</div>
             <p className="text-xs text-muted-foreground">Recent signups</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Top Clients Card */}
-      {stats && <TopClientsCard stats={stats} />}
+      <TopClientsCard stats={safeStats} />
     </div>
   )
 })
