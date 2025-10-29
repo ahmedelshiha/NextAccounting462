@@ -200,6 +200,9 @@ export default function AdminUsersPage() {
           />
         </div>
 
+        {/* User Profile Dialog (Phase 2) */}
+        <UserProfileDialog />
+
         {/* Permission Modal (Phase 3) */}
         {context.selectedUser && (
           <UnifiedPermissionModal
@@ -214,12 +217,6 @@ export default function AdminUsersPage() {
             targetName={context.selectedUser.name || context.selectedUser.email}
           />
         )}
-
-        {/* User Profile Dialog (Phase 2) - To be implemented */}
-        {/* <UserProfileDialog /> */}
-
-        {/* Status Change Dialog (Phase 2) - To be implemented */}
-        {/* <StatusChangeDialog /> */}
       </div>
     </div>
   )
