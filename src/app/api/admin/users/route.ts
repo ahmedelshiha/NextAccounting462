@@ -66,9 +66,9 @@ export const GET = withTenantContext(async (request: Request) => {
       const timeoutPromise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
           if (!queryCompleted.value) {
-            reject(new Error('Users query timeout after 6 seconds'))
+            reject(new Error('Users query timeout after 15 seconds'))
           }
-        }, 6000)
+        }, 15000)
       })
 
       const { total, users } = await Promise.race([queryPromise, timeoutPromise])
