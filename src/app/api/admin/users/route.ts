@@ -39,7 +39,10 @@ export const GET = withTenantContext(async (request: Request) => {
         { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
         { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
       ]
-      return NextResponse.json({ users: fallback })
+      return NextResponse.json({
+        users: fallback,
+        pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+      })
     }
 
     try {
@@ -49,8 +52,11 @@ export const GET = withTenantContext(async (request: Request) => {
       const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
       const skip = (page - 1) * limit
 
-      // Get total count and users
-      const [total, users] = await Promise.all([
+      // Implement timeout resilience for slow queries
+      let timeoutId: NodeJS.Timeout | null = null
+      const queryCompleted = { value: false }
+
+      const queryPromise = Promise.all([
         prisma.user.count({ where: tenantFilter(tenantId) }),
         prisma.user.findMany({
           where: tenantFilter(tenantId),
@@ -66,7 +72,25 @@ export const GET = withTenantContext(async (request: Request) => {
           take: limit,
           orderBy: { createdAt: 'desc' }
         })
-      ])
+      ]).then(([total, users]) => {
+        queryCompleted.value = true
+        if (timeoutId) clearTimeout(timeoutId)
+        return { total, users }
+      }).catch(err => {
+        queryCompleted.value = true
+        if (timeoutId) clearTimeout(timeoutId)
+        throw err
+      })
+
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          if (!queryCompleted.value) {
+            reject(new Error('Users query timeout after 6 seconds'))
+          }
+        }, 6000)
+      })
+
+      const { total, users } = await Promise.race([queryPromise, timeoutPromise])
 
       // Map users to response format
       const mapped = users.map((user) => ({
@@ -74,8 +98,8 @@ export const GET = withTenantContext(async (request: Request) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt?.toISOString() || user.createdAt.toISOString()
+        createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
+        updatedAt: user.updatedAt ? (user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt) : (user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt)
       }))
 
       // Generate ETag from users data
