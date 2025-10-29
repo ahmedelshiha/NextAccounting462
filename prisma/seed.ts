@@ -910,11 +910,20 @@ Effective cash flow management requires ongoing attention and planning. Regular 
   ]
 
   for (const rate of exchangeRates) {
-    await prisma.exchangeRate.upsert({
-      where: { id: undefined as any },
-      update: { rate: rate.rate, source: 'seed', fetchedAt: new Date(), ttlSeconds: 86400 },
-      create: { base: rate.base, target: rate.target, rate: rate.rate, source: 'seed', ttlSeconds: 86400 },
+    const existing = await prisma.exchangeRate.findFirst({
+      where: { base: rate.base, target: rate.target },
     })
+
+    if (existing) {
+      await prisma.exchangeRate.update({
+        where: { id: existing.id },
+        data: { rate: rate.rate, source: 'seed', fetchedAt: new Date(), ttlSeconds: 86400 },
+      })
+    } else {
+      await prisma.exchangeRate.create({
+        data: { base: rate.base, target: rate.target, rate: rate.rate, source: 'seed', ttlSeconds: 86400 },
+      })
+    }
   }
 
   console.log('✅ Currencies & exchange rates created')
