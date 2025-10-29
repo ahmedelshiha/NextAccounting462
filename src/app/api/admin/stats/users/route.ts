@@ -126,6 +126,38 @@ export const GET = withTenantContext(async (request: NextRequest) => {
     const admins = roleCounts['ADMIN'] || 0
     const staff = teamMembers + teamLeads
 
+    // Get users created this month and last month
+    const newThisMonth = await prisma.user.count({
+      where: {
+        ...tenantFilter(tenantId),
+        createdAt: { gte: startOfMonth, lt: now }
+      }
+    })
+
+    const newLastMonth = await prisma.user.count({
+      where: {
+        ...tenantFilter(tenantId),
+        createdAt: { gte: startOfLastMonth, lt: endOfLastMonth }
+      }
+    })
+
+    const growth = newLastMonth > 0 ? ((newThisMonth - newLastMonth) / newLastMonth) * 100 : 0
+
+    // Transform registration data
+    const registrationTrends = registrationByMonth.map((entry: any) => ({
+      month: entry.month instanceof Date ? entry.month.toISOString().split('T')[0] : String(entry.month),
+      count: typeof entry.count === 'bigint' ? Number(entry.count) : entry.count
+    }))
+
+    // Transform top users data
+    const topUsers = topClientsData.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      bookingsCount: user._count.bookings,
+      createdAt: user.createdAt
+    }))
+
     let ranged: { range?: string; newUsers?: number; growth?: number } = {}
     if (days > 0 && Array.isArray(rangedStats) && rangedStats.length === 2) {
       const [inRange, prevRange] = rangedStats as number[]
