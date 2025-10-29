@@ -360,7 +360,7 @@ function jsonResponse(payload: any, status = 200) {
 export const GET = withTenantContext(async (request: Request) => {
   try {
     const ctx = requireTenantContext()
-    if (!ctx || !ctx.role || !hasPermission(ctx.role, PERMISSIONS.SETTINGS_MANAGE)) {
+    if (!ctx || !ctx.role || !hasPermission(ctx.role, PERMISSIONS.SYSTEM_ADMIN_SETTINGS_VIEW)) {
       return jsonResponse({ error: 'Forbidden' }, 403)
     }
 
@@ -379,7 +379,7 @@ export const GET = withTenantContext(async (request: Request) => {
 export const PUT = withTenantContext(async (request: Request) => {
   try {
     const ctx = requireTenantContext()
-    if (!ctx || !ctx.role || !hasPermission(ctx.role, PERMISSIONS.SETTINGS_MANAGE)) {
+    if (!ctx || !ctx.role || !hasPermission(ctx.role, PERMISSIONS.SYSTEM_ADMIN_SETTINGS_EDIT)) {
       return jsonResponse({ error: 'Forbidden' }, 403)
     }
 
