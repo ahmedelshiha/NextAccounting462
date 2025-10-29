@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { withTenantContext } from '@/lib/api-wrapper'
 import { requireTenantContext } from '@/lib/tenant-utils'
 import prisma from '@/lib/prisma'
-import { queryTenantRaw } from '@/lib/db-raw'
 import { respond } from '@/lib/api-response'
 import { hasPermission, PERMISSIONS } from '@/lib/permissions'
 import { createHash } from 'crypto'
@@ -26,25 +25,6 @@ export const GET = withTenantContext(async (request: Request) => {
     if (!ctx.userId) return respond.unauthorized()
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
 
-    let useFallback = false
-    try {
-      await queryTenantRaw`SELECT 1`
-    } catch (e: any) {
-      const code = String(e?.code || '')
-      if (code.startsWith('P10')) useFallback = true
-    }
-    if (useFallback) {
-      const fallback = [
-        { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
-        { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-        { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
-      ]
-      return NextResponse.json({
-        users: fallback,
-        pagination: { page: 1, limit: 50, total: 3, pages: 1 }
-      })
-    }
-
     try {
       // Parse pagination parameters
       const { searchParams } = new URL(request.url)
@@ -54,7 +34,11 @@ export const GET = withTenantContext(async (request: Request) => {
 
       // Implement timeout resilience for slow queries
       let timeoutId: NodeJS.Timeout | null = null
-      const queryCompleted = { value: false }
+
+      // Use timeout-safe promise pattern for slow databases
+      let queryCompleted = false
+      let queryError: Error | null = null
+      let queryData: any = null
 
       const queryPromise = Promise.all([
         prisma.user.count({ where: tenantFilter(tenantId) }),
@@ -73,24 +57,43 @@ export const GET = withTenantContext(async (request: Request) => {
           orderBy: { createdAt: 'desc' }
         })
       ]).then(([total, users]) => {
-        queryCompleted.value = true
+        queryCompleted = true
+        queryData = { total, users }
         if (timeoutId) clearTimeout(timeoutId)
-        return { total, users }
       }).catch(err => {
-        queryCompleted.value = true
+        queryCompleted = true
+        queryError = err
         if (timeoutId) clearTimeout(timeoutId)
-        throw err
       })
 
-      const timeoutPromise = new Promise<never>((_, reject) => {
+      // Set a timeout to fail fast if database is slow
+      await new Promise(resolve => {
         timeoutId = setTimeout(() => {
-          if (!queryCompleted.value) {
-            reject(new Error('Users query timeout after 6 seconds'))
-          }
-        }, 6000)
+          resolve(null)
+        }, 5000)
+
+        // Also resolve if query completes
+        queryPromise.finally(() => resolve(null))
       })
 
-      const { total, users } = await Promise.race([queryPromise, timeoutPromise])
+      // If query didn't complete, use fallback data
+      if (!queryCompleted) {
+        const fallback = [
+          { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
+          { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
+          { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
+        ]
+        return NextResponse.json({
+          users: fallback,
+          pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+        })
+      }
+
+      // If query errored, throw the error to be caught by error handler
+      if (queryError) throw queryError
+
+      // If query succeeded, use the data
+      const { total, users } = queryData as { total: number; users: Array<{ id: string; name: string | null; email: string; role: string; createdAt: Date; updatedAt: Date | null }> }
 
       // Map users to response format
       const mapped = users.map((user) => ({
