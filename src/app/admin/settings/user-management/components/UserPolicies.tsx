@@ -200,17 +200,20 @@ export function UserPolicies({
                 { label: 'Track Permission Changes', key: 'trackPermissionChanges' },
                 { label: 'Track Bulk Actions', key: 'trackBulkActions' },
                 { label: 'Alert on Suspicious Activity', key: 'alertOnSuspiciousActivity' }
-              ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between p-3 border rounded">
-                  <Label htmlFor={item.key} className="flex-1">{item.label}</Label>
-                  <Switch
-                    id={item.key}
-                    checked={policies.activityMonitoring[item.key as keyof typeof policies.activityMonitoring]}
-                    onCheckedChange={(value) => handleToggleBoolean(`activityMonitoring.${item.key}`, value)}
-                    disabled={isSaving}
-                  />
-                </div>
-              ))}
+              ].map((item) => {
+                const value = policies.activityMonitoring[item.key as keyof typeof policies.activityMonitoring]
+                return (
+                  <div key={item.key} className="flex items-center justify-between p-3 border rounded">
+                    <Label htmlFor={item.key} className="flex-1">{item.label}</Label>
+                    <Switch
+                      id={item.key}
+                      checked={Boolean(value)}
+                      onCheckedChange={(checked) => handleToggleBoolean(`activityMonitoring.${item.key}`, checked)}
+                      disabled={isSaving}
+                    />
+                  </div>
+                )
+              })}
             </div>
 
             <div>
