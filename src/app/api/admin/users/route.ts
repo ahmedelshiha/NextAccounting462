@@ -74,7 +74,7 @@ export const GET = withTenantContext(async (request: Request) => {
 
       // Get users WITHOUT the expensive bookings count
       // Booking counts can be fetched separately if needed on detail view
-      const users = await Promise.race([
+      const users = (await Promise.race([
         prisma.user.findMany({
           where,
           orderBy: { createdAt: 'desc' },
@@ -92,7 +92,7 @@ export const GET = withTenantContext(async (request: Request) => {
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Query timeout')), 8000)
         )
-      ])
+      ])) as any
 
       const mapped = (Array.isArray(users) ? users : []).map((u) => ({
         id: u.id,
