@@ -43,37 +43,62 @@ export const GET = withTenantContext(async (request: Request) => {
     }
 
     try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000)
+      let timeoutId: NodeJS.Timeout | null = null
+      let queryCompleted = false
 
-      try {
-        const users = (await Promise.race([
-          prisma.user.findMany({
-            where: tenantFilter(tenantId),
-            orderBy: { createdAt: 'desc' },
-            take: 100,
-            select: { id: true, name: true, email: true, role: true, createdAt: true }
-          }),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Query timeout')), 5000)
-          )
-        ])) || []
-        clearTimeout(timeoutId)
+      const queryPromise = prisma.user.findMany({
+        where: tenantFilter(tenantId),
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+        select: { id: true, name: true, email: true, role: true, createdAt: true }
+      }).then(result => {
+        queryCompleted = true
+        if (timeoutId) clearTimeout(timeoutId)
+        return result
+      }).catch(err => {
+        queryCompleted = true
+        if (timeoutId) clearTimeout(timeoutId)
+        throw err
+      })
 
-        const mapped = (Array.isArray(users) ? users : []).map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, createdAt: u.createdAt, totalBookings: 0 }))
-        const etag = '"' + createHash('sha1').update(JSON.stringify({ t: mapped.length, ids: mapped.map(u=>u.id), up: mapped.map(u=>u.createdAt) })).digest('hex') + '"'
-        const ifNoneMatch = request.headers.get('if-none-match')
-        if (ifNoneMatch && ifNoneMatch === etag) {
-          return new NextResponse(null, { status: 304, headers: { ETag: etag } })
-        }
-        return NextResponse.json({ users: mapped }, { headers: { ETag: etag, 'Cache-Control': 'private, max-age=60' } })
-      } catch (e: any) {
-        clearTimeout(timeoutId)
-        throw e
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          if (!queryCompleted) {
+            reject(new Error('Query timeout after 4 seconds'))
+          }
+        }, 4000)
+      })
+
+      const users = (await Promise.race([queryPromise, timeoutPromise])) || []
+
+      const mapped = (Array.isArray(users) ? users : []).map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        createdAt: u.createdAt,
+        totalBookings: 0
+      }))
+
+      const etag = '"' + createHash('sha1').update(JSON.stringify({
+        t: mapped.length,
+        ids: mapped.map(u => u.id),
+        up: mapped.map(u => u.createdAt)
+      })).digest('hex') + '"'
+
+      const ifNoneMatch = request.headers.get('if-none-match')
+      if (ifNoneMatch && ifNoneMatch === etag) {
+        return new NextResponse(null, { status: 304, headers: { ETag: etag } })
       }
+
+      return NextResponse.json({ users: mapped }, {
+        headers: { ETag: etag, 'Cache-Control': 'private, max-age=60' }
+      })
     } catch (e: any) {
       const code = String(e?.code || '')
       const msg = String(e?.message || '')
+      console.error('Users query error:', { code, msg, error: e })
+
       if (code.startsWith('P20') || msg.includes('timeout') || /relation|table|column/i.test(msg)) {
         const fallback = [
           { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString(), totalBookings: 0 },
