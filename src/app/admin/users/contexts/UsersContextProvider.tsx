@@ -109,8 +109,8 @@ interface UsersContextType {
   setActivityError: (msg: string | null) => void
 
   setSearch: (search: string) => void
-  setRoleFilter: (filter: typeof roleFilter) => void
-  setStatusFilter: (filter: typeof statusFilter) => void
+  setRoleFilter: (filter: 'ALL' | 'ADMIN' | 'TEAM_LEAD' | 'TEAM_MEMBER' | 'STAFF' | 'CLIENT') => void
+  setStatusFilter: (filter: 'ALL' | 'ACTIVE' | 'INACTIVE' | 'SUSPENDED') => void
 
   setProfileOpen: (open: boolean) => void
   setActiveTab: (tab: TabType) => void
