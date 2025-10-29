@@ -39,74 +39,114 @@ export const GET = withTenantContext(async (request: Request) => {
         { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
         { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
       ]
-      return NextResponse.json({ users: fallback })
+      return NextResponse.json({
+        users: fallback,
+        pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+      })
     }
 
     try {
-      let timeoutId: NodeJS.Timeout | null = null
-      let queryCompleted = false
+      // Parse pagination parameters
+      const { searchParams } = new URL(request.url)
+      const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+      const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
+      const skip = (page - 1) * limit
 
-      const queryPromise = prisma.user.findMany({
-        where: tenantFilter(tenantId),
-        orderBy: { createdAt: 'desc' },
-        take: 100,
-        select: { id: true, name: true, email: true, role: true, createdAt: true }
-      }).then(result => {
-        queryCompleted = true
+      // Implement timeout resilience for slow queries
+      let timeoutId: NodeJS.Timeout | null = null
+      const queryCompleted = { value: false }
+
+      const queryPromise = Promise.all([
+        prisma.user.count({ where: tenantFilter(tenantId) }),
+        prisma.user.findMany({
+          where: tenantFilter(tenantId),
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true
+          },
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' }
+        })
+      ]).then(([total, users]) => {
+        queryCompleted.value = true
         if (timeoutId) clearTimeout(timeoutId)
-        return result
+        return { total, users }
       }).catch(err => {
-        queryCompleted = true
+        queryCompleted.value = true
         if (timeoutId) clearTimeout(timeoutId)
         throw err
       })
 
       const timeoutPromise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
-          if (!queryCompleted) {
-            reject(new Error('Query timeout after 4 seconds'))
+          if (!queryCompleted.value) {
+            reject(new Error('Users query timeout after 6 seconds'))
           }
-        }, 4000)
+        }, 6000)
       })
 
-      const users = (await Promise.race([queryPromise, timeoutPromise])) || []
+      const { total, users } = await Promise.race([queryPromise, timeoutPromise])
 
-      const mapped = (Array.isArray(users) ? users : []).map(u => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        role: u.role,
-        createdAt: u.createdAt,
-        totalBookings: 0
+      // Map users to response format
+      const mapped = users.map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
+        updatedAt: user.updatedAt ? (user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt) : (user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt)
       }))
 
-      const etag = '"' + createHash('sha1').update(JSON.stringify({
-        t: mapped.length,
-        ids: mapped.map(u => u.id),
-        up: mapped.map(u => u.createdAt)
-      })).digest('hex') + '"'
+      // Generate ETag from users data
+      const etagData = JSON.stringify(mapped)
+      const etag = `"${createHash('sha256').update(etagData).digest('hex')}"`
 
       const ifNoneMatch = request.headers.get('if-none-match')
+
       if (ifNoneMatch && ifNoneMatch === etag) {
         return new NextResponse(null, { status: 304, headers: { ETag: etag } })
       }
 
-      return NextResponse.json({ users: mapped }, {
-        headers: { ETag: etag, 'Cache-Control': 'private, max-age=60' }
-      })
+      return NextResponse.json(
+        {
+          users: mapped,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+          }
+        },
+        {
+          headers: {
+            ETag: etag,
+            'Cache-Control': 'private, max-age=30, stale-while-revalidate=60'
+          }
+        }
+      )
     } catch (e: any) {
       const code = String(e?.code || '')
-      const msg = String(e?.message || '')
-      console.error('Users query error:', { code, msg, error: e })
+      const message = String(e?.message || '')
 
-      if (code.startsWith('P20') || msg.includes('timeout') || /relation|table|column/i.test(msg)) {
+      // Handle database connection errors with fallback
+      if (code.startsWith('P20') || code.startsWith('P10') || /relation|table|column|timeout/i.test(message)) {
+        console.warn('Database query error, returning fallback data:', code, message)
         const fallback = [
-          { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString(), totalBookings: 0 },
-          { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString(), totalBookings: 0 },
-          { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString(), totalBookings: 0 },
+          { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
+          { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
+          { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
         ]
-        return NextResponse.json({ users: fallback })
+        return NextResponse.json({
+          users: fallback,
+          pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+        })
       }
+
       throw e
     }
   } catch (error) {
@@ -114,8 +154,11 @@ export const GET = withTenantContext(async (request: Request) => {
     const fallback = [
       { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
       { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-      { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
+      { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
     ]
-    return NextResponse.json({ users: fallback })
+    return NextResponse.json({
+      users: fallback,
+      pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+    })
   }
 })
