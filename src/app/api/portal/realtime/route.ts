@@ -50,15 +50,15 @@ export const GET = withTenantContext(async (request: NextRequest) => {
         try {
           controller.close()
         } catch {}
-        // Log disconnect
-        try {
-          const { default: prisma } = await import('@/lib/prisma')
-          if (tenantId) {
-            await prisma.healthLog
+        // Log disconnect - non-blocking
+        if (tenantId) {
+          try {
+            const { default: prisma } = await import('@/lib/prisma')
+            prisma.healthLog
               .create({ data: withTenant({ service: 'portal:realtime', status: 'DISCONNECTED', message: `user:${userId}` }, tenantId) })
               .catch(() => null)
-          }
-        } catch {}
+          } catch {}
+        }
       }
       request.signal.addEventListener('abort', onAbort)
     },
