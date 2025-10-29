@@ -196,25 +196,7 @@ export function UserPolicies({
         {expandedSection === 'monitoring' && (
           <CardContent className="space-y-4 border-t pt-4">
             <div className="space-y-3">
-              {(
-                [
-                  { label: 'Track Login Attempts', key: 'trackLoginAttempts' },
-                  { label: 'Track Data Access', key: 'trackDataAccess' },
-                  { label: 'Track Permission Changes', key: 'trackPermissionChanges' },
-                  { label: 'Track Bulk Actions', key: 'trackBulkActions' },
-                  { label: 'Alert on Suspicious Activity', key: 'alertOnSuspiciousActivity' },
-                ] as { label: string; key: ActivityMonitoringBoolKey }[]
-              ).map((item) => (
-                <div key={item.key} className="flex items-center justify-between p-3 border rounded">
-                  <Label htmlFor={item.key} className="flex-1">{item.label}</Label>
-                  <Switch
-                    id={item.key}
-                    checked={policies.activityMonitoring[item.key]}
-                    onCheckedChange={(value) => handleToggleBoolean(`activityMonitoring.${item.key}`, value)}
-                    disabled={isSaving}
-                  />
-                </div>
-              ))}
+
             </div>
 
             <div>

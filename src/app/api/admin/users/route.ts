@@ -43,62 +43,7 @@ export const GET = withTenantContext(async (request: Request) => {
     }
 
     try {
-      // Get search and pagination params
-      const url = new URL(request.url)
-      const searchParams = url.searchParams
-      const search = (searchParams.get('search') || '').trim().toLowerCase()
-      const roleFilter = searchParams.get('role') || 'ALL'
-      const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-      const limit = Math.min(100, Math.max(10, parseInt(searchParams.get('limit') || '50', 10)))
-      const skip = (page - 1) * limit
 
-      // Build filters
-      let where = tenantFilter(tenantId)
-
-      if (search) {
-        where = {
-          ...where,
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { email: { contains: search, mode: 'insensitive' } }
-          ]
-        }
-      }
-
-      if (roleFilter !== 'ALL') {
-        where = { ...where, role: roleFilter }
-      }
-
-      // Get total count for pagination (fast - no expensive _count)
-      const total = await prisma.user.count({ where })
-
-      // Get users WITHOUT the expensive bookings count
-      // Booking counts can be fetched separately if needed on detail view
-      const users = await prisma.user.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          createdAt: true
-        },
-        skip,
-        take: limit
-      })
-
-      const mapped = (Array.isArray(users) ? users : []).map((u) => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        role: u.role,
-        createdAt: u.createdAt
-      }))
-
-      // Generate etag from mapped data (much smaller hash)
-      const etagData = { total, page, limit, count: mapped.length, ids: mapped.map((u) => u.id) }
-      const etag = '"' + createHash('sha256').update(JSON.stringify(etagData)).digest('hex') + '"'
       const ifNoneMatch = request.headers.get('if-none-match')
 
       if (ifNoneMatch && ifNoneMatch === etag) {

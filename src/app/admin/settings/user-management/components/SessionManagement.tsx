@@ -325,25 +325,6 @@ export function SessionManagement({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {(
-            [
-              { label: 'Require SSL/HTTPS', key: 'requireSSL' },
-              { label: 'HTTP-Only Tokens', key: 'httpOnlyTokens' },
-              { label: 'Reset Tokens on Password Change', key: 'resetTokensOnPasswordChange' },
-              { label: 'Invalidate on Permission Change', key: 'invalidateOnPermissionChange' },
-              { label: 'Regenerate Session ID on Login', key: 'regenerateSessionIdOnLogin' },
-            ] as { label: string; key: SecurityBoolKey }[]
-          ).map((item) => (
-            <div key={item.key} className="flex items-center justify-between p-3 border rounded">
-              <Label htmlFor={item.key}>{item.label}</Label>
-              <Switch
-                id={item.key}
-                checked={config.security[item.key]}
-                onCheckedChange={(value) => handleToggleSecurity(item.key, value)}
-                disabled={isSaving}
-              />
-            </div>
-          ))}
 
           <div>
             <Label htmlFor="same-site">SameSite Cookie Policy</Label>

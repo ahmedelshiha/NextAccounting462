@@ -126,35 +126,6 @@ export const GET = withTenantContext(async (request: NextRequest) => {
     const admins = roleCounts['ADMIN'] || 0
     const staff = teamMembers + teamLeads
 
-    // Calculate growth metrics with proper date-based queries
-    const newThisMonth = await prisma.user.count({
-      where: { ...tenantFilter(tenantId), createdAt: { gte: startOfMonth } }
-    })
-
-    const newLastMonth = await prisma.user.count({
-      where: { ...tenantFilter(tenantId), createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } }
-    })
-
-    const growth = newLastMonth > 0 ? ((newThisMonth - newLastMonth) / newLastMonth) * 100 : 0
-
-    // Format registration trends
-    const registrationTrends = (registrationByMonth || [])
-      .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
-      .map((trend) => ({
-        month: new Date(trend.month).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
-        count: typeof trend.count === 'bigint' ? Number(trend.count) : trend.count
-      }))
-
-    // Format top users
-    const topUsers = topClientsData.map((user) => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      bookingsCount: user._count.bookings,
-      createdAt: user.createdAt
-    }))
-
-    // Format ranged stats
     let ranged: { range?: string; newUsers?: number; growth?: number } = {}
     if (days > 0 && Array.isArray(rangedStats) && rangedStats.length === 2) {
       const [inRange, prevRange] = rangedStats as number[]
