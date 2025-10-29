@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import React from 'react'
 import {
   BarChart3,
   Calendar,
@@ -36,6 +37,8 @@ import useRovingTabIndex from '@/hooks/useRovingTabIndex'
 import SidebarHeader from './SidebarHeader'
 import SidebarFooter from './SidebarFooter'
 import { useSidebarCollapsed, useSidebarActions } from '@/stores/admin/layout.store.selectors'
+import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
+import { applyCustomizationToNavigation } from '@/lib/menu/menuUtils'
 
 interface NavigationItem {
   name: string
@@ -54,10 +57,11 @@ interface AdminSidebarProps {
   isOpen?: boolean
   onToggle?: () => void
   onClose?: () => void
+  onOpenMenuCustomization?: () => void
 }
 
-export default function AdminSidebar(props: AdminSidebarProps) {
-  const { collapsed, isCollapsed: isCollapsedProp, isMobile = false, isOpen = false, onToggle, onClose } = props
+function AdminSidebar(props: AdminSidebarProps) {
+  const { collapsed, isCollapsed: isCollapsedProp, isMobile = false, isOpen = false, onToggle, onClose, onOpenMenuCustomization } = props
   const pathname = usePathname()
   const { data: session } = useSession()
 
@@ -80,7 +84,10 @@ export default function AdminSidebar(props: AdminSidebarProps) {
 
   const userRole = (session?.user as any)?.role
 
-  const navigation: { section: string; items: NavigationItem[] }[] = [
+  // Get menu customization from store
+  const { customization } = useMenuCustomizationStore()
+
+  const defaultNavigation: { section: string; items: NavigationItem[] }[] = [
     {
       section: 'dashboard',
       items: [
@@ -137,6 +144,12 @@ export default function AdminSidebar(props: AdminSidebarProps) {
   ]
 
   {/* Static link reference for telemetry test: <Link href="/admin/cron-telemetry">Cron Telemetry</Link> */}
+
+  // Apply customization to navigation with memoization for performance
+  const navigation = useMemo(
+    () => applyCustomizationToNavigation(defaultNavigation, customization),
+    [customization]
+  )
 
   const [expandedSections, setExpandedSections] = useState<string[]>(() => {
     try {
@@ -300,7 +313,7 @@ export default function AdminSidebar(props: AdminSidebarProps) {
             })}
           </nav>
 
-          <SidebarFooter collapsed={storeCollapsed} isMobile={isMobile} onClose={onClose} />
+          <SidebarFooter collapsed={storeCollapsed} isMobile={isMobile} onClose={onClose} onOpenMenuCustomization={onOpenMenuCustomization} />
         </div>
 
         {/* Resizer - only on desktop and when not collapsed */}
@@ -309,3 +322,8 @@ export default function AdminSidebar(props: AdminSidebarProps) {
     </>
   )
 }
+
+// Memoize the component for performance optimization
+// Prevents unnecessary re-renders when parent components update
+// but props and customization remain unchanged
+export default React.memo(AdminSidebar)

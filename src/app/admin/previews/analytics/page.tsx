@@ -1,8 +1,8 @@
-"use client"
-
+import { getSessionOrBypass } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 import AnalyticsPage from '@/components/dashboard/templates/AnalyticsPage'
 
-export default function AnalyticsPagePreview() {
+export default async function AnalyticsPagePreview() {
   const stats = {
     revenue: { current: 45230, target: 60000, targetProgress: 75.4, trend: 6.2 },
     bookings: { total: 340, today: 12, pending: 8, conversion: 42.7 },
@@ -21,6 +21,10 @@ export default function AnalyticsPagePreview() {
   if (!enabled) {
     return <div className="p-6 text-sm text-gray-600">Previews are disabled in production.</div>
   }
+  const session = await getSessionOrBypass()
+  if (!session?.user) { redirect('/login') }
+  const role = (session.user as any)?.role as string | undefined
+  if (!['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF'].includes(role || '')) { redirect('/admin') }
   return (
     <AnalyticsPage
       title="Analytics Template Preview"

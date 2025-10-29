@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
+import {
   Users,
   Search,
   Download,
@@ -33,6 +33,8 @@ import {
   Ban
 } from 'lucide-react'
 import { usePermissions } from '@/lib/use-permissions'
+import UnifiedPermissionModal, { PermissionChangeSet } from '@/components/admin/permissions/UnifiedPermissionModal'
+import { toast } from 'sonner'
 
 // Enhanced types
 interface UserStats {
@@ -133,7 +135,11 @@ export default function AdminUsersPage() {
   // Status change state
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
   const [statusAction, setStatusAction] = useState<{ action: 'activate' | 'deactivate' | 'suspend', user: UserItem } | null>(null)
-  
+
+  // Permission modal state
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false)
+  const [permissionsSaving, setPermissionsSaving] = useState(false)
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   // Loaders
@@ -292,9 +298,41 @@ export default function AdminUsersPage() {
     }
   }, [selectedUser, editForm])
 
+  const handleSavePermissions = useCallback(async (changes: PermissionChangeSet) => {
+    setPermissionsSaving(true)
+    try {
+      const response = await apiFetch('/api/admin/permissions/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changes)
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(error.error || 'Failed to update permissions')
+      }
+
+      const result = await response.json()
+
+      // Update local state - refresh user data
+      if (selectedUser && changes.targetIds.includes(selectedUser.id)) {
+        await loadUsers()
+      }
+
+      setPermissionModalOpen(false)
+      toast.success(`Updated ${changes.targetIds.length} user(s) successfully`)
+    } catch (error) {
+      console.error('Permission update failed', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update permissions')
+      setErrorMsg('Failed to update permissions')
+    } finally {
+      setPermissionsSaving(false)
+    }
+  }, [selectedUser, loadUsers])
+
   const handleStatusChange = useCallback(async () => {
     if (!statusAction) return
-    
+
     const { action, user } = statusAction
     let newStatus: string
     
@@ -1042,6 +1080,17 @@ export default function AdminUsersPage() {
                             </div>
                           </div>
                         )}
+                        {perms.canManageUsers && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full flex items-center gap-2"
+                            onClick={() => setPermissionModalOpen(true)}
+                          >
+                            <Shield className="h-4 w-4" />
+                            Manage Permissions
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1096,13 +1145,13 @@ export default function AdminUsersPage() {
               {statusAction?.action === 'suspend' && 'Suspend User Account'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {statusAction?.action === 'activate' && 
+              {statusAction?.action === 'activate' &&
                 `Are you sure you want to activate ${statusAction.user.name || statusAction.user.email}'s account? They will regain access to their account.`
               }
-              {statusAction?.action === 'deactivate' && 
+              {statusAction?.action === 'deactivate' &&
                 `Are you sure you want to deactivate ${statusAction.user.name || statusAction.user.email}'s account? They will lose access but their data will be preserved.`
               }
-              {statusAction?.action === 'suspend' && 
+              {statusAction?.action === 'suspend' &&
                 `Are you sure you want to suspend ${statusAction.user.name || statusAction.user.email}'s account? This action should only be used for policy violations.`
               }
             </AlertDialogDescription>
@@ -1113,8 +1162,8 @@ export default function AdminUsersPage() {
               onClick={handleStatusChange}
               disabled={updating}
               className={
-                statusAction?.action === 'suspend' 
-                  ? 'bg-red-600 hover:bg-red-700' 
+                statusAction?.action === 'suspend'
+                  ? 'bg-red-600 hover:bg-red-700'
                   : statusAction?.action === 'activate'
                   ? 'bg-green-600 hover:bg-green-700'
                   : ''
@@ -1136,6 +1185,23 @@ export default function AdminUsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Permission Management Modal */}
+      {permissionModalOpen && selectedUser && (
+        <UnifiedPermissionModal
+          mode="user"
+          targetId={selectedUser.id}
+          currentRole={selectedUser.role}
+          currentPermissions={(selectedUser.permissions || []) as any}
+          onSave={handleSavePermissions}
+          onClose={() => setPermissionModalOpen(false)}
+          targetName={selectedUser.name || selectedUser.email}
+          targetEmail={selectedUser.email}
+          showTemplates={true}
+          showHistory={true}
+          allowCustomPermissions={true}
+        />
+      )}
     </div>
   )
 }
