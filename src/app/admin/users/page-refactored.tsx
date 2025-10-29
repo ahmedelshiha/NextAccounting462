@@ -6,6 +6,7 @@ import { useUsersList, useUserStats, useUserActions } from './hooks'
 import { DashboardHeader, StatsSection, UsersTable, UserProfileDialog } from './components'
 import UnifiedPermissionModal, { PermissionChangeSet } from '@/components/admin/permissions/UnifiedPermissionModal'
 import { useUserPermissions } from './hooks/useUserPermissions'
+import { PERMISSIONS, Permission } from '@/lib/permissions'
 import { toast } from 'sonner'
 
 /**
@@ -203,25 +204,25 @@ export default function AdminUsersPage() {
         <UserProfileDialog />
 
         {/* Permission Modal (Phase 3) */}
-        {context.selectedUser && (
-          (() => {
-            const all = Object.values(require('@/lib/permissions').PERMISSIONS) as string[]
-            const currentPerms = (context.selectedUser?.permissions || []).filter((p: string) => all.includes(p)) as import('@/lib/permissions').Permission[]
-            return (
-              <UnifiedPermissionModal
-                isOpen={context.permissionModalOpen}
-                onClose={() => context.setPermissionModalOpen(false)}
-                mode="user"
-                targetId={context.selectedUser.id}
-                currentRole={context.selectedUser.role}
-                currentPermissions={currentPerms}
-                onSave={handleSavePermissions}
-                isLoading={context.permissionsSaving}
-                targetName={context.selectedUser.name || context.selectedUser.email}
-              />
-            )
-          })()
-        )}
+        {context.selectedUser && (() => {
+          const all = Object.values(PERMISSIONS) as Permission[]
+          const currentPerms = (context.selectedUser?.permissions || []).filter(
+            (p: string): p is Permission => (all as string[]).includes(p)
+          )
+          return (
+            <UnifiedPermissionModal
+              isOpen={context.permissionModalOpen}
+              onClose={() => context.setPermissionModalOpen(false)}
+              mode="user"
+              targetId={context.selectedUser.id}
+              currentRole={context.selectedUser.role}
+              currentPermissions={currentPerms}
+              onSave={handleSavePermissions}
+              isLoading={context.permissionsSaving}
+              targetName={context.selectedUser.name || context.selectedUser.email}
+            />
+          )
+        })()}
       </div>
     </div>
   )
