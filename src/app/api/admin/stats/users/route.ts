@@ -44,8 +44,6 @@ export const GET = withTenantContext(async (request: NextRequest) => {
 
     const growth = newLastMonth > 0 ? ((newThisMonth - newLastMonth) / newLastMonth) * 100 : 0
 
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-
     const usersWithRecentBookings = 0
 
     const registrationTrends: Array<{ month: string; count: number }> = []
