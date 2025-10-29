@@ -329,17 +329,20 @@ export function SessionManagement({
             { label: 'Reset Tokens on Password Change', key: 'resetTokensOnPasswordChange' },
             { label: 'Invalidate on Permission Change', key: 'invalidateOnPermissionChange' },
             { label: 'Regenerate Session ID on Login', key: 'regenerateSessionIdOnLogin' }
-          ].map((item) => (
-            <div key={item.key} className="flex items-center justify-between p-3 border rounded">
-              <Label htmlFor={item.key}>{item.label}</Label>
-              <Switch
-                id={item.key}
-                checked={config.security[item.key as keyof typeof config.security]}
-                onCheckedChange={(value) => handleToggleSecurity(item.key, value)}
-                disabled={isSaving}
-              />
-            </div>
-          ))}
+          ].map((item) => {
+            const value = config.security[item.key as keyof typeof config.security]
+            return (
+              <div key={item.key} className="flex items-center justify-between p-3 border rounded">
+                <Label htmlFor={item.key}>{item.label}</Label>
+                <Switch
+                  id={item.key}
+                  checked={Boolean(value)}
+                  onCheckedChange={(checked) => handleToggleSecurity(item.key, checked)}
+                  disabled={isSaving}
+                />
+              </div>
+            )
+          })}
 
           <div>
             <Label htmlFor="same-site">SameSite Cookie Policy</Label>
