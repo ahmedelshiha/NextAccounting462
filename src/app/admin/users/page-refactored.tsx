@@ -204,21 +204,19 @@ export default function AdminUsersPage() {
         <UserProfileDialog />
 
         {/* Permission Modal (Phase 3) */}
-        {context.selectedUser && (() => {
+        {context.selectedUser && context.permissionModalOpen && (() => {
           const all = Object.values(PERMISSIONS) as Permission[]
           const currentPerms = (context.selectedUser?.permissions || []).filter(
             (p: string): p is Permission => (all as string[]).includes(p)
           )
           return (
             <UnifiedPermissionModal
-              isOpen={context.permissionModalOpen}
               onClose={() => context.setPermissionModalOpen(false)}
               mode="user"
               targetId={context.selectedUser.id}
               currentRole={context.selectedUser.role}
               currentPermissions={currentPerms}
               onSave={handleSavePermissions}
-              isLoading={context.permissionsSaving}
               targetName={context.selectedUser.name || context.selectedUser.email}
             />
           )
