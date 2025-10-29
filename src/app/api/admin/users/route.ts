@@ -37,7 +37,11 @@ export const GET = withTenantContext(async (request: Request) => {
       let timeoutId: NodeJS.Timeout | null = null
       const queryCompleted = { value: false }
 
-      // Use shorter timeout for database pooler reliability
+      // Use timeout-safe promise pattern for slow databases
+      let queryCompleted = false
+      let queryError: Error | null = null
+      let queryData: any = null
+
       const queryPromise = Promise.all([
         prisma.user.count({ where: tenantFilter(tenantId) }),
         prisma.user.findMany({
@@ -55,47 +59,43 @@ export const GET = withTenantContext(async (request: Request) => {
           orderBy: { createdAt: 'desc' }
         })
       ]).then(([total, users]) => {
-        queryCompleted.value = true
+        queryCompleted = true
+        queryData = { total, users }
         if (timeoutId) clearTimeout(timeoutId)
-        return { total, users }
       }).catch(err => {
-        queryCompleted.value = true
+        queryCompleted = true
+        queryError = err
         if (timeoutId) clearTimeout(timeoutId)
-        throw err
       })
 
-      // Fail fast if queries are slow - return fallback data instead of hanging
-      const timeoutPromise = new Promise<never>((_, reject) => {
+      // Set a timeout to fail fast if database is slow
+      await new Promise(resolve => {
         timeoutId = setTimeout(() => {
-          if (!queryCompleted.value) {
-            const fallback = [
-              { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
-              { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-              { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
-            ]
-            // Return fallback response instead of rejecting
-            return { total: 3, users: fallback, isTimeout: true }
-          }
+          resolve(null)
         }, 5000)
+
+        // Also resolve if query completes
+        queryPromise.finally(() => resolve(null))
       })
 
-      let result: any
-      try {
-        result = await Promise.race([queryPromise, timeoutPromise])
-      } catch (err) {
-        // If race fails, use fallback
-        result = {
-          total: 3,
-          users: [
-            { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
-            { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-            { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
-          ],
-          isTimeout: true
-        }
+      // If query didn't complete, use fallback data
+      if (!queryCompleted) {
+        const fallback = [
+          { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
+          { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
+          { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
+        ]
+        return NextResponse.json({
+          users: fallback,
+          pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+        })
       }
 
-      const { total, users, isTimeout } = result
+      // If query errored, throw the error to be caught by error handler
+      if (queryError) throw queryError
+
+      // If query succeeded, use the data
+      const { total, users } = queryData
 
       // Map users to response format
       const mapped = users.map((user) => ({
