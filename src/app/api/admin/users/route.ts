@@ -83,9 +83,7 @@ export const GET = withTenantContext(async (request: Request) => {
             name: true,
             email: true,
             role: true,
-            createdAt: true,
-            lastLoginAt: true,
-            isActive: true
+            createdAt: true
           },
           skip,
           take: limit,
@@ -101,9 +99,7 @@ export const GET = withTenantContext(async (request: Request) => {
         name: u.name,
         email: u.email,
         role: u.role,
-        createdAt: u.createdAt,
-        lastLoginAt: u.lastLoginAt,
-        isActive: u.isActive
+        createdAt: u.createdAt
       }))
 
       // Generate etag from mapped data (much smaller hash)
