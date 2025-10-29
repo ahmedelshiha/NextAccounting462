@@ -155,10 +155,13 @@ export const GET = withTenantContext(async (request: Request) => {
   } catch (error) {
     console.error('Error fetching users:', error)
     const fallback = [
-      { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
-      { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-      { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
+      { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString(), lastLoginAt: null, isActive: true },
+      { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString(), lastLoginAt: null, isActive: true },
+      { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString(), lastLoginAt: null, isActive: true }
     ]
-    return NextResponse.json({ users: fallback })
+    return NextResponse.json({
+      users: fallback,
+      pagination: { page: 1, limit: 50, total: 3, pages: 1 }
+    })
   }
 })
