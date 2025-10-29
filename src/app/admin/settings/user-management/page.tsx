@@ -108,8 +108,8 @@ export default function UserManagementSettingsPage() {
                 roleConfig={settings.roles}
                 isLoading={isLoading}
                 isSaving={isSaving}
-                onUpdate={async (updates) => {
-                  await updateSettings({ roles: updates })
+                onUpdate={async (updates: Partial<RoleConfig>) => {
+                  await updateSettings({ roles: updates as RoleConfig })
                 }}
               />
             )}
