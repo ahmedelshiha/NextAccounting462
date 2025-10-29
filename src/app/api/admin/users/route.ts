@@ -60,7 +60,7 @@ export const GET = withTenantContext(async (request: Request) => {
         queryCompleted = true
         queryData = { total, users }
         if (timeoutId) clearTimeout(timeoutId)
-      }).catch(err => {
+      }).catch((err: any) => {
         queryCompleted = true
         queryError = err
         if (timeoutId) clearTimeout(timeoutId)
@@ -147,12 +147,12 @@ export const GET = withTenantContext(async (request: Request) => {
         return NextResponse.json({
           users: fallback,
           pagination: { page: 1, limit: 50, total: 3, pages: 1 }
-        })
+        }, { status: 200 })
       }
 
       throw e
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching users:', error)
     const fallback = [
       { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
@@ -162,6 +162,6 @@ export const GET = withTenantContext(async (request: Request) => {
     return NextResponse.json({
       users: fallback,
       pagination: { page: 1, limit: 50, total: 3, pages: 1 }
-    })
+    }, { status: 200 })
   }
 })
