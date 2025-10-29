@@ -3,7 +3,7 @@
 import React, { useEffect, useCallback } from 'react'
 import { useUsersContext } from './contexts/UsersContextProvider'
 import { useUsersList, useUserStats, useUserActions } from './hooks'
-import { DashboardHeader, StatsSection, UsersTable } from './components'
+import { DashboardHeader, StatsSection, UsersTable, UserProfileDialog } from './components'
 import { UnifiedPermissionModal } from '@/components/admin/permissions/UnifiedPermissionModal'
 import { PermissionChangeSet } from '@/components/admin/permissions/UnifiedPermissionModal'
 import { useUserPermissions } from './hooks/useUserPermissions'
