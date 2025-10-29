@@ -35,7 +35,6 @@ export const GET = withTenantContext(async (request: Request) => {
 
       // Implement timeout resilience for slow queries
       let timeoutId: NodeJS.Timeout | null = null
-      const queryCompleted = { value: false }
 
       // Use timeout-safe promise pattern for slow databases
       let queryCompleted = false
