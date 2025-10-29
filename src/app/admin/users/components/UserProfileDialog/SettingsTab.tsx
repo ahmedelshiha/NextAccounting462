@@ -27,7 +27,7 @@ export const SettingsTab = memo(function SettingsTab({ user }: SettingsTabProps)
           <h3 className="font-semibold text-gray-900">Permissions</h3>
         </div>
         <p className="text-sm text-gray-600">
-          Manage this user's permissions and access control.
+          Manage this user&apos;s permissions and access control.
         </p>
         {user.permissions && user.permissions.length > 0 && (
           <div className="space-y-2">
