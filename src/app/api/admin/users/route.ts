@@ -28,10 +28,28 @@ export const GET = withTenantContext(async (request: Request) => {
 
     let useFallback = false
     try {
-      await queryTenantRaw`SELECT 1`
+      // Health check with aggressive timeout to prevent hanging
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 2000)
+
+      try {
+        await Promise.race([
+          queryTenantRaw`SELECT 1`,
+          new Promise((_, reject) => {
+            abortController.signal.addEventListener('abort', () => {
+              reject(new Error('Database health check timeout'))
+            })
+          })
+        ])
+      } finally {
+        clearTimeout(timeoutId)
+      }
     } catch (e: any) {
       const code = String(e?.code || '')
-      if (code.startsWith('P10')) useFallback = true
+      const message = String(e?.message || '')
+      if (code.startsWith('P10') || /timeout|abort/i.test(message)) {
+        useFallback = true
+      }
     }
     if (useFallback) {
       const fallback = [
