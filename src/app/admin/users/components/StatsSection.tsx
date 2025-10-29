@@ -25,6 +25,9 @@ const StatsCardSkeleton = memo(function StatsCardSkeleton() {
 })
 
 const TopClientsCard = memo(function TopClientsCard({ stats }: { stats: UserStats | null }) {
+  // Safely access topUsers with proper null/undefined checks
+  const topUsers = stats?.topUsers && Array.isArray(stats.topUsers) ? stats.topUsers : []
+
   return (
     <Card className="lg:col-span-1">
       <CardHeader>
@@ -32,19 +35,21 @@ const TopClientsCard = memo(function TopClientsCard({ stats }: { stats: UserStat
         <CardDescription>Most active clients</CardDescription>
       </CardHeader>
       <CardContent>
-        {stats?.topUsers?.length ? (
+        {topUsers.length > 0 ? (
           <div className="divide-y divide-gray-100">
-            {stats.topUsers.map((u) => (
-              <div key={u.id} className="flex items-center justify-between py-3">
-                <div>
-                  <div className="font-medium text-gray-900">{u.name || 'Unnamed User'}</div>
-                  <div className="text-sm text-gray-600">{u.email}</div>
+            {topUsers.map((u) => {
+              // Ensure bookingsCount is safely accessed
+              const bookingCount = typeof u.bookingsCount === 'number' ? u.bookingsCount : 0
+              return (
+                <div key={u.id} className="flex items-center justify-between py-3">
+                  <div>
+                    <div className="font-medium text-gray-900">{u.name || 'Unnamed User'}</div>
+                    <div className="text-sm text-gray-600">{u.email || ''}</div>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-800">{bookingCount} bookings</Badge>
                 </div>
-                <Badge className="bg-blue-100 text-blue-800">
-                  {(u.bookings ?? u.bookingsCount ?? 0)} bookings
-                </Badge>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <div className="text-gray-500 text-sm">No user performance data.</div>
