@@ -3,23 +3,56 @@
 import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Shield, Users, Workflow, AlertCircle, Zap, Clock, Mail } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Shield, Users, Workflow, AlertCircle, Zap, Clock, Mail, Save } from 'lucide-react'
+import { useUserManagementSettings } from './hooks/useUserManagementSettings'
+import {
+  RoleManagement,
+  PermissionTemplates,
+  OnboardingWorkflows,
+  UserPolicies,
+  RateLimiting,
+  SessionManagement,
+  InvitationSettings
+} from './components'
 
 /**
  * User Management Settings Page
- * 
- * Allows Super Admins to configure:
+ *
+ * Comprehensive configuration interface for system administrators to manage:
  * - User roles and hierarchies
  * - Permission templates
  * - Onboarding workflows
  * - User lifecycle policies
- * - API rate limits
+ * - API rate limiting
  * - Session management
- * - Invitation settings
+ * - Invitation and signup settings
  */
 
 export default function UserManagementSettingsPage() {
   const [activeTab, setActiveTab] = useState('roles')
+  const { settings, isLoading, isSaving, error, fetchSettings, updateSettings } = useUserManagementSettings()
+
+  if (error && !settings) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="border-red-200 bg-red-50">
+            <CardHeader>
+              <CardTitle className="text-red-900 flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Error Loading Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-red-800 mb-4">{error}</p>
+              <Button onClick={fetchSettings}>Retry</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -37,14 +70,14 @@ export default function UserManagementSettingsPage() {
 
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 gap-2 mb-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 gap-2 mb-6 h-auto">
             <TabsTrigger value="roles" className="flex items-center gap-1">
               <Shield className="h-4 w-4" />
               <span className="hidden sm:inline">Roles</span>
             </TabsTrigger>
             <TabsTrigger value="permissions" className="flex items-center gap-1">
               <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Permissions</span>
+              <span className="hidden sm:inline">Templates</span>
             </TabsTrigger>
             <TabsTrigger value="onboarding" className="flex items-center gap-1">
               <Workflow className="h-4 w-4" />
@@ -70,198 +103,121 @@ export default function UserManagementSettingsPage() {
 
           {/* Role Management Tab */}
           <TabsContent value="roles">
-            <Card>
-              <CardHeader>
-                <CardTitle>Role Management</CardTitle>
-                <CardDescription>
-                  Define and customize user roles, hierarchy, and permissions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Role management functionality coming soon. You will be able to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                    <li>Define custom roles based on system roles</li>
-                    <li>Set role hierarchies and permissions</li>
-                    <li>Configure default roles for signup/invite</li>
-                    <li>View role usage statistics</li>
-                    <li>Manage permission inheritance</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            {settings && (
+              <RoleManagement
+                roleConfig={settings.roles}
+                isLoading={isLoading}
+                isSaving={isSaving}
+                onUpdate={async (updates) => {
+                  await updateSettings({ roles: updates })
+                }}
+              />
+            )}
           </TabsContent>
 
           {/* Permission Templates Tab */}
           <TabsContent value="permissions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Permission Templates</CardTitle>
-                <CardDescription>
-                  Create and manage pre-configured permission sets for quick assignment
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Permission templates functionality coming soon. You will be able to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                    <li>Create templates from scratch</li>
-                    <li>Copy and customize system templates</li>
-                    <li>Use templates for bulk user assignment</li>
-                    <li>Track template usage and adoption</li>
-                    <li>Version and track changes to templates</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            {settings && (
+              <PermissionTemplates
+                templates={settings.permissions}
+                isLoading={isLoading}
+                isSaving={isSaving}
+                onUpdate={async (templates) => {
+                  await updateSettings({ permissions: templates })
+                }}
+              />
+            )}
           </TabsContent>
 
           {/* Onboarding Workflows Tab */}
           <TabsContent value="onboarding">
-            <Card>
-              <CardHeader>
-                <CardTitle>Onboarding Workflows</CardTitle>
-                <CardDescription>
-                  Configure automated onboarding processes for new users
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Onboarding workflows functionality coming soon. You will be able to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                    <li>Design visual workflows with conditional logic</li>
-                    <li>Customize welcome emails and templates</li>
-                    <li>Create onboarding checklists</li>
-                    <li>Set up auto-assignment rules</li>
-                    <li>Define role-specific workflows</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            {settings && (
+              <OnboardingWorkflows
+                config={settings.onboarding}
+                isLoading={isLoading}
+                isSaving={isSaving}
+                onUpdate={async (config) => {
+                  await updateSettings({ onboarding: config })
+                }}
+              />
+            )}
           </TabsContent>
 
           {/* User Policies Tab */}
           <TabsContent value="policies">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Policies</CardTitle>
-                <CardDescription>
-                  Configure user lifecycle and data management policies
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    User policies functionality coming soon. You will be able to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                    <li>Set inactivity thresholds and archival</li>
-                    <li>Configure data retention policies</li>
-                    <li>Enable activity monitoring</li>
-                    <li>Set access control rules (MFA, IP restrictions)</li>
-                    <li>Configure automatic user deletion</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            {settings && (
+              <UserPolicies
+                policies={settings.policies}
+                isLoading={isLoading}
+                isSaving={isSaving}
+                onUpdate={async (policies) => {
+                  await updateSettings({ policies })
+                }}
+              />
+            )}
           </TabsContent>
 
           {/* Rate Limiting Tab */}
           <TabsContent value="rate-limits">
-            <Card>
-              <CardHeader>
-                <CardTitle>Rate Limiting</CardTitle>
-                <CardDescription>
-                  Configure API rate limits and resource quotas per role
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Rate limiting functionality coming soon. You will be able to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                    <li>Set per-role API call limits</li>
-                    <li>Configure bulk operation limits</li>
-                    <li>Manage export size quotas</li>
-                    <li>Set concurrent session limits</li>
-                    <li>Enable adaptive throttling</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            {settings && (
+              <RateLimiting
+                config={settings.rateLimits}
+                isLoading={isLoading}
+                isSaving={isSaving}
+                onUpdate={async (config) => {
+                  await updateSettings({ rateLimits: config })
+                }}
+              />
+            )}
           </TabsContent>
 
           {/* Session Management Tab */}
           <TabsContent value="sessions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Session Management</CardTitle>
-                <CardDescription>
-                  Configure session timeouts, security, and device management
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Session management functionality coming soon. You will be able to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                    <li>Set inactivity timeouts per role</li>
-                    <li>Configure absolute max session duration</li>
-                    <li>Limit concurrent sessions per user</li>
-                    <li>Manage device tracking and approval</li>
-                    <li>Set up location-based warnings</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            {settings && (
+              <SessionManagement
+                config={settings.sessions}
+                isLoading={isLoading}
+                isSaving={isSaving}
+                onUpdate={async (config) => {
+                  await updateSettings({ sessions: config })
+                }}
+              />
+            )}
           </TabsContent>
 
           {/* Invitation Settings Tab */}
           <TabsContent value="invitations">
-            <Card>
-              <CardHeader>
-                <CardTitle>Invitation Settings</CardTitle>
-                <CardDescription>
-                  Configure user invitations and sign-up behaviors
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Invitation settings functionality coming soon. You will be able to:
-                  </p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                    <li>Configure invitation expiry and resend limits</li>
-                    <li>Enable/disable public sign-up</li>
-                    <li>Set domain-based auto-assignment rules</li>
-                    <li>Customize sign-up form and required fields</li>
-                    <li>Track and manage pending invitations</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            {settings && (
+              <InvitationSettings
+                config={settings.invitations}
+                isLoading={isLoading}
+                isSaving={isSaving}
+                onUpdate={async (config) => {
+                  await updateSettings({ invitations: config })
+                }}
+              />
+            )}
           </TabsContent>
         </Tabs>
 
         {/* Help Section */}
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="font-semibold text-blue-900 mb-2">Need Help?</h3>
-          <p className="text-sm text-blue-800">
-            For detailed documentation on user management settings, please refer to the{' '}
-            <a href="/docs" className="underline font-medium hover:text-blue-700">
-              documentation
-            </a>
-            .
-          </p>
+          <h3 className="font-semibold text-blue-900 mb-2">💡 Pro Tips</h3>
+          <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+            <li>Test policy changes with a small group before rolling out organization-wide</li>
+            <li>Use permission templates to speed up user onboarding</li>
+            <li>Monitor activity logs to ensure security policies are working</li>
+            <li>Review and update rate limits based on actual usage patterns</li>
+          </ul>
         </div>
+
+        {/* Save Status */}
+        {isSaving && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-blue-600">
+            <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+            <span>Saving changes...</span>
+          </div>
+        )}
       </div>
     </div>
   )

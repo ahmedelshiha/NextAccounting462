@@ -27,7 +27,7 @@ export const SettingsTab = memo(function SettingsTab({ user }: SettingsTabProps)
           <h3 className="font-semibold text-gray-900">Permissions</h3>
         </div>
         <p className="text-sm text-gray-600">
-          Manage this user's permissions and access control.
+          Manage this user&apos;s permissions and access control.
         </p>
         {user.permissions && user.permissions.length > 0 && (
           <div className="space-y-2">
@@ -62,7 +62,7 @@ export const SettingsTab = memo(function SettingsTab({ user }: SettingsTabProps)
           <h3 className="font-semibold text-gray-900">Two-Factor Authentication</h3>
         </div>
         <p className="text-sm text-gray-600">
-          Require two-factor authentication for this user's account.
+          Require two-factor authentication for this user&apos;s account.
         </p>
         <Button variant="outline" disabled className="w-full">
           Configure 2FA
@@ -76,7 +76,7 @@ export const SettingsTab = memo(function SettingsTab({ user }: SettingsTabProps)
           <h3 className="font-semibold text-gray-900">Session Management</h3>
         </div>
         <p className="text-sm text-gray-600">
-          Manage this user's active sessions and login history.
+          Manage this user&apos;s active sessions and login history.
         </p>
         <Button variant="outline" disabled className="w-full">
           View Sessions
