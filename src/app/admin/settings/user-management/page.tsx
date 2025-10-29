@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Shield, Users, Workflow, AlertCircle, Zap, Clock, Mail, Save } from 'lucide-react'
 import { useUserManagementSettings } from './hooks/useUserManagementSettings'
+import { RoleConfig } from './types'
 import {
   RoleManagement,
   PermissionTemplates,
