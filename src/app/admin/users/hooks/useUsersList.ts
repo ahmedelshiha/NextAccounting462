@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { apiFetch } from '@/lib/api'
 import { UserItem } from '../contexts/UsersContextProvider'
 
@@ -43,9 +43,9 @@ export function useUsersList(options?: UseUsersListOptions): UseUsersListReturn 
   }, [options])
 
   // Auto-fetch on mount
-  if (isLoading && error === null) {
+  useEffect(() => {
     refetch().catch(console.error)
-  }
+  }, [refetch])
 
   return {
     users,
