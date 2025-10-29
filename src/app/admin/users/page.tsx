@@ -154,18 +154,44 @@ export default function AdminUsersPage() {
   }, [])
 
   const loadUsers = useCallback(async () => {
-    try {
-      const res = await apiFetch('/api/admin/users')
-      if (!res.ok) throw new Error(`Failed to load users (${res.status})`)
-      const data = await res.json()
-      const list = Array.isArray(data?.users) ? (data.users as UserItem[]) : []
-      setUsers(list)
-    } catch (e) {
-      console.error(e)
-      setUsers([])
-    } finally {
-      setUsersLoading(false)
+    let retries = 0
+    const maxRetries = 2
+
+    const attempt = async (): Promise<void> => {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000)
+
+        const res = await apiFetch('/api/admin/users', { signal: controller.signal })
+        clearTimeout(timeoutId)
+
+        if (!res.ok) {
+          if (res.status === 503 && retries < maxRetries) {
+            retries++
+            await new Promise(resolve => setTimeout(resolve, 1000 * retries))
+            return attempt()
+          }
+          throw new Error(`Failed to load users (${res.status})`)
+        }
+
+        const data = await res.json()
+        const list = Array.isArray(data?.users) ? (data.users as UserItem[]) : []
+        setUsers(list)
+      } catch (e: any) {
+        console.error('Error loading users:', e)
+        if (retries < maxRetries && (e?.message?.includes('abort') || e?.message?.includes('timeout'))) {
+          retries++
+          await new Promise(resolve => setTimeout(resolve, 1000 * retries))
+          return attempt()
+        }
+        setUsers([])
+        setErrorMsg('Failed to load users. Please try again.')
+      } finally {
+        setUsersLoading(false)
+      }
     }
+
+    return attempt()
   }, [])
 
   const loadUserActivity = useCallback(async (userId: string) => {
