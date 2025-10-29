@@ -43,21 +43,42 @@ export const GET = withTenantContext(async (request: Request) => {
     }
 
     try {
-      const users = (await prisma.user.findMany({ where: tenantFilter(tenantId), orderBy: { createdAt: 'desc' }, select: { id: true, name: true, email: true, role: true, createdAt: true, _count: { select: { bookings: true } } } })) || []
-      const mapped = (Array.isArray(users) ? users : []).map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, createdAt: u.createdAt, totalBookings: (u as any)._count?.bookings ?? 0 }))
-      const etag = '"' + createHash('sha1').update(JSON.stringify({ t: mapped.length, ids: mapped.map(u=>u.id), up: mapped.map(u=>u.createdAt) })).digest('hex') + '"'
-      const ifNoneMatch = request.headers.get('if-none-match')
-      if (ifNoneMatch && ifNoneMatch === etag) {
-        return new NextResponse(null, { status: 304, headers: { ETag: etag } })
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+      try {
+        const users = (await Promise.race([
+          prisma.user.findMany({
+            where: tenantFilter(tenantId),
+            orderBy: { createdAt: 'desc' },
+            take: 100,
+            select: { id: true, name: true, email: true, role: true, createdAt: true }
+          }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Query timeout')), 5000)
+          )
+        ])) || []
+        clearTimeout(timeoutId)
+
+        const mapped = (Array.isArray(users) ? users : []).map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, createdAt: u.createdAt, totalBookings: 0 }))
+        const etag = '"' + createHash('sha1').update(JSON.stringify({ t: mapped.length, ids: mapped.map(u=>u.id), up: mapped.map(u=>u.createdAt) })).digest('hex') + '"'
+        const ifNoneMatch = request.headers.get('if-none-match')
+        if (ifNoneMatch && ifNoneMatch === etag) {
+          return new NextResponse(null, { status: 304, headers: { ETag: etag } })
+        }
+        return NextResponse.json({ users: mapped }, { headers: { ETag: etag, 'Cache-Control': 'private, max-age=60' } })
+      } catch (e: any) {
+        clearTimeout(timeoutId)
+        throw e
       }
-      return NextResponse.json({ users: mapped }, { headers: { ETag: etag, 'Cache-Control': 'private, max-age=60' } })
     } catch (e: any) {
       const code = String(e?.code || '')
-      if (code.startsWith('P20') || /relation|table|column/i.test(String(e?.message || ''))) {
+      const msg = String(e?.message || '')
+      if (code.startsWith('P20') || msg.includes('timeout') || /relation|table|column/i.test(msg)) {
         const fallback = [
-          { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
-          { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-          { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
+          { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString(), totalBookings: 0 },
+          { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString(), totalBookings: 0 },
+          { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString(), totalBookings: 0 },
         ]
         return NextResponse.json({ users: fallback })
       }
