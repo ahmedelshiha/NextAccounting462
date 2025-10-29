@@ -81,13 +81,7 @@ export const GET = withTenantContext(async (request: NextRequest) => {
       growth: Math.round(growth * 100) / 100,
       activeUsers: usersWithRecentBookings,
       registrationTrends,
-      topUsers: topUsers.map((user) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        bookingsCount: user._count.bookings,
-        createdAt: user.createdAt
-      })),
+      topUsers,
       range: ranged
     })
   } catch (error) {
