@@ -28,6 +28,8 @@ const ROLE_LABELS: Record<UserRole, string> = {
 
 const ROLES: UserRole[] = ['SUPER_ADMIN', 'ADMIN', 'TEAM_LEAD', 'TEAM_MEMBER', 'STAFF', 'CLIENT']
 
+type SecurityBoolKey = 'requireSSL' | 'httpOnlyTokens' | 'resetTokensOnPasswordChange' | 'invalidateOnPermissionChange' | 'regenerateSessionIdOnLogin'
+
 export function SessionManagement({
   config,
   isLoading,
@@ -86,7 +88,7 @@ export function SessionManagement({
   )
 
   const handleToggleSecurity = useCallback(
-    async (field: string, value: boolean) => {
+    async (field: SecurityBoolKey, value: boolean) => {
       if (!config) return
 
       try {
@@ -323,18 +325,20 @@ export function SessionManagement({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {[
-            { label: 'Require SSL/HTTPS', key: 'requireSSL' },
-            { label: 'HTTP-Only Tokens', key: 'httpOnlyTokens' },
-            { label: 'Reset Tokens on Password Change', key: 'resetTokensOnPasswordChange' },
-            { label: 'Invalidate on Permission Change', key: 'invalidateOnPermissionChange' },
-            { label: 'Regenerate Session ID on Login', key: 'regenerateSessionIdOnLogin' }
-          ].map((item) => (
+          {(
+            [
+              { label: 'Require SSL/HTTPS', key: 'requireSSL' },
+              { label: 'HTTP-Only Tokens', key: 'httpOnlyTokens' },
+              { label: 'Reset Tokens on Password Change', key: 'resetTokensOnPasswordChange' },
+              { label: 'Invalidate on Permission Change', key: 'invalidateOnPermissionChange' },
+              { label: 'Regenerate Session ID on Login', key: 'regenerateSessionIdOnLogin' },
+            ] as { label: string; key: SecurityBoolKey }[]
+          ).map((item) => (
             <div key={item.key} className="flex items-center justify-between p-3 border rounded">
               <Label htmlFor={item.key}>{item.label}</Label>
               <Switch
                 id={item.key}
-                checked={config.security[item.key as keyof typeof config.security]}
+                checked={config.security[item.key]}
                 onCheckedChange={(value) => handleToggleSecurity(item.key, value)}
                 disabled={isSaving}
               />
