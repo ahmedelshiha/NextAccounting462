@@ -24,30 +24,49 @@ export const GET = withTenantContext(async (request: NextRequest) => {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-    const total = await prisma.user.count({ where: tenantFilter(tenantId) })
+    let timeoutId: NodeJS.Timeout | null = null
+    const queryCompleted = { value: false }
 
-    const [clients, teamMembers, teamLeads, admins] = await Promise.all([
+    const statsPromise = Promise.all([
+      prisma.user.count({ where: tenantFilter(tenantId) }),
       prisma.user.count({ where: { ...tenantFilter(tenantId), role: 'CLIENT' } }),
       prisma.user.count({ where: { ...tenantFilter(tenantId), role: 'TEAM_MEMBER' } }),
       prisma.user.count({ where: { ...tenantFilter(tenantId), role: 'TEAM_LEAD' } }),
-      prisma.user.count({ where: { ...tenantFilter(tenantId), role: 'ADMIN' } })
-    ])
+      prisma.user.count({ where: { ...tenantFilter(tenantId), role: 'ADMIN' } }),
+      prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: startOfMonth } } }),
+      prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } } }),
+      prisma.user.count({ where: { ...tenantFilter(tenantId), bookings: { some: { createdAt: { gte: thirtyDaysAgo } } } } }),
+      prisma.user.findMany({
+        where: { ...tenantFilter(tenantId), role: 'CLIENT' },
+        select: { id: true, name: true, email: true, createdAt: true, _count: { select: { bookings: true } } },
+        orderBy: { bookings: { _count: 'desc' } },
+        take: 5
+      })
+    ]).then(([total, clients, teamMembers, teamLeads, admins, newThisMonth, newLastMonth, activeUsers, topUsers]) => {
+      queryCompleted.value = true
+      if (timeoutId) clearTimeout(timeoutId)
+      return { total, clients, teamMembers, teamLeads, admins, newThisMonth, newLastMonth, activeUsers, topUsers }
+    }).catch(err => {
+      queryCompleted.value = true
+      if (timeoutId) clearTimeout(timeoutId)
+      throw err
+    })
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        if (!queryCompleted.value) {
+          reject(new Error('Stats query timeout after 5 seconds'))
+        }
+      }, 5000)
+    })
+
+    const { total, clients, teamMembers, teamLeads, admins, newThisMonth, newLastMonth, activeUsers, topUsers } =
+      await Promise.race([statsPromise, timeoutPromise])
+
     const staff = teamMembers + teamLeads
-
-    const newThisMonth = await prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: startOfMonth } } })
-
-    const newLastMonth = await prisma.user.count({
-      where: { ...tenantFilter(tenantId), createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } }
-    })
-
     const growth = newLastMonth > 0 ? ((newThisMonth - newLastMonth) / newLastMonth) * 100 : 0
-
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-
-    const usersWithRecentBookings = await prisma.user.count({
-      where: { ...tenantFilter(tenantId), bookings: { some: { createdAt: { gte: thirtyDaysAgo } } } }
-    })
 
     const registrationTrends: Array<{ month: string; count: number }> = []
     for (let i = 5; i >= 0; i--) {
@@ -64,19 +83,14 @@ export const GET = withTenantContext(async (request: NextRequest) => {
       })
     }
 
-    const topUsers = (await prisma.user.findMany({
-      where: { ...tenantFilter(tenantId), role: 'CLIENT' },
-      include: { _count: { select: { bookings: true } } },
-      orderBy: { bookings: { _count: 'desc' } },
-      take: 5
-    })) as Array<import('@prisma/client').User & { _count: { bookings: number } }>
-
     let ranged: { range?: string; newUsers?: number; growth?: number } = {}
     if (days > 0) {
       const start = new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
       const prevStart = new Date(start.getTime() - days * 24 * 60 * 60 * 1000)
-      const inRange = await prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: start } } })
-      const prevRange = await prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: prevStart, lt: start } } })
+      const [inRange, prevRange] = await Promise.all([
+        prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: start } } }),
+        prisma.user.count({ where: { ...tenantFilter(tenantId), createdAt: { gte: prevStart, lt: start } } })
+      ])
       const growthRange = prevRange > 0 ? ((inRange - prevRange) / prevRange) * 100 : 0
       ranged = { range: rangeParam, newUsers: inRange, growth: Math.round(growthRange * 100) / 100 }
     }
@@ -89,16 +103,18 @@ export const GET = withTenantContext(async (request: NextRequest) => {
       newThisMonth,
       newLastMonth,
       growth: Math.round(growth * 100) / 100,
-      activeUsers: usersWithRecentBookings,
+      activeUsers,
       registrationTrends,
-      topUsers: topUsers.map((user) => ({
+      topUsers: (topUsers as any[]).map((user) => ({
         id: user.id,
         name: user.name,
         email: user.email,
-        bookingsCount: user._count.bookings,
+        bookingsCount: user._count?.bookings ?? 0,
         createdAt: user.createdAt
       })),
       range: ranged
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=120' }
     })
   } catch (error) {
     console.error('Error fetching user statistics:', error)
