@@ -151,9 +151,9 @@ export const GET = withTenantContext(async (request: Request) => {
   } catch (error) {
     console.error('Error fetching users:', error)
     const fallback = [
-      { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString(), lastLoginAt: null, isActive: true },
-      { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString(), lastLoginAt: null, isActive: true },
-      { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString(), lastLoginAt: null, isActive: true }
+      { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
+      { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
+      { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() }
     ]
     return NextResponse.json({
       users: fallback,
