@@ -62,7 +62,7 @@ export const SettingsTab = memo(function SettingsTab({ user }: SettingsTabProps)
           <h3 className="font-semibold text-gray-900">Two-Factor Authentication</h3>
         </div>
         <p className="text-sm text-gray-600">
-          Require two-factor authentication for this user's account.
+          Require two-factor authentication for this user&apos;s account.
         </p>
         <Button variant="outline" disabled className="w-full">
           Configure 2FA
