@@ -190,7 +190,7 @@ export function OnboardingWorkflows({
               <p className="font-semibold mb-2">Auto-assignment is enabled</p>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 {config.autoAssignment.assignToManager && (
-                  <li>Assign new users to their inviter's manager</li>
+                  <li>Assign new users to their inviter&apos;s manager</li>
                 )}
                 {config.autoAssignment.departmentFromInviter && (
                   <li>Assign department from inviting user</li>
