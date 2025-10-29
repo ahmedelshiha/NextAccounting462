@@ -26,43 +26,6 @@ export const GET = withTenantContext(async (request: Request) => {
     if (!ctx.userId) return respond.unauthorized()
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
 
-    let useFallback = false
-    try {
-      // Health check with aggressive timeout to prevent hanging
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 2000)
-
-      try {
-        await Promise.race([
-          queryTenantRaw`SELECT 1`,
-          new Promise((_, reject) => {
-            abortController.signal.addEventListener('abort', () => {
-              reject(new Error('Database health check timeout'))
-            })
-          })
-        ])
-      } finally {
-        clearTimeout(timeoutId)
-      }
-    } catch (e: any) {
-      const code = String(e?.code || '')
-      const message = String(e?.message || '')
-      if (code.startsWith('P10') || /timeout|abort/i.test(message)) {
-        useFallback = true
-      }
-    }
-    if (useFallback) {
-      const fallback = [
-        { id: 'demo-admin', name: 'Admin User', email: 'admin@accountingfirm.com', role: 'ADMIN', createdAt: new Date().toISOString() },
-        { id: 'demo-staff', name: 'Staff Member', email: 'staff@accountingfirm.com', role: 'STAFF', createdAt: new Date().toISOString() },
-        { id: 'demo-client', name: 'John Smith', email: 'john@example.com', role: 'CLIENT', createdAt: new Date().toISOString() },
-      ]
-      return NextResponse.json({
-        users: fallback,
-        pagination: { page: 1, limit: 50, total: 3, pages: 1 }
-      })
-    }
-
     try {
       // Parse pagination parameters
       const { searchParams } = new URL(request.url)
