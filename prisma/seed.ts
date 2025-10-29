@@ -165,7 +165,7 @@ async function main() {
     where: { tenantId: defaultTenant.id },
     update: {
       projectId: 'demo-accounting-project',
-      apiTokenMasked: '****sk_live_**demo**token****',
+      apiTokenMasked: '****demo-token',
       autoSyncDaily: true,
       syncOnDeploy: false,
       createPrs: true,
@@ -176,8 +176,8 @@ async function main() {
     create: {
       tenantId: defaultTenant.id,
       projectId: 'demo-accounting-project',
-      apiTokenMasked: '****sk_live_**demo**token****',
-      apiTokenEncrypted: 'demo-encrypted-token-placeholder',
+      apiTokenMasked: '****demo-token',
+      apiTokenEncrypted: 'demo-encrypted-token',
       autoSyncDaily: true,
       syncOnDeploy: false,
       createPrs: true,
