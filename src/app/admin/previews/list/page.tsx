@@ -1,11 +1,11 @@
-"use client"
-
+import { getSessionOrBypass } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 import ListPage from '@/components/dashboard/templates/ListPage'
 import type { Column, RowAction, TabItem, FilterConfig } from '@/types/dashboard'
 
 interface Row { id: number; name: string; status: string; amount: number }
 
-export default function ListPagePreview() {
+export default async function ListPagePreview() {
   const columns: Column<Row>[] = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'status', label: 'Status', sortable: true },
@@ -37,6 +37,10 @@ export default function ListPagePreview() {
   if (!enabled) {
     return <div className="p-6 text-sm text-gray-600">Previews are disabled in production.</div>
   }
+  const session = await getSessionOrBypass()
+  if (!session?.user) { redirect('/login') }
+  const role = (session.user as any)?.role as string | undefined
+  if (!['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF'].includes(role || '')) { redirect('/admin') }
   return (
     <ListPage<Row>
       title="List Template Preview"
