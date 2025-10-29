@@ -1223,11 +1223,22 @@ Effective cash flow management requires ongoing attention and planning. Regular 
     const invoiceCreatedAt = new Date(now)
     invoiceCreatedAt.setDate(invoiceCreatedAt.getDate() - i * 5)
 
+    const invoiceNumber = `INV-${1000 + i}`
+
+    // Check if invoice already exists
+    const existingInvoice = await prisma.invoice.findUnique({
+      where: { number: invoiceNumber },
+    })
+
+    if (existingInvoice) {
+      continue
+    }
+
     const invoice = await prisma.invoice.create({
       data: {
         tenantId: defaultTenant.id,
         clientId: i % 2 === 0 ? client1.id : client2.id,
-        number: `INV-${1000 + i}`,
+        number: invoiceNumber,
         status: invoiceStatuses[i % invoiceStatuses.length] as any,
         currency: 'USD',
         totalCents: (500 + i * 100) * 100,
