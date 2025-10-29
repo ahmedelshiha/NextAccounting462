@@ -93,7 +93,7 @@ export const GET = withTenantContext(async (request: Request) => {
       if (queryError) throw queryError
 
       // If query succeeded, use the data
-      const { total, users } = queryData
+      const { total, users } = queryData as { total: number; users: Array<{ id: string; name: string | null; email: string; role: string; createdAt: Date; updatedAt: Date | null }> }
 
       // Map users to response format
       const mapped = users.map((user) => ({
