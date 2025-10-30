@@ -25,7 +25,7 @@ export const GET = withTenantContext(async (request: NextRequest) => {
 
     // Determine role from tenant context when available
     const role = tenantContext.getContextOrNull()?.role ?? null
-    if (!role || !['ADMIN', 'STAFF'].includes(role)) {
+    if (!role || !hasRole(role, ['ADMIN', 'STAFF'])) {
       where.published = true
     } else if (published !== null) {
       where.published = published === 'true'
