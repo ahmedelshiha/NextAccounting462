@@ -192,7 +192,7 @@ export function Navigation({ orgName = 'Accounting Firm', orgLogoUrl }: { orgNam
                             Settings
                           </Link>
                         </DropdownMenuItem>
-                        {hasRole((session?.user?.role as string, ['ADMIN', 'TEAM_LEAD', 'TEAM_MEMBER']) || '') && (
+                        {hasRole(((session?.user?.role as string) || ''), ['ADMIN', 'TEAM_LEAD', 'TEAM_MEMBER']) && (
                           <>
                             <DropdownMenuItem asChild>
                               <Link href="/admin" className="flex items-center">
@@ -304,7 +304,7 @@ export function Navigation({ orgName = 'Accounting Firm', orgLogoUrl }: { orgNam
                         >
                           Settings
                         </Link>
-                        {hasRole((session?.user?.role as string, ['ADMIN', 'TEAM_LEAD', 'TEAM_MEMBER']) || '') && (
+                        {hasRole(((session?.user?.role as string) || ''), ['ADMIN', 'TEAM_LEAD', 'TEAM_MEMBER']) && (
                           <>
                             <Link
                               href="/admin"
