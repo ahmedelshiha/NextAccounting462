@@ -85,6 +85,8 @@ export async function fetchUsersServerSide(
       status: 'ACTIVE' as const
     }))
 
+    console.log(`[fetchUsersServerSide] Successfully fetched ${mapped.length} users for tenant ${tenantId}`)
+
     return {
       users: mapped,
       total,
