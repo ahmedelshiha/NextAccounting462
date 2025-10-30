@@ -16,7 +16,7 @@ export const GET = withTenantContext(async (request: NextRequest, context: { par
     const where: Prisma.PostWhereInput = { slug, ...(tenantFilter(tenantId) as any) }
 
     const role = tenantContext.getContextOrNull()?.role ?? null
-    if (!role || !['ADMIN', 'STAFF'].includes(role)) {
+    if (!role || !hasRole(role, ['ADMIN', 'STAFF'])) {
       where.published = true
     }
 
