@@ -118,7 +118,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchPerm
     // Check for permission escalation
     const adminPermissions = getRolePermissions(user.role)
     if (permissionChanges?.added) {
-      if (user.role !== 'SUPER_ADMIN') {
+      if (!hasRole(user.role, ['SUPER_ADMIN'])) {
         const unauthorized = permissionChanges.added.filter(
           p => !adminPermissions.includes(p as any)
         )
