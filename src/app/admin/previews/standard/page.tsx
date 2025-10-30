@@ -28,7 +28,7 @@ export default async function StandardPagePreview() {
   const session = await getSessionOrBypass()
   if (!session?.user) { redirect('/login') }
   const role = (session.user as any)?.role as string | undefined
-  if (!['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF'].includes(role || '')) { redirect('/admin') }
+  if (!hasRole(role || '', ['ADMIN', 'TEAM_LEAD', 'SUPER_ADMIN', 'STAFF'])) { redirect('/admin') }
   return (
     <StandardPage
       title="Standard Template Preview"

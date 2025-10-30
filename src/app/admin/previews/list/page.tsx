@@ -40,7 +40,7 @@ export default async function ListPagePreview() {
   const session = await getSessionOrBypass()
   if (!session?.user) { redirect('/login') }
   const role = (session.user as any)?.role as string | undefined
-  if (!['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF'].includes(role || '')) { redirect('/admin') }
+  if (!hasRole(role || '', ['ADMIN', 'TEAM_LEAD', 'SUPER_ADMIN', 'STAFF'])) { redirect('/admin') }
   return (
     <ListPage<Row>
       title="List Template Preview"

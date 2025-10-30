@@ -441,7 +441,7 @@ function useAssignees() {
             const usersJson = await resUsers.json().catch(() => ({}))
             const users = Array.isArray(usersJson) ? usersJson : (usersJson?.users || [])
             mapped = users
-              .filter((u: any) => ['ADMIN','STAFF'].includes(String(u.role || '').toUpperCase()))
+              .filter((u: any) => hasRole(String(u.role || '', ['ADMIN', 'STAFF']).toUpperCase()))
               .map((u: any) => ({ id: u.id, name: u.name || u.email || 'User', email: u.email || '', role: u.role || 'STAFF' }))
           } catch {}
         }

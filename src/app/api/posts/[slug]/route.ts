@@ -45,7 +45,7 @@ export const GET = withTenantContext(async (request: NextRequest, context: { par
 export const PUT = withTenantContext(async (request: NextRequest, context: { params: Promise<{ slug: string }> }) => {
   try {
     const ctx = requireTenantContext()
-    if (!['ADMIN', 'STAFF'].includes(String(ctx.role || ''))) {
+    if (!hasRole(String(ctx.role || '', ['ADMIN', 'STAFF']))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

@@ -209,7 +209,7 @@ export function withTenantContext(
         )
       }
 
-      if (requireTenantAdmin && !['OWNER', 'ADMIN'].includes(user.tenantRole)) {
+      if (requireTenantAdmin && !hasRole(user.tenantRole, ['OWNER', 'ADMIN'])) {
         return attachRequestId(
           NextResponse.json(
             { error: 'Forbidden', message: 'Tenant admin access required' },
