@@ -85,32 +85,38 @@ export async function fetchPendingOperations(
 
 /**
  * Get metrics about operations
- * 
- * TODO: Replace with real API call to /api/admin/operations-metrics
+ *
+ * Calculates metrics from pending operations data
+ * In Phase 4b, this will be replaced with dedicated metrics API
  */
 export async function fetchOperationsMetrics(
   tenantId: string,
   userCount: number
 ): Promise<OperationsMetrics> {
   try {
-    const response = await fetch(`/api/admin/operations-metrics`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+    // Fetch pending operations to calculate metrics
+    const operations = await fetchPendingOperations(tenantId, { limit: 100 })
+
+    // Calculate metrics from operations
+    const pendingOps = operations.filter(op => op.status === 'pending')
+    const inProgressOps = operations.filter(op => op.status === 'in-progress')
+    const dueOps = operations.filter(op => {
+      if (!op.dueDate) return false
+      const dueDate = new Date(op.dueDate)
+      const weekFromNow = new Date()
+      weekFromNow.setDate(weekFromNow.getDate() + 7)
+      return dueDate <= weekFromNow
     })
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return getMockMetrics(userCount)
-      }
-      throw new Error(`Failed to fetch metrics: ${response.statusText}`)
+    return {
+      totalUsers: userCount,
+      pendingApprovals: pendingOps.length,
+      inProgressWorkflows: inProgressOps.length,
+      dueThisWeek: dueOps.length
     }
-
-    const data = await response.json()
-    return data.metrics || getMockMetrics(userCount)
   } catch (error) {
-    console.warn('Operations metrics API error:', error)
+    console.warn('Failed to calculate operations metrics:', error)
+    // Return computed metrics as fallback
     return getMockMetrics(userCount)
   }
 }
