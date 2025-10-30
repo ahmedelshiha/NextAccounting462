@@ -222,6 +222,19 @@ Week 5+:   ⏳ Phase 4 - Awaiting Approval
 
 ## 📁 All Related Files
 
+### Navigation & Reference
+- [`docs/ADMIN_USERS_INDEX.md`](./ADMIN_USERS_INDEX.md) ⭐ **START HERE**
+  - Complete documentation index
+  - Organized by purpose and audience
+  - Quick links to all 8 documents
+  - Used for: Finding what you need quickly
+
+- [`docs/ADMIN_USERS_QUICK_REFERENCE.md`](./ADMIN_USERS_QUICK_REFERENCE.md)
+  - Quick reference guide organized by role
+  - "I need to..." quick access
+  - Document summary table
+  - Used for: Quick guidance by role
+
 ### Current State Analysis
 - [`docs/ADMIN_USERS_PAGE_CRITICAL_AUDIT.md`](./ADMIN_USERS_PAGE_CRITICAL_AUDIT.md)
   - Root cause analysis of the bug
