@@ -1,12 +1,21 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { QuickActionsBar } from '../QuickActionsBar'
 import { OperationsOverviewCards, OperationsMetrics } from '../OperationsOverviewCards'
 import { PendingOperationsPanel, PendingOperation } from '../PendingOperationsPanel'
 import { AdvancedUserFilters, UserFilters } from '../AdvancedUserFilters'
 import { UsersTable } from '../UsersTable'
 import { UserItem } from '../contexts/UsersContextProvider'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 interface DashboardTabProps {
   users: UserItem[]
