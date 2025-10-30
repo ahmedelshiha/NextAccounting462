@@ -118,7 +118,13 @@ export const UsersTable = memo(function UsersTable({
         className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm w-full"
       >
         <div className="flex items-center gap-4 min-w-0">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+          <Checkbox
+            checked={selectedUserIds.has(user.id)}
+            onCheckedChange={(checked) => handleSelectUser(user.id, checked === true)}
+            aria-label={`Select ${user.name || user.email}`}
+            className="shrink-0"
+          />
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shrink-0">
             {(user.name || user.email).charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
@@ -162,7 +168,7 @@ export const UsersTable = memo(function UsersTable({
         </div>
       </div>
     ),
-    [onViewProfile, perms.canManageUsers, handleRoleChange, isUpdating]
+    [onViewProfile, perms.canManageUsers, handleRoleChange, isUpdating, selectedUserIds, handleSelectUser]
   )
 
   return (
