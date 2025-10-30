@@ -1,9 +1,11 @@
 # Admin Users Page - Master Project File
 
-**Project Name:** Enterprise Admin Users Page Redesign & Fix  
-**Status:** 🟡 In Progress (Phase 1 & 2 Complete)  
-**Last Updated:** January 2025  
-**Project Owner:** Engineering Team  
+**Project Name:** Enterprise Admin Users Page Redesign & Fix
+**Status:** 🟡 In Progress (Phase 1 & 2 Complete)
+**Last Updated:** January 2025
+**Project Owner:** Engineering Team
+
+> **📌 New to this project?** Start with [README.md](./README.md) or [ADMIN_USERS_INDEX.md](./ADMIN_USERS_INDEX.md)
 
 ---
 
@@ -147,7 +149,7 @@ Next Step: Stakeholder review & approval (Week 3)
 ### Phase 4: Implementation (⏳ PENDING)
 
 ```
-[░░░░░░░░░░░░░░░░░░░░░░░░] 0%
+[░░░░░░░░��░░░░░░░░░░░░░░░] 0%
 
 Status: 🟡 Awaiting stakeholder approval
 
@@ -194,7 +196,7 @@ Total: 195 hours, 9 weeks
 
 ---
 
-## 🔄 Progress Timeline
+## �� Progress Timeline
 
 ```
 Week 1-2:  ✅ Phase 1 - Quick Fix
