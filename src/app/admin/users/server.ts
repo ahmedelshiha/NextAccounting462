@@ -114,13 +114,13 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
     const [total, active, admins, staffCount, clientCount, newThisMonth, newLastMonth] = await Promise.all([
       prisma.user.count({ where: tenantFilter(tenantId) }),
       prisma.user.count({
-        where: { ...tenantFilter(tenantId), status: { not: 'SUSPENDED' } }
+        where: { ...tenantFilter(tenantId), availabilityStatus: { not: 'UNAVAILABLE' } }
       }),
       prisma.user.count({
         where: { ...tenantFilter(tenantId), role: 'ADMIN' }
       }),
       prisma.user.count({
-        where: { ...tenantFilter(tenantId), role: 'STAFF' }
+        where: { ...tenantFilter(tenantId), role: 'TEAM_MEMBER' }
       }),
       prisma.user.count({
         where: { ...tenantFilter(tenantId), role: 'CLIENT' }
