@@ -3,6 +3,7 @@ import { tenantContext, TenantContext } from '@/lib/tenant-context'
 import { logger } from '@/lib/logger'
 import { verifyTenantCookie } from '@/lib/tenant-cookie'
 import { incrementMetric } from '@/lib/observability-helpers'
+import { hasRole } from '@/lib/permissions'
 
 /**
  * Safely read a cookie value from NextRequest or a request-like object.
