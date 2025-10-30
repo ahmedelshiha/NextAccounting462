@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('@/lib/prisma')
 (async ()=>{
   try{
     const u = await prisma.user.findFirst({ where: { email: 'superadmin@accountingfirm.com' } });
