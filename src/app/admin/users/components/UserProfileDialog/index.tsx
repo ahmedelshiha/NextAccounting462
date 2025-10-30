@@ -113,3 +113,5 @@ export const UserProfileDialog = memo(function UserProfileDialog({
 })
 
 UserProfileDialog.displayName = 'UserProfileDialog'
+
+export { UserProfileDialog }
