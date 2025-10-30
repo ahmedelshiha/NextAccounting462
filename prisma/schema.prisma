@@ -1498,6 +1498,150 @@ enum BookingStatus {
   CANCELLED
 }
 
+// Phase 4b Workflow Engine Enums
+enum WorkflowStatus {
+  DRAFT
+  PENDING
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum StepStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+enum WorkflowType {
+  ONBOARDING
+  OFFBOARDING
+  ROLE_CHANGE
+}
+
+// Phase 4b Workflow Engine Models
+model UserWorkflow {
+  id              String          @id @default(cuid())
+  tenantId        String
+  userId          String
+  type            WorkflowType
+  status          WorkflowStatus  @default(DRAFT)
+  triggeredBy     String
+  approvedBy      String?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  scheduledFor    DateTime?
+  totalSteps      Int
+  completedSteps  Int             @default(0)
+  progressPercent Int             @default(0)
+  errorMessage    String?
+  retryCount      Int             @default(0)
+  lastErrorAt     DateTime?
+  dueAt           DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  triggeredByUser User            @relation("WorkflowTriggeredBy", fields: [triggeredBy], references: [id])
+  approvedByUser  User?           @relation("WorkflowApprovedBy", fields: [approvedBy], references: [id])
+  steps           WorkflowStep[]
+  notifications   WorkflowNotification[]
+  history         WorkflowHistory[]
+
+  @@index([tenantId, status, createdAt])
+  @@index([userId, createdAt])
+  @@map("user_workflows")
+}
+
+model WorkflowStep {
+  id              String         @id @default(cuid())
+  workflowId      String
+  stepNumber      Int
+  name            String
+  description     String?
+  actionType      String
+  status          StepStatus     @default(PENDING)
+  config          Json?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  durationMs      Int?
+  errorMessage    String?
+  requiresApproval Boolean       @default(false)
+  approvedAt      DateTime?
+  approvedBy      String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  workflow        UserWorkflow   @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  approvedByUser  User?          @relation(fields: [approvedBy], references: [id])
+
+  @@index([workflowId, stepNumber])
+  @@index([status])
+  @@map("workflow_steps")
+}
+
+model WorkflowTemplate {
+  id               String        @id @default(cuid())
+  tenantId         String
+  name             String        @db.VarChar(100)
+  description      String?
+  type             WorkflowType
+  steps            Json
+  requiresApproval Boolean       @default(false)
+  approvalEmails   String[]
+  isActive         Boolean       @default(true)
+  createdBy        String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdByUser    User          @relation(fields: [createdBy], references: [id])
+
+  @@index([tenantId, isActive])
+  @@unique([tenantId, name])
+  @@map("workflow_templates")
+}
+
+model WorkflowNotification {
+  id           String        @id @default(cuid())
+  workflowId   String
+  emailTo      String
+  emailSubject String
+  emailBody    String
+  status       String        @default("PENDING")
+  sentAt       DateTime?
+  errorMessage String?
+  createdAt    DateTime      @default(now())
+
+  workflow     UserWorkflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId, createdAt])
+  @@map("workflow_notifications")
+}
+
+model WorkflowHistory {
+  id               String        @id @default(cuid())
+  workflowId       String
+  eventType        String
+  eventDescription String?
+  changedBy        String
+  oldValue         Json?
+  newValue         Json?
+  createdAt        DateTime      @default(now())
+
+  workflow         UserWorkflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  changedByUser    User          @relation(fields: [changedBy], references: [id])
+
+  @@index([workflowId, createdAt])
+  @@map("workflow_history")
+}
+
 enum TaskPriority {
   LOW
   MEDIUM
