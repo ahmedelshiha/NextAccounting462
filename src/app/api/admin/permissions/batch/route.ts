@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { PermissionEngine, ValidationError } from '@/lib/permission-engine'
-import { PERMISSIONS, getRolePermissions, Permission } from '@/lib/permissions'
+import { PERMISSIONS, getRolePermissions, Permission, hasRole } from '@/lib/permissions'
 
 /**
  * Request body for batch permission update
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchPerm
       select: { role: true, tenantId: true },
     })
 
-    if (!user || !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+    if (!user || !hasRole(user.role, ['ADMIN','SUPER_ADMIN'])) {
       return NextResponse.json(
         { error: 'Forbidden: Only admins can modify permissions', success: false },
         { status: 403 }
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchPerm
     // Check for permission escalation
     const adminPermissions = getRolePermissions(user.role)
     if (permissionChanges?.added) {
-      if (user.role !== 'SUPER_ADMIN') {
+      if (!hasRole(user.role, ['SUPER_ADMIN'])) {
         const unauthorized = permissionChanges.added.filter(
           p => !adminPermissions.includes(p as any)
         )

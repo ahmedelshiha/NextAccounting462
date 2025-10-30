@@ -2,9 +2,11 @@
 
 import prisma from '@/lib/prisma'
 import { requireTenantContext } from '@/lib/tenant-utils'
+import { tenantContext } from '@/lib/tenant-context'
 import { hasPermission, PERMISSIONS } from '@/lib/permissions'
 import { tenantFilter } from '@/lib/tenant'
 import { UserItem, UserStats } from './contexts/UsersContextProvider'
+import { AvailabilityStatus } from '@prisma/client'
 
 /**
  * ✅ Server-side Data Fetching for Admin Users Page
@@ -27,8 +29,16 @@ export async function fetchUsersServerSide(
   limit: number = 50
 ): Promise<{ users: UserItem[]; total: number; page: number; limit: number }> {
   try {
-    const ctx = requireTenantContext()
-    if (!ctx.userId) throw new Error('Unauthorized')
+    const ctx = tenantContext.getContextOrNull()
+    if (!ctx || !ctx.userId) {
+      // No tenant context available during static generation/build — return empty result
+      return {
+        users: [],
+        total: 0,
+        page: 1,
+        limit: 50
+      }
+    }
     
     const role = ctx.role as string
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
@@ -74,7 +84,7 @@ export async function fetchUsersServerSide(
       role: (user.role as 'ADMIN' | 'TEAM_MEMBER' | 'TEAM_LEAD' | 'STAFF' | 'CLIENT') || 'TEAM_MEMBER',
       createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : String(user.createdAt),
       lastLoginAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : String(user.updatedAt),
-      isActive: user.availabilityStatus !== 'UNAVAILABLE',
+      isActive: user.availabilityStatus === AvailabilityStatus.AVAILABLE,
       avatar: user.image || undefined,
       company: user.department || undefined,
       location: user.position || undefined,
@@ -105,8 +115,22 @@ export async function fetchUsersServerSide(
  */
 export async function fetchStatsServerSide(): Promise<UserStats> {
   try {
-    const ctx = requireTenantContext()
-    if (!ctx.userId) throw new Error('Unauthorized')
+    const ctx = tenantContext.getContextOrNull()
+    if (!ctx || !ctx.userId) {
+      // No tenant context available during static generation/build — return empty stats
+      return {
+        total: 0,
+        clients: 0,
+        staff: 0,
+        admins: 0,
+        newThisMonth: 0,
+        newLastMonth: 0,
+        growth: 0,
+        activeUsers: 0,
+        registrationTrends: [],
+        topUsers: []
+      }
+    }
 
     const tenantId = ctx.tenantId
 
@@ -114,7 +138,7 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
     const [total, active, admins, staffCount, clientCount, newThisMonth, newLastMonth] = await Promise.all([
       prisma.user.count({ where: tenantFilter(tenantId) }),
       prisma.user.count({
-        where: { ...tenantFilter(tenantId), availabilityStatus: { not: 'UNAVAILABLE' } }
+        where: { ...tenantFilter(tenantId), availabilityStatus: AvailabilityStatus.AVAILABLE }
       }),
       prisma.user.count({
         where: { ...tenantFilter(tenantId), role: 'ADMIN' }
@@ -183,8 +207,11 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
  */
 export async function fetchUserActivityServerSide(userId: string) {
   try {
-    const ctx = requireTenantContext()
-    if (!ctx.userId) throw new Error('Unauthorized')
+    const ctx = tenantContext.getContextOrNull()
+    if (!ctx || !ctx.userId) {
+      // No tenant context available — return empty activity
+      return []
+    }
 
     // TODO: Implement activity log fetching based on your database schema
     // For now, return empty array
