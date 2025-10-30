@@ -1,8 +1,10 @@
 # Enterprise Admin Users Page - Redesign Proposal
 
-**Version:** 2.0 - Enterprise Operations Focus  
-**Target:** Oracle/SAP-grade user management system  
-**Focus:** Operations & Workflows (NOT KPIs)  
+> **📌 Part of:** [ADMIN_USERS_PROJECT_MASTER.md](./ADMIN_USERS_PROJECT_MASTER.md) - Feature specifications and design reference
+
+**Version:** 2.0 - Enterprise Operations Focus
+**Target:** Oracle/SAP-grade user management system
+**Focus:** Operations & Workflows (NOT KPIs)
 **Timeline:** 10-15 development hours  
 
 ---
