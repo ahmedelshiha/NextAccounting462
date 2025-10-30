@@ -54,12 +54,11 @@ export async function fetchUsersServerSide(
           role: true,
           createdAt: true,
           updatedAt: true,
-          status: true,
-          phone: true,
-          company: true,
-          location: true,
-          avatar: true,
-          notes: true
+          image: true,
+          department: true,
+          position: true,
+          employeeId: true,
+          availabilityStatus: true
         },
         skip,
         take: validLimit,
@@ -75,13 +74,11 @@ export async function fetchUsersServerSide(
       role: (user.role as 'ADMIN' | 'TEAM_MEMBER' | 'TEAM_LEAD' | 'STAFF' | 'CLIENT') || 'TEAM_MEMBER',
       createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : String(user.createdAt),
       lastLoginAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : String(user.updatedAt),
-      isActive: (user.status as any) !== 'SUSPENDED',
-      phone: user.phone || undefined,
-      company: user.company || undefined,
-      location: user.location || undefined,
-      avatar: user.avatar || undefined,
-      notes: user.notes || undefined,
-      status: (user.status as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | undefined) || 'ACTIVE'
+      isActive: user.availabilityStatus !== 'UNAVAILABLE',
+      avatar: user.image || undefined,
+      company: user.department || undefined,
+      location: user.position || undefined,
+      status: 'ACTIVE' as const
     }))
 
     return {
