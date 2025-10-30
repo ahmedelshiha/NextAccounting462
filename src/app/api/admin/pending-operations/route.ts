@@ -266,6 +266,6 @@ export const POST = withTenantContext(async (request: Request) => {
     return respond.badRequest('Invalid action')
   } catch (error) {
     console.error('Error handling operation action:', error)
-    return respond.internalError('Failed to handle operation')
+    return respond.serverError('Failed to handle operation')
   }
 })
