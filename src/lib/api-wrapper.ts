@@ -290,7 +290,7 @@ export function withTenantContext(
         userEmail: (user.email as string | undefined) ?? null,
         role: user.role ?? null,
         tenantRole: user.tenantRole ?? null,
-        isSuperAdmin: user.role === 'SUPER_ADMIN',
+        isSuperAdmin: (function(){ try{ return String(user.role).toUpperCase() === 'SUPER_ADMIN' }catch{return false}})(),
         requestId,
         timestamp: new Date(),
       }
