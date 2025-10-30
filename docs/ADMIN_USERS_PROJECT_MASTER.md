@@ -68,7 +68,7 @@ This is the master hub for tracking the Admin Users Page project. Use this file 
   - ✅ E2E test suite for Phase 4a
   - ✅ A11y test suite for accessibility validation
   - ✅ Comprehensive documentation and guides
-- **Next Steps:** Proceed with Phase 4b (Workflow Engine - 50 hours) implementation
+- **Next Steps:** Phase 4b (Workflow Engine - 50 hours) in progress — DB schema, services, and API routes implemented; proceeding with UI and tests
 
 ### Critical Information (Reference)
 - **Document:** [ADMIN_USERS_PAGE_CRITICAL_AUDIT.md](./ADMIN_USERS_PAGE_CRITICAL_AUDIT.md)
@@ -733,7 +733,7 @@ If NO: Maintain current state, revisit in Q2 2025
 
 ---
 
-## ✋ Need Help?
+## �� Need Help?
 
 ### Quick Questions?
 - **Quick Fix Issues:** See [ADMIN_USERS_QUICK_FIX_IMPLEMENTATION.md](./ADMIN_USERS_QUICK_FIX_IMPLEMENTATION.md) → Debugging Checklist
