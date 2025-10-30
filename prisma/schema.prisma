@@ -77,6 +77,12 @@ model User {
   manager                   User?                   @relation("ManagerEmployee", fields: [managerId], references: [id])
   employees                 User[]                  @relation("ManagerEmployee")
   tenant                    Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workflowsAsUser           UserWorkflow[]          @relation("WorkflowUser")
+  workflowsTriggered        UserWorkflow[]          @relation("WorkflowTriggeredBy")
+  workflowsApproved         UserWorkflow[]          @relation("WorkflowApprovedBy")
+  workflowStepsApproved     WorkflowStep[]
+  workflowTemplatesCreated  WorkflowTemplate[]
+  workflowHistoryChanges    WorkflowHistory[]
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
