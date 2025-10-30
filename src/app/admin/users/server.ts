@@ -26,12 +26,13 @@ import { AvailabilityStatus } from '@prisma/client'
  */
 export async function fetchUsersServerSide(
   page: number = 1,
-  limit: number = 50
+  limit: number = 50,
+  tenantId: string
 ): Promise<{ users: UserItem[]; total: number; page: number; limit: number }> {
   try {
-    const ctx = tenantContext.getContextOrNull()
-    if (!ctx || !ctx.userId) {
-      // No tenant context available during static generation/build — return empty result
+    // ✅ FIXED: Validate tenantId directly instead of using tenantContext
+    if (!tenantId) {
+      console.error('fetchUsersServerSide: tenantId is required')
       return {
         users: [],
         total: 0,
@@ -39,13 +40,6 @@ export async function fetchUsersServerSide(
         limit: 50
       }
     }
-    
-    const role = ctx.role as string
-    if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
-      throw new Error('Forbidden: You do not have permission to view users')
-    }
-
-    const tenantId = ctx.tenantId
 
     // Validate pagination
     const validPage = Math.max(1, page)
