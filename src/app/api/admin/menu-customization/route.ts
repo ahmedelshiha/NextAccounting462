@@ -36,7 +36,7 @@ const _api_GET = async (request: NextRequest): Promise<NextResponse> => {
 
     // Server-side guard: allow only admin/staff roles or super admin
     const role = ctx.role ?? ''
-    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+    if (!(hasRole(role, ALLOWED_ADMIN_ROLES) || ctx.isSuperAdmin)) {
       return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
     }
 
@@ -92,7 +92,7 @@ const _api_POST = async (request: NextRequest): Promise<NextResponse> => {
 
     // Server-side guard: allow only admin/staff roles or super admin
     const role = ctx.role ?? ''
-    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+    if (!(hasRole(role, ALLOWED_ADMIN_ROLES) || ctx.isSuperAdmin)) {
       return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
     }
 
@@ -181,7 +181,7 @@ const _api_DELETE = async (request: NextRequest): Promise<NextResponse> => {
 
     // Server-side guard: allow only admin/staff roles or super admin
     const role = ctx.role ?? ''
-    if (!(ALLOWED_ADMIN_ROLES.includes(role) || ctx.isSuperAdmin)) {
+    if (!(hasRole(role, ALLOWED_ADMIN_ROLES) || ctx.isSuperAdmin)) {
       return NextResponse.json({ error: 'Forbidden', message: 'Insufficient permissions' }, { status: 403 })
     }
 
