@@ -15,6 +15,9 @@ interface UsersTableProps {
   onViewProfile: (user: UserItem) => void
   onRoleChange?: (userId: string, role: UserItem['role']) => Promise<void>
   isUpdating?: boolean
+  selectedUserIds?: Set<string>
+  onSelectUser?: (userId: string, selected: boolean) => void
+  onSelectAll?: (selected: boolean) => void
 }
 
 const UserRowSkeleton = memo(function UserRowSkeleton() {
