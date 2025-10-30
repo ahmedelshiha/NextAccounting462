@@ -13,7 +13,7 @@ export const POST = withTenantContext(async (request: NextRequest, context: { pa
     const ctx = requireTenantContext()
     if (!ctx.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    if (!['ADMIN', 'TEAM_LEAD', 'TEAM_MEMBER', 'STAFF'].includes(ctx.role ?? '')) {
+    if (!hasRole(ctx.role ?? '', ['ADMIN', 'TEAM_LEAD', 'TEAM_MEMBER', 'STAFF'])) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
