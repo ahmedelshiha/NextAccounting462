@@ -96,7 +96,7 @@ export const DashboardHeader = memo(function DashboardHeader({
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            value={search}
+            value={localSearch}
             onChange={handleSearchChange}
             placeholder="Search by name, email, or company"
             className="pl-9"
