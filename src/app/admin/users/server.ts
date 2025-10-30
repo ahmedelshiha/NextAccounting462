@@ -107,11 +107,11 @@ export async function fetchUsersServerSide(
  * Fetch user statistics
  * Called during page render, data is immediately available
  */
-export async function fetchStatsServerSide(): Promise<UserStats> {
+export async function fetchStatsServerSide(tenantId: string): Promise<UserStats> {
   try {
-    const ctx = tenantContext.getContextOrNull()
-    if (!ctx || !ctx.userId) {
-      // No tenant context available during static generation/build — return empty stats
+    // ✅ FIXED: Validate tenantId directly instead of using tenantContext
+    if (!tenantId) {
+      console.error('fetchStatsServerSide: tenantId is required')
       return {
         total: 0,
         clients: 0,
@@ -125,8 +125,6 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
         topUsers: []
       }
     }
-
-    const tenantId = ctx.tenantId
 
     // Fetch all required stats in parallel
     const [total, active, admins, staffCount, clientCount, newThisMonth, newLastMonth] = await Promise.all([
