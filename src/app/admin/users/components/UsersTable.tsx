@@ -81,7 +81,10 @@ export const UsersTable = memo(function UsersTable({
   isLoading = false,
   onViewProfile,
   onRoleChange,
-  isUpdating = false
+  isUpdating = false,
+  selectedUserIds = new Set(),
+  onSelectUser,
+  onSelectAll
 }: UsersTableProps) {
   const perms = usePermissions()
 
@@ -91,6 +94,20 @@ export const UsersTable = memo(function UsersTable({
     },
     [onRoleChange]
   )
+
+  const handleSelectUser = useCallback(
+    (userId: string, selected: boolean) => {
+      onSelectUser?.(userId, selected)
+    },
+    [onSelectUser]
+  )
+
+  const allSelected = users.length > 0 && users.every(u => selectedUserIds.has(u.id))
+  const someSelected = users.length > 0 && users.some(u => selectedUserIds.has(u.id)) && !allSelected
+
+  const handleSelectAllChange = useCallback(() => {
+    onSelectAll?.(!allSelected)
+  }, [allSelected, onSelectAll])
 
   // ✅ OPTIMIZED: Use VirtualScroller for handling 100+ users efficiently
   // Only renders ~10 visible rows instead of all rows
