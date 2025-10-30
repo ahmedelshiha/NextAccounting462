@@ -88,7 +88,7 @@ export const UsersTable = memo(function UsersTable({
   )
 
   return (
-    <Card className="lg:col-span-2">
+    <Card>
       <CardHeader>
         <CardTitle>User Directory</CardTitle>
         <CardDescription>Search, filter and manage users</CardDescription>

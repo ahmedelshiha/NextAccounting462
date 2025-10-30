@@ -190,15 +190,13 @@ export default function AdminUsersPage() {
         <StatsSection stats={context.stats} isLoading={context.isLoading} />
 
         {/* Users Table */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <UsersTable
-            users={context.filteredUsers}
-            isLoading={context.usersLoading}
-            onViewProfile={context.openUserProfile}
-            onRoleChange={handleRoleChange}
-            isUpdating={context.updating}
-          />
-        </div>
+        <UsersTable
+          users={context.filteredUsers}
+          isLoading={context.usersLoading}
+          onViewProfile={context.openUserProfile}
+          onRoleChange={handleRoleChange}
+          isUpdating={context.updating}
+        />
 
         {/* User Profile Dialog (Phase 2) */}
         <UserProfileDialog />
