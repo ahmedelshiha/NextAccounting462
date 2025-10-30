@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { authOptions, getSessionOrBypass } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import AdminOverview from '@/components/admin/dashboard/AdminOverview'
+import { hasRole } from '@/lib/permissions'
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard Overview',
