@@ -177,12 +177,12 @@ export function DashboardTab({
       />
 
       {/* Operations Overview Metrics */}
-      <OperationsOverviewCards metrics={metrics} isLoading={isLoading} />
+      <OperationsOverviewCards metrics={displayMetrics} isLoading={isLoading || operationsLoading} />
 
       {/* Pending Operations */}
       <PendingOperationsPanel
         operations={pendingOperations}
-        isLoading={isLoading}
+        isLoading={operationsLoading}
         onViewAll={() => {}}
       />
 
