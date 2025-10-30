@@ -165,29 +165,35 @@ export function DashboardTab({
   }, [bulkActionType, bulkActionValue, selectedUserIds.size])
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gray-50 space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Quick Actions Bar */}
-      <QuickActionsBar
-        onAddUser={onAddUser}
-        onImport={onImport}
-        onBulkOperation={onBulkOperation}
-        onExport={onExport}
-        onRefresh={onRefresh}
-        isLoading={isLoading}
-      />
+      <section role="region" aria-label="Quick actions">
+        <QuickActionsBar
+          onAddUser={onAddUser}
+          onImport={onImport}
+          onBulkOperation={onBulkOperation}
+          onExport={onExport}
+          onRefresh={onRefresh}
+          isLoading={isLoading}
+        />
+      </section>
 
       {/* Operations Overview Metrics */}
-      <OperationsOverviewCards metrics={displayMetrics} isLoading={isLoading || operationsLoading} />
+      <section role="region" aria-label="Operations metrics" className="max-w-7xl mx-auto w-full">
+        <OperationsOverviewCards metrics={displayMetrics} isLoading={isLoading || operationsLoading} />
+      </section>
 
       {/* Pending Operations */}
-      <PendingOperationsPanel
-        operations={pendingOperations}
-        isLoading={operationsLoading}
-        onViewAll={() => {}}
-      />
+      <section role="region" aria-label="Pending operations" className="max-w-7xl mx-auto w-full">
+        <PendingOperationsPanel
+          operations={pendingOperations}
+          isLoading={operationsLoading}
+          onViewAll={() => {}}
+        />
+      </section>
 
       {/* Filters Section */}
-      <div>
+      <section role="region" aria-label="User filters" className="max-w-7xl mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">User Directory</h2>
         <AdvancedUserFilters
           filters={filters}
@@ -202,80 +208,103 @@ export function DashboardTab({
             })
           }
         />
-      </div>
+      </section>
 
       {/* Users Table with Bulk Actions */}
-      <div>
-        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="text-sm text-gray-600">
-            Showing {filteredUsers.length} of {users.length} users
-            {selectedUserIds.size > 0 && (
-              <span className="ml-2 font-semibold text-blue-600">
-                ({selectedUserIds.size} selected)
-              </span>
-            )}
+      <section role="region" aria-label="User table and bulk actions" className="max-w-7xl mx-auto w-full">
+        <div className="mb-4 flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="text-sm text-gray-600">
+              Showing {filteredUsers.length} of {users.length} users
+              {selectedUserIds.size > 0 && (
+                <span className="ml-2 font-semibold text-blue-600" role="status" aria-live="polite">
+                  ({selectedUserIds.size} selected)
+                </span>
+              )}
+            </div>
           </div>
 
           {selectedUserIds.size > 0 && (
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <Select value={bulkActionType} onValueChange={setBulkActionType}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="Select action" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="role">Change Role</SelectItem>
-                  <SelectItem value="status">Change Status</SelectItem>
-                  <SelectItem value="department">Change Department</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {bulkActionType === 'role' && (
-                <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
-                  <SelectTrigger className="w-full sm:w-40">
-                    <SelectValue placeholder="Select role" />
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-4" role="region" aria-label="Bulk actions panel">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="bulk-action-select" className="text-sm font-medium text-gray-700">
+                  Select an action to apply to {selectedUserIds.size} user{selectedUserIds.size !== 1 ? 's' : ''}
+                </label>
+                <Select value={bulkActionType} onValueChange={setBulkActionType}>
+                  <SelectTrigger id="bulk-action-select" className="w-full sm:w-40" aria-label="Bulk action type">
+                    <SelectValue placeholder="Select action" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ADMIN">Admin</SelectItem>
-                    <SelectItem value="TEAM_LEAD">Team Lead</SelectItem>
-                    <SelectItem value="TEAM_MEMBER">Team Member</SelectItem>
-                    <SelectItem value="STAFF">Staff</SelectItem>
-                    <SelectItem value="CLIENT">Client</SelectItem>
+                    <SelectItem value="role">Change Role</SelectItem>
+                    <SelectItem value="status">Change Status</SelectItem>
+                    <SelectItem value="department">Change Department</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {bulkActionType === 'role' && (
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="bulk-value-role" className="text-sm font-medium text-gray-700">
+                    Select new role
+                  </label>
+                  <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
+                    <SelectTrigger id="bulk-value-role" className="w-full sm:w-40" aria-label="Role selection">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ADMIN">Admin</SelectItem>
+                      <SelectItem value="TEAM_LEAD">Team Lead</SelectItem>
+                      <SelectItem value="TEAM_MEMBER">Team Member</SelectItem>
+                      <SelectItem value="STAFF">Staff</SelectItem>
+                      <SelectItem value="CLIENT">Client</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
 
               {bulkActionType === 'status' && (
-                <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
-                  <SelectTrigger className="w-full sm:w-40">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="INACTIVE">Inactive</SelectItem>
-                    <SelectItem value="SUSPENDED">Suspended</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="bulk-value-status" className="text-sm font-medium text-gray-700">
+                    Select new status
+                  </label>
+                  <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
+                    <SelectTrigger id="bulk-value-status" className="w-full sm:w-40" aria-label="Status selection">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="INACTIVE">Inactive</SelectItem>
+                      <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
 
               {bulkActionType === 'department' && (
-                <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
-                  <SelectTrigger className="w-full sm:w-40">
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="engineering">Engineering</SelectItem>
-                    <SelectItem value="sales">Sales</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="operations">Operations</SelectItem>
-                    <SelectItem value="support">Support</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="bulk-value-department" className="text-sm font-medium text-gray-700">
+                    Select new department
+                  </label>
+                  <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
+                    <SelectTrigger id="bulk-value-department" className="w-full sm:w-40" aria-label="Department selection">
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="operations">Operations</SelectItem>
+                      <SelectItem value="support">Support</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
 
               <Button
                 onClick={handleApplyBulkAction}
                 disabled={isApplyingBulkAction || !bulkActionType || !bulkActionValue}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+                aria-busy={isApplyingBulkAction}
               >
                 {isApplyingBulkAction ? 'Applying...' : 'Apply'}
               </Button>
@@ -291,7 +320,7 @@ export function DashboardTab({
           onSelectAll={handleSelectAll}
           onViewProfile={() => {}}
         />
-      </div>
+      </section>
     </div>
   )
 }
