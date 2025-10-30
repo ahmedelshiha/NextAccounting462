@@ -173,9 +173,25 @@ export const UsersTable = memo(function UsersTable({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>User Directory</CardTitle>
-        <CardDescription>Search, filter and manage users</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <div className="space-y-1">
+          <CardTitle>User Directory</CardTitle>
+          <CardDescription>Search, filter and manage users</CardDescription>
+        </div>
+        {users.length > 0 && (
+          <div className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={allSelected}
+              indeterminate={someSelected}
+              onCheckedChange={handleSelectAllChange}
+              aria-label="Select all users"
+              title={allSelected ? 'Deselect all' : 'Select all'}
+            />
+            <span className="text-gray-500">
+              {selectedUserIds.size > 0 ? `${selectedUserIds.size} selected` : 'Select all'}
+            </span>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
