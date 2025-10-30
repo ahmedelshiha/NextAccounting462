@@ -145,7 +145,7 @@ export function useDebouncedEffect(
   dependencies: React.DependencyList,
   delay: number = 300
 ) {
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     timeoutRef.current = setTimeout(() => {
@@ -162,15 +162,18 @@ export function useDebouncedEffect(
 
 /**
  * useComponentMemory
- * 
+ *
  * Hook to monitor component memory usage in development
  */
 export function useComponentMemory(componentName: string) {
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return
-    if (!performance.memory) return
 
-    const memUsage = performance.memory
+    // Check if performance.memory is available (non-standard API)
+    const perf = performance as any
+    if (!perf.memory) return
+
+    const memUsage = perf.memory
     console.debug(`[${componentName}] Memory - Used: ${(memUsage.usedJSHeapSize / 1048576).toFixed(2)}MB, Limit: ${(memUsage.jsHeapSizeLimit / 1048576).toFixed(2)}MB`)
   }, [componentName])
 }
