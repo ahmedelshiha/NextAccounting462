@@ -6,7 +6,7 @@ import { OperationsOverviewCards, OperationsMetrics } from '../OperationsOvervie
 import { PendingOperationsPanel, PendingOperation } from '../PendingOperationsPanel'
 import { AdvancedUserFilters, UserFilters } from '../AdvancedUserFilters'
 import { UsersTable } from '../UsersTable'
-import { UserItem } from '../contexts/UsersContextProvider'
+import { UserItem } from '../../contexts/UsersContextProvider'
 import { usePendingOperations } from '../../hooks/usePendingOperations'
 import {
   Select,
