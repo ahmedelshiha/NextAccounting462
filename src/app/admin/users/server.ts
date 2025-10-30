@@ -26,12 +26,13 @@ import { AvailabilityStatus } from '@prisma/client'
  */
 export async function fetchUsersServerSide(
   page: number = 1,
-  limit: number = 50
+  limit: number = 50,
+  tenantId: string
 ): Promise<{ users: UserItem[]; total: number; page: number; limit: number }> {
   try {
-    const ctx = tenantContext.getContextOrNull()
-    if (!ctx || !ctx.userId) {
-      // No tenant context available during static generation/build — return empty result
+    // ✅ FIXED: Validate tenantId directly instead of using tenantContext
+    if (!tenantId) {
+      console.error('fetchUsersServerSide: tenantId is required')
       return {
         users: [],
         total: 0,
@@ -39,13 +40,6 @@ export async function fetchUsersServerSide(
         limit: 50
       }
     }
-    
-    const role = ctx.role as string
-    if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
-      throw new Error('Forbidden: You do not have permission to view users')
-    }
-
-    const tenantId = ctx.tenantId
 
     // Validate pagination
     const validPage = Math.max(1, page)
@@ -91,6 +85,8 @@ export async function fetchUsersServerSide(
       status: 'ACTIVE' as const
     }))
 
+    console.log(`[fetchUsersServerSide] Successfully fetched ${mapped.length} users for tenant ${tenantId}`)
+
     return {
       users: mapped,
       total,
@@ -113,11 +109,11 @@ export async function fetchUsersServerSide(
  * Fetch user statistics
  * Called during page render, data is immediately available
  */
-export async function fetchStatsServerSide(): Promise<UserStats> {
+export async function fetchStatsServerSide(tenantId: string): Promise<UserStats> {
   try {
-    const ctx = tenantContext.getContextOrNull()
-    if (!ctx || !ctx.userId) {
-      // No tenant context available during static generation/build — return empty stats
+    // ✅ FIXED: Validate tenantId directly instead of using tenantContext
+    if (!tenantId) {
+      console.error('fetchStatsServerSide: tenantId is required')
       return {
         total: 0,
         clients: 0,
@@ -131,8 +127,6 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
         topUsers: []
       }
     }
-
-    const tenantId = ctx.tenantId
 
     // Fetch all required stats in parallel
     const [total, active, admins, staffCount, clientCount, newThisMonth, newLastMonth] = await Promise.all([
@@ -170,6 +164,8 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
     ])
 
     const growth = newLastMonth > 0 ? ((newThisMonth - newLastMonth) / newLastMonth) * 100 : 0
+
+    console.log(`[fetchStatsServerSide] Fetched stats for tenant ${tenantId}: ${total} total users, ${active} active`)
 
     return {
       total,
