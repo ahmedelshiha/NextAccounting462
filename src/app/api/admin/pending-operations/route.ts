@@ -74,7 +74,7 @@ export const GET = withTenantContext(async (request: Request) => {
     })
   } catch (error) {
     console.error('Error fetching pending operations:', error)
-    return respond.internalError('Failed to fetch pending operations')
+    return respond.serverError('Failed to fetch pending operations')
   }
 })
 
