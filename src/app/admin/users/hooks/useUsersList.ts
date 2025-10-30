@@ -118,9 +118,17 @@ export function useUsersList(options?: UseUsersListOptions): UseUsersListReturn 
     return pendingRequestRef.current
   }, [options])
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount (only if not already initialized from server)
   useEffect(() => {
-    refetch().catch(console.error)
+    if (hasInitializedRef.current) return
+    hasInitializedRef.current = true
+
+    // ✅ With server-provided data in context, auto-fetch is now optional
+    // Only fetch if context data is empty and we need fresh data
+    // Users can still call refetch() manually when needed
+
+    // Comment out auto-fetch since data comes from server via context
+    // refetch().catch(console.error)
 
     // Cleanup: abort requests on unmount
     return () => {
