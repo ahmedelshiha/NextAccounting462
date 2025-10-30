@@ -51,15 +51,15 @@ export interface HealthLog {
 type TabType = 'overview' | 'details' | 'activity' | 'settings'
 type StatusAction = 'activate' | 'deactivate' | 'suspend'
 
-// Context Type
+// ✅ OPTIMIZED: Organized into logical sections
 interface UsersContextType {
-  // Data
+  // Data State
   users: UserItem[]
   stats: UserStats | null
   selectedUser: UserItem | null
   activity: HealthLog[]
 
-  // UI State
+  // Loading State
   isLoading: boolean
   usersLoading: boolean
   activityLoading: boolean
@@ -68,37 +68,34 @@ interface UsersContextType {
   updating: boolean
   permissionsSaving: boolean
 
-  // Errors
+  // Error State
   errorMsg: string | null
   activityError: string | null
 
-  // Filters
+  // Filter State
   search: string
   roleFilter: 'ALL' | 'ADMIN' | 'TEAM_LEAD' | 'TEAM_MEMBER' | 'STAFF' | 'CLIENT'
   statusFilter: 'ALL' | 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
 
-  // Profile Dialog State
+  // Dialog State
   profileOpen: boolean
   activeTab: TabType
   editMode: boolean
   editForm: Partial<UserItem>
-
-  // Status Change Dialog
   statusDialogOpen: boolean
   statusAction: { action: StatusAction; user: UserItem } | null
-
-  // Permission Modal
   permissionModalOpen: boolean
 
   // Computed
   filteredUsers: UserItem[]
 
-  // Actions
+  // Data Actions
   setUsers: (users: UserItem[]) => void
   setStats: (stats: UserStats | null) => void
   setSelectedUser: (user: UserItem | null) => void
   setActivity: (activity: HealthLog[]) => void
 
+  // Loading Actions
   setIsLoading: (value: boolean) => void
   setUsersLoading: (value: boolean) => void
   setActivityLoading: (value: boolean) => void
@@ -107,21 +104,22 @@ interface UsersContextType {
   setUpdating: (value: boolean) => void
   setPermissionsSaving: (value: boolean) => void
 
+  // Error Actions
   setErrorMsg: (msg: string | null) => void
   setActivityError: (msg: string | null) => void
 
+  // Filter Actions
   setSearch: (search: string) => void
   setRoleFilter: (filter: 'ALL' | 'ADMIN' | 'TEAM_LEAD' | 'TEAM_MEMBER' | 'STAFF' | 'CLIENT') => void
   setStatusFilter: (filter: 'ALL' | 'ACTIVE' | 'INACTIVE' | 'SUSPENDED') => void
 
+  // Dialog Actions
   setProfileOpen: (open: boolean) => void
   setActiveTab: (tab: TabType) => void
   setEditMode: (mode: boolean) => void
   setEditForm: (form: Partial<UserItem>) => void
-
   setStatusDialogOpen: (open: boolean) => void
   setStatusAction: (action: { action: StatusAction; user: UserItem } | null) => void
-
   setPermissionModalOpen: (open: boolean) => void
 
   // Helpers
@@ -135,49 +133,45 @@ const UsersContext = createContext<UsersContextType | undefined>(undefined)
 // Provider Component
 interface UsersContextProviderProps {
   children: ReactNode
+  initialUsers?: UserItem[]
+  initialStats?: UserStats | null
 }
 
-export function UsersContextProvider({ children }: UsersContextProviderProps) {
+export function UsersContextProvider({ children, initialUsers = [], initialStats = null }: UsersContextProviderProps) {
   // Data state
-  const [users, setUsers] = useState<UserItem[]>([])
-  const [stats, setStats] = useState<UserStats | null>(null)
+  const [users, setUsers] = useState<UserItem[]>(initialUsers)
+  const [stats, setStats] = useState<UserStats | null>(initialStats)
   const [selectedUser, setSelectedUser] = useState<UserItem | null>(null)
   const [activity, setActivity] = useState<HealthLog[]>([])
 
-  // UI state
-  const [isLoading, setIsLoading] = useState(true)
-  const [usersLoading, setUsersLoading] = useState(true)
+  // Loading state
+  const [isLoading, setIsLoading] = useState(!initialUsers.length)
+  const [usersLoading, setUsersLoading] = useState(!initialUsers.length)
   const [activityLoading, setActivityLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [permissionsSaving, setPermissionsSaving] = useState(false)
 
-  // Errors
+  // Error state
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [activityError, setActivityError] = useState<string | null>(null)
 
-  // Filters
+  // Filter state
   const [search, setSearch] = useState('')
-  type RoleFilter = 'ALL' | 'ADMIN' | 'TEAM_LEAD' | 'TEAM_MEMBER' | 'STAFF' | 'CLIENT'
-  type StatusFilter = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
-  const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
+  const [roleFilter, setRoleFilter] = useState<'ALL' | 'ADMIN' | 'TEAM_LEAD' | 'TEAM_MEMBER' | 'STAFF' | 'CLIENT'>('ALL')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'>('ALL')
 
-  // Profile dialog state
+  // Dialog state
   const [profileOpen, setProfileOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const [editMode, setEditMode] = useState(false)
   const [editForm, setEditForm] = useState<Partial<UserItem>>({})
-
-  // Status change dialog
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
   const [statusAction, setStatusAction] = useState<{ action: StatusAction; user: UserItem } | null>(null)
-
-  // Permission modal
   const [permissionModalOpen, setPermissionModalOpen] = useState(false)
 
-  // Computed filtered users
+  // ✅ OPTIMIZED: Memoized filtering - only recompute when dependencies change
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase()
     return users
@@ -218,7 +212,7 @@ export function UsersContextProvider({ children }: UsersContextProviderProps) {
     selectedUser,
     activity,
 
-    // UI State
+    // Loading
     isLoading,
     usersLoading,
     activityLoading,
@@ -236,28 +230,25 @@ export function UsersContextProvider({ children }: UsersContextProviderProps) {
     roleFilter,
     statusFilter,
 
-    // Profile Dialog State
+    // Dialog State
     profileOpen,
     activeTab,
     editMode,
     editForm,
-
-    // Status Change Dialog
     statusDialogOpen,
     statusAction,
-
-    // Permission Modal
     permissionModalOpen,
 
     // Computed
     filteredUsers,
 
-    // Actions
+    // Data Actions
     setUsers,
     setStats,
     setSelectedUser,
     setActivity,
 
+    // Loading Actions
     setIsLoading,
     setUsersLoading,
     setActivityLoading,
@@ -266,21 +257,22 @@ export function UsersContextProvider({ children }: UsersContextProviderProps) {
     setUpdating,
     setPermissionsSaving,
 
+    // Error Actions
     setErrorMsg,
     setActivityError,
 
+    // Filter Actions
     setSearch,
     setRoleFilter,
     setStatusFilter,
 
+    // Dialog Actions
     setProfileOpen,
     setActiveTab,
     setEditMode,
     setEditForm,
-
     setStatusDialogOpen,
     setStatusAction,
-
     setPermissionModalOpen,
 
     // Helpers
