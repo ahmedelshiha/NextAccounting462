@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { UserItem } from '../contexts/UsersContextProvider'
 import { UserActions } from './UserActions'
 import { usePermissions } from '@/lib/use-permissions'
+import { VirtualScroller } from '@/lib/virtual-scroller'
 
 interface UsersTableProps {
   users: UserItem[]
