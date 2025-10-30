@@ -1,8 +1,10 @@
 # Enterprise Redesign - Visual Roadmap
 
-**Project Duration:** 9-13 weeks  
-**Team Size:** 2-3 developers + 1 QA + 1 PM  
-**Budget:** ~$35,400  
+> **📌 Part of:** [ADMIN_USERS_PROJECT_MASTER.md](./ADMIN_USERS_PROJECT_MASTER.md) - Visual timeline and milestone tracking
+
+**Project Duration:** 9-13 weeks
+**Team Size:** 2-3 developers + 1 QA + 1 PM
+**Budget:** ~$35,400
 **Go-Live:** Q1 2025 (if approved immediately)
 
 ---
@@ -38,7 +40,7 @@ Q2 2025 (Apr - Jun)
 
 ```
 PHASE 1: Foundation & Dashboard (Week 1-2, 40 hours)
-████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 20%
+████���███░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 20%
 
 PHASE 2: Workflows (Week 3-4, 50 hours)
 ░░████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 25%
