@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useClientNotifications } from '@/hooks/useClientNotifications'
+import { hasRole } from '@/lib/permissions'
 
 const navigation = [
   { name: 'Home', href: '/' },
