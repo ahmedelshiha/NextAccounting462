@@ -206,8 +206,11 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
  */
 export async function fetchUserActivityServerSide(userId: string) {
   try {
-    const ctx = requireTenantContext()
-    if (!ctx.userId) throw new Error('Unauthorized')
+    const ctx = tenantContext.getContextOrNull()
+    if (!ctx || !ctx.userId) {
+      // No tenant context available — return empty activity
+      return []
+    }
 
     // TODO: Implement activity log fetching based on your database schema
     // For now, return empty array
