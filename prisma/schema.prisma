@@ -220,6 +220,8 @@ model Tenant {
   translationKeys       TranslationKey[]
   translationMetrics    TranslationMetrics[]
   users                 User[]
+  userWorkflows         UserWorkflow[]
+  workflowTemplates     WorkflowTemplate[]
 
   @@index([status])
 }
