@@ -71,6 +71,12 @@ export function DashboardTab({
   const [bulkActionValue, setBulkActionValue] = useState<string>('')
   const [isApplyingBulkAction, setIsApplyingBulkAction] = useState(false)
 
+  // Fetch pending operations
+  const { operations: pendingOperations, metrics, isLoading: operationsLoading } = usePendingOperations({
+    userCount: users.length,
+    enabled: true
+  })
+
   // Filter users based on active filters
   const filteredUsers = users.filter((user) => {
     // Search filter
@@ -97,29 +103,12 @@ export function DashboardTab({
     return true
   })
 
-  // Mock pending operations data (will be replaced with real data)
-  const pendingOperations: PendingOperation[] = [
-    {
-      id: '1',
-      title: 'John Doe - Onboarding',
-      description: 'New employee setup and role assignment',
-      progress: 75,
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      assignee: 'Admin',
-      status: 'in-progress',
-      actions: [
-        { label: 'View', onClick: () => {} },
-        { label: 'Resume', onClick: () => {} }
-      ]
-    }
-  ]
-
-  // Mock metrics (will be replaced with real data)
-  const metrics: OperationsMetrics = {
+  // Use fetched metrics or provide defaults
+  const displayMetrics: OperationsMetrics = metrics || {
     totalUsers: users.length,
-    pendingApprovals: 2,
-    inProgressWorkflows: 3,
-    dueThisWeek: 1
+    pendingApprovals: 0,
+    inProgressWorkflows: 0,
+    dueThisWeek: 0
   }
 
   const handleSelectUser = (userId: string, selected: boolean) => {
