@@ -64,7 +64,7 @@ export const GET = withTenantContext(async (request: NextRequest) => {
 export const POST = withTenantContext(async (request: NextRequest) => {
   try {
     const ctx = requireTenantContext()
-    if (!['ADMIN', 'STAFF'].includes(String(ctx.role || ''))) {
+    if (!hasRole(String(ctx.role || ''), ['ADMIN', 'STAFF'])) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
