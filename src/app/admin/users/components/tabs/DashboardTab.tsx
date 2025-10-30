@@ -197,9 +197,10 @@ export function DashboardTab({
         <UsersTable
           users={filteredUsers}
           isLoading={isLoading}
-          selectedIds={selectedUserIds}
+          selectedUserIds={selectedUserIds}
           onSelectUser={handleSelectUser}
           onSelectAll={handleSelectAll}
+          onViewProfile={() => {}}
         />
       </div>
     </div>
