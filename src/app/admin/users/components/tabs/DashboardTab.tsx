@@ -7,6 +7,7 @@ import { PendingOperationsPanel, PendingOperation } from '../PendingOperationsPa
 import { AdvancedUserFilters, UserFilters } from '../AdvancedUserFilters'
 import { UsersTable } from '../UsersTable'
 import { UserItem } from '../contexts/UsersContextProvider'
+import { usePendingOperations } from '../../hooks/usePendingOperations'
 import {
   Select,
   SelectContent,
