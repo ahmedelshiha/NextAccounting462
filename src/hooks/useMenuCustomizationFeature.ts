@@ -16,10 +16,16 @@ export const useMenuCustomizationFeature = () => {
 
   const isEnabled = isMenuCustomizationEnabled()
   const userId = (session?.user as any)?.id
+  const role = (session?.user as any)?.role as string | undefined
 
-  const isEnabledForCurrentUser = userId
-    ? isMenuCustomizationEnabledForUser(userId)
-    : false
+  // If session isn't fully hydrated on first render, allow admin/staff roles to access the modal
+  const isEnabledForCurrentUser = (() => {
+    if (!isEnabled) return false
+    if (userId) return isMenuCustomizationEnabledForUser(userId)
+    // Fallback to role-based check for better UX during session loading
+    const adminRoles = ['ADMIN', 'SUPER_ADMIN', 'TEAM_LEAD', 'STAFF']
+    return Boolean(role && adminRoles.includes(role))
+  })()
 
   return {
     isEnabled,

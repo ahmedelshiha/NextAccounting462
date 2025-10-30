@@ -10,6 +10,7 @@
 import { useMemo, useState } from 'react'
 import AnalyticsPage from '@/components/dashboard/templates/AnalyticsPage'
 import IntelligentActivityFeed from '@/components/dashboard/analytics/IntelligentActivityFeed'
+import { AuthErrorFallback } from '@/components/dashboard/AuthErrorFallback'
 import { useUnifiedData } from '@/hooks/useUnifiedData'
 import { Download, RefreshCw, Calendar, Users } from 'lucide-react'
 import { fetchExportBlob } from '@/lib/admin-export'
@@ -117,6 +118,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: analytics,
     error: analyticsError,
+    authError: analyticsAuthError,
     isLoading: analyticsLoading,
   } = useUnifiedData<AnalyticsResponse>({
     key: 'analytics',
@@ -128,6 +130,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: bookingStats,
     error: bookingStatsError,
+    authError: bookingStatsAuthError,
     isLoading: bookingStatsLoading,
   } = useUnifiedData<{ success?: boolean; data?: BookingStatsPayload }>({
     key: 'bookings/stats',
@@ -139,6 +142,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: serviceRequestsAnalytics,
     error: serviceRequestsError,
+    authError: serviceRequestsAuthError,
     isLoading: serviceRequestsLoading,
   } = useUnifiedData<{ success?: boolean; data?: ServiceRequestAnalyticsPayload }>({
     key: 'service-requests/analytics',
@@ -149,6 +153,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: tasksAnalyticsData,
     error: tasksError,
+    authError: tasksAuthError,
     isLoading: tasksLoading,
   } = useUnifiedData<TaskAnalyticsPayload>({
     key: 'tasks/analytics',
@@ -159,6 +164,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: servicesStatsData,
     error: servicesError,
+    authError: servicesAuthError,
     isLoading: servicesStatsLoading,
   } = useUnifiedData<ServicesStatsPayload>({
     key: 'services/stats',
@@ -171,6 +177,7 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   const {
     data: usersOverview,
     error: usersError,
+    authError: usersAuthError,
     isLoading: usersLoading,
   } = useUnifiedData<UsersStatsPayload>({
     key: 'stats/users',
@@ -291,6 +298,17 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
     return analytics?.revenue_trend
   }, [servicesPayload, analytics, revenueMetrics.target])
 
+  const authErrors = [
+    analyticsAuthError,
+    bookingStatsAuthError,
+    serviceRequestsAuthError,
+    tasksAuthError,
+    servicesAuthError,
+    usersAuthError,
+  ].filter(Boolean)
+
+  const firstAuthError = authErrors.length > 0 ? authErrors[0] : null
+
   const combinedError = analyticsError || bookingStatsError || serviceRequestsError || tasksError || servicesError || usersError
   const errorMessage = combinedError ? 'Failed to load dashboard metrics' : null
 
@@ -353,6 +371,22 @@ export default function AdminOverview({ initial }: { initial?: AdminOverviewInit
   }
 
   const isLoading = analyticsLoading || bookingStatsLoading || serviceRequestsLoading || tasksLoading || servicesStatsLoading || usersLoading
+
+  // Show auth error fallback if any endpoint returns 401/403
+  if (firstAuthError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <AuthErrorFallback
+          error={firstAuthError}
+          title={firstAuthError.statusCode === 401 ? 'Session Expired' : 'Access Denied'}
+          description={firstAuthError.statusCode === 401
+            ? 'Your session has expired. Please sign in again to access the dashboard.'
+            : 'You do not have permission to view the dashboard. Contact your administrator for access.'
+          }
+        />
+      </div>
+    )
+  }
 
   const activityData = {
     recentBookings: (recentBookingsResp?.bookings || []).map((b: any) => ({
