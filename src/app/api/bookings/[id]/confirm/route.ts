@@ -4,6 +4,7 @@ import type { BookingStatus } from '@prisma/client'
 import { withTenantContext } from '@/lib/api-wrapper'
 import { requireTenantContext } from '@/lib/tenant-utils'
 import { sendBookingConfirmation } from '@/lib/email'
+import { hasRole } from '@/lib/permissions'
 
 // POST /api/bookings/[id]/confirm - Confirm booking and send email
 export const POST = withTenantContext(async (request: NextRequest, context: { params: Promise<{ id: string }> }) => {
