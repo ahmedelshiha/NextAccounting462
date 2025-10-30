@@ -68,7 +68,7 @@ export const PUT = withTenantContext(async (request: NextRequest, context: { par
     if (!existingBooking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
 
     const isOwner = existingBooking.clientId === ctx.userId
-    const isAdminOrStaff = ['ADMIN', 'STAFF'].includes(ctx.role ?? '')
+    const isAdminOrStaff = hasRole(ctx.role ?? '', ['ADMIN', 'STAFF'])
 
     if (!isOwner && !isAdminOrStaff) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
