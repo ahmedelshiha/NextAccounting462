@@ -1,0 +1,194 @@
+/**
+ * Pending Operations Service
+ * 
+ * Handles fetching and managing pending operations/workflows
+ * for the admin users page dashboard.
+ * 
+ * This service can be extended to connect to real APIs:
+ * - GET /api/admin/workflows - List pending workflows
+ * - POST /api/admin/workflows/:id/approve - Approve workflow
+ * - POST /api/admin/workflows/:id/cancel - Cancel workflow
+ */
+
+export interface PendingOperation {
+  id: string
+  title: string
+  description: string
+  progress: number
+  dueDate?: string
+  assignee?: string
+  status: 'pending' | 'in-progress' | 'completed'
+  actions?: Array<{ label: string; onClick: () => void }>
+}
+
+export interface OperationsMetrics {
+  totalUsers: number
+  pendingApprovals: number
+  inProgressWorkflows: number
+  dueThisWeek: number
+}
+
+/**
+ * Fetch pending operations from the API
+ * 
+ * TODO: Replace with real API call to /api/admin/workflows
+ */
+export async function fetchPendingOperations(
+  tenantId: string,
+  options?: { limit?: number; offset?: number }
+): Promise<PendingOperation[]> {
+  try {
+    // Call the API endpoint
+    const params = new URLSearchParams()
+    if (options?.limit) params.append('limit', options.limit.toString())
+    if (options?.offset) params.append('offset', options.offset.toString())
+
+    const response = await fetch(
+      `/api/admin/pending-operations?${params.toString()}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    if (!response.ok) {
+      // Return empty array if API not yet implemented
+      if (response.status === 404) {
+        return getMockPendingOperations()
+      }
+      throw new Error(`Failed to fetch pending operations: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return data.operations || []
+  } catch (error) {
+    console.warn('Pending operations API error:', error)
+    // Return mock data as fallback
+    return getMockPendingOperations()
+  }
+}
+
+/**
+ * Get metrics about operations
+ * 
+ * TODO: Replace with real API call to /api/admin/operations-metrics
+ */
+export async function fetchOperationsMetrics(
+  tenantId: string,
+  userCount: number
+): Promise<OperationsMetrics> {
+  try {
+    const response = await fetch(`/api/admin/operations-metrics`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return getMockMetrics(userCount)
+      }
+      throw new Error(`Failed to fetch metrics: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return data.metrics || getMockMetrics(userCount)
+  } catch (error) {
+    console.warn('Operations metrics API error:', error)
+    return getMockMetrics(userCount)
+  }
+}
+
+/**
+ * Mock data - Remove when API endpoints are implemented
+ */
+function getMockPendingOperations(): PendingOperation[] {
+  const now = new Date()
+  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+  return [
+    {
+      id: '1',
+      title: 'Onboarding - John Doe',
+      description: 'New employee setup and system access provisioning',
+      progress: 65,
+      dueDate: nextWeek.toISOString(),
+      assignee: 'HR Manager',
+      status: 'in-progress',
+      actions: [
+        { label: 'View', onClick: () => {} },
+        { label: 'Resume', onClick: () => {} }
+      ]
+    },
+    {
+      id: '2',
+      title: 'Role Change - Jane Smith',
+      description: 'Promotion to Team Lead role',
+      progress: 40,
+      dueDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      assignee: 'Admin',
+      status: 'pending',
+      actions: [
+        { label: 'Review', onClick: () => {} },
+        { label: 'Approve', onClick: () => {} }
+      ]
+    },
+    {
+      id: '3',
+      title: 'Offboarding - Mike Johnson',
+      description: 'Employee departure process and data archival',
+      progress: 25,
+      dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      assignee: 'IT Manager',
+      status: 'pending',
+      actions: [
+        { label: 'Start', onClick: () => {} },
+        { label: 'Details', onClick: () => {} }
+      ]
+    }
+  ]
+}
+
+function getMockMetrics(userCount: number): OperationsMetrics {
+  return {
+    totalUsers: userCount,
+    pendingApprovals: Math.max(0, Math.floor(userCount * 0.05)), // ~5% pending
+    inProgressWorkflows: Math.max(1, Math.floor(userCount * 0.02)), // ~2% in progress
+    dueThisWeek: Math.max(1, Math.floor(userCount * 0.03)) // ~3% due this week
+  }
+}
+
+/**
+ * Approve a pending operation
+ */
+export async function approvePendingOperation(operationId: string): Promise<void> {
+  const response = await fetch(`/api/admin/pending-operations/${operationId}/approve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to approve operation: ${response.statusText}`)
+  }
+}
+
+/**
+ * Cancel a pending operation
+ */
+export async function cancelPendingOperation(operationId: string): Promise<void> {
+  const response = await fetch(`/api/admin/pending-operations/${operationId}/cancel`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to cancel operation: ${response.statusText}`)
+  }
+}

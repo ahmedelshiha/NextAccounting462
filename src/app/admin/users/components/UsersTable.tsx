@@ -3,6 +3,7 @@
 import React, { memo, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UserItem } from '../contexts/UsersContextProvider'
 import { UserActions } from './UserActions'
@@ -15,6 +16,9 @@ interface UsersTableProps {
   onViewProfile: (user: UserItem) => void
   onRoleChange?: (userId: string, role: UserItem['role']) => Promise<void>
   isUpdating?: boolean
+  selectedUserIds?: Set<string>
+  onSelectUser?: (userId: string, selected: boolean) => void
+  onSelectAll?: (selected: boolean) => void
 }
 
 const UserRowSkeleton = memo(function UserRowSkeleton() {
@@ -77,7 +81,10 @@ export const UsersTable = memo(function UsersTable({
   isLoading = false,
   onViewProfile,
   onRoleChange,
-  isUpdating = false
+  isUpdating = false,
+  selectedUserIds = new Set(),
+  onSelectUser,
+  onSelectAll
 }: UsersTableProps) {
   const perms = usePermissions()
 
@@ -88,6 +95,20 @@ export const UsersTable = memo(function UsersTable({
     [onRoleChange]
   )
 
+  const handleSelectUser = useCallback(
+    (userId: string, selected: boolean) => {
+      onSelectUser?.(userId, selected)
+    },
+    [onSelectUser]
+  )
+
+  const allSelected = users.length > 0 && users.every(u => selectedUserIds.has(u.id))
+  const someSelected = users.length > 0 && users.some(u => selectedUserIds.has(u.id)) && !allSelected
+
+  const handleSelectAllChange = useCallback(() => {
+    onSelectAll?.(!allSelected)
+  }, [allSelected, onSelectAll])
+
   // ✅ OPTIMIZED: Use VirtualScroller for handling 100+ users efficiently
   // Only renders ~10 visible rows instead of all rows
   const renderUserRow = useCallback(
@@ -97,7 +118,13 @@ export const UsersTable = memo(function UsersTable({
         className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm w-full"
       >
         <div className="flex items-center gap-4 min-w-0">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+          <Checkbox
+            checked={selectedUserIds.has(user.id)}
+            onCheckedChange={(checked) => handleSelectUser(user.id, checked === true)}
+            aria-label={`Select ${user.name || user.email}`}
+            className="shrink-0"
+          />
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shrink-0">
             {(user.name || user.email).charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
@@ -141,14 +168,30 @@ export const UsersTable = memo(function UsersTable({
         </div>
       </div>
     ),
-    [onViewProfile, perms.canManageUsers, handleRoleChange, isUpdating]
+    [onViewProfile, perms.canManageUsers, handleRoleChange, isUpdating, selectedUserIds, handleSelectUser]
   )
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>User Directory</CardTitle>
-        <CardDescription>Search, filter and manage users</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <div className="space-y-1">
+          <CardTitle>User Directory</CardTitle>
+          <CardDescription>Search, filter and manage users</CardDescription>
+        </div>
+        {users.length > 0 && (
+          <div className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={allSelected || someSelected}
+              onCheckedChange={handleSelectAllChange}
+              aria-label={allSelected ? 'Deselect all users' : 'Select all users'}
+              title={allSelected ? 'Deselect all' : 'Select all'}
+              className={someSelected ? 'opacity-50' : ''}
+            />
+            <span className="text-gray-500">
+              {selectedUserIds.size > 0 ? `${selectedUserIds.size} selected` : 'Select all'}
+            </span>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
