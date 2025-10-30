@@ -180,7 +180,7 @@ export function getPerformanceReport() {
     dataFetch: performanceMetrics.getStats('data-fetch'),
     filterApply: performanceMetrics.getStats('filter-apply'),
     bulkAction: performanceMetrics.getStats('bulk-action'),
-    totalMetrics: Object.keys(Object.fromEntries(performanceMetrics.getAllMetrics())).length
+    totalMetrics: Object.keys(performanceMetrics.getAllMetrics()).length
   }
 }
 
