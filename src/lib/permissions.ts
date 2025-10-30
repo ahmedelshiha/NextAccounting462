@@ -935,5 +935,9 @@ export function getRolePermissions(userRole: string | undefined | null): Permiss
  */
 export function hasRole(userRole: string | undefined | null, allowedRoles: readonly string[]): boolean {
   if (!userRole || !allowedRoles) return false
+  try {
+    const roleNormalized = String(userRole).toUpperCase()
+    if (roleNormalized === 'SUPER_ADMIN') return true
+  } catch {}
   return allowedRoles.includes(userRole)
 }
