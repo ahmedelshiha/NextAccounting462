@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { MenuCustomizationData } from '@/types/admin/menuCustomization'
 import { validateMenuCustomization } from '@/lib/menu/menuValidator'
+import { hasRole } from '@/lib/permissions'
 
 const ALLOWED_ADMIN_ROLES = ['ADMIN','TEAM_LEAD','SUPER_ADMIN','STAFF']
 
