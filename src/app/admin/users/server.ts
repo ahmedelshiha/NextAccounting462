@@ -28,8 +28,16 @@ export async function fetchUsersServerSide(
   limit: number = 50
 ): Promise<{ users: UserItem[]; total: number; page: number; limit: number }> {
   try {
-    const ctx = requireTenantContext()
-    if (!ctx.userId) throw new Error('Unauthorized')
+    const ctx = tenantContext.getContextOrNull()
+    if (!ctx || !ctx.userId) {
+      // No tenant context available during static generation/build — return empty result
+      return {
+        users: [],
+        total: 0,
+        page: 1,
+        limit: 50
+      }
+    }
     
     const role = ctx.role as string
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
