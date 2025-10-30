@@ -216,7 +216,7 @@ export function DashboardTab({
 
       {/* Users Table with Bulk Actions */}
       <div>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="text-sm text-gray-600">
             Showing {filteredUsers.length} of {users.length} users
             {selectedUserIds.size > 0 && (
@@ -227,16 +227,68 @@ export function DashboardTab({
           </div>
 
           {selectedUserIds.size > 0 && (
-            <div className="flex gap-2">
-              <select className="px-3 py-2 border border-gray-300 rounded-md text-sm">
-                <option value="">Bulk Actions</option>
-                <option value="role">Change Role</option>
-                <option value="status">Change Status</option>
-                <option value="department">Change Department</option>
-              </select>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
-                Apply
-              </button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Select value={bulkActionType} onValueChange={setBulkActionType}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Select action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="role">Change Role</SelectItem>
+                  <SelectItem value="status">Change Status</SelectItem>
+                  <SelectItem value="department">Change Department</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {bulkActionType === 'role' && (
+                <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
+                    <SelectItem value="TEAM_LEAD">Team Lead</SelectItem>
+                    <SelectItem value="TEAM_MEMBER">Team Member</SelectItem>
+                    <SelectItem value="STAFF">Staff</SelectItem>
+                    <SelectItem value="CLIENT">Client</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+
+              {bulkActionType === 'status' && (
+                <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ACTIVE">Active</SelectItem>
+                    <SelectItem value="INACTIVE">Inactive</SelectItem>
+                    <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+
+              {bulkActionType === 'department' && (
+                <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="engineering">Engineering</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="operations">Operations</SelectItem>
+                    <SelectItem value="support">Support</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+
+              <Button
+                onClick={handleApplyBulkAction}
+                disabled={isApplyingBulkAction || !bulkActionType || !bulkActionValue}
+                className="w-full sm:w-auto"
+              >
+                {isApplyingBulkAction ? 'Applying...' : 'Apply'}
+              </Button>
             </div>
           )}
         </div>
