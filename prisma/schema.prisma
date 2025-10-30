@@ -1609,7 +1609,7 @@ model WorkflowTemplate {
   updatedAt        DateTime      @updatedAt
 
   tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdByUser    User          @relation(fields: [createdBy], references: [id])
+  createdByUser    User          @relation("WorkflowTemplateCreatedBy", fields: [createdBy], references: [id])
 
   @@index([tenantId, isActive])
   @@unique([tenantId, name])
