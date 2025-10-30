@@ -4,6 +4,7 @@ import type { BookingStatus } from '@prisma/client'
 import { withTenantContext } from '@/lib/api-wrapper'
 import { requireTenantContext } from '@/lib/tenant-utils'
 import { isMultiTenancyEnabled } from '@/lib/tenant'
+import { hasRole } from '@/lib/permissions'
 
 // GET /api/bookings/[id] - Get booking by ID
 export const GET = withTenantContext(async (request: NextRequest, context: { params: Promise<{ id: string }> }) => {
