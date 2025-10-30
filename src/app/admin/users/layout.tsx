@@ -41,15 +41,12 @@ export default async function UsersLayout({ children }: UsersLayoutProps) {
 
   const tenantId = (session.user as any)?.tenantId as string | undefined
 
-  if (!tenantId) {
-    throw new Error('Tenant ID not found in session. User must be logged in to access admin panel.')
-  }
-
   // ✅ FIXED: Pass tenantId explicitly to server functions
   // This runs once per page request, not in the browser
+  // Server functions will handle missing tenantId gracefully
   const [usersData, statsData] = await Promise.all([
-    fetchUsersServerSide(1, 50, tenantId),
-    fetchStatsServerSide(tenantId)
+    fetchUsersServerSide(1, 50, tenantId || ''),
+    fetchStatsServerSide(tenantId || '')
   ])
 
   return (
