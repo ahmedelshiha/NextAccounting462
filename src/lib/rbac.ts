@@ -39,6 +39,8 @@ const rolePermissions: Record<Role, Permission[]> = {
 
 export function hasPermission(role: string | undefined | null, permission: Permission) {
   if (!role) return false
+  // Super admins bypass permissions
+  if (role === 'SUPER_ADMIN') return true
   const perms = rolePermissions[(role as Role) ?? 'CLIENT'] || []
   return perms.includes(permission)
 }
