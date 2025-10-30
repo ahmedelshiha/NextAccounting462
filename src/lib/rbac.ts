@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'STAFF' | 'CLIENT'
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'STAFF' | 'CLIENT'
 
 export type Permission =
   | 'view_dashboard'
