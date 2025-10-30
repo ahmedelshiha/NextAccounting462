@@ -8,7 +8,7 @@ export const GET = withTenantContext(async () => {
     const ctx = requireTenantContext()
 
     const allowed = ['ADMIN', 'TEAM_LEAD', 'STAFF']
-    if (!ctx.role || !allowed.includes(ctx.role)) {
+    if (!ctx.role || !hasRole(ctx.role, allowed)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
