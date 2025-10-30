@@ -88,6 +88,62 @@ export const UsersTable = memo(function UsersTable({
     [onRoleChange]
   )
 
+  // ✅ OPTIMIZED: Use VirtualScroller for handling 100+ users efficiently
+  // Only renders ~10 visible rows instead of all rows
+  const renderUserRow = useCallback(
+    (user: UserItem) => (
+      <div
+        key={user.id}
+        className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm w-full"
+      >
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+            {(user.name || user.email).charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <button
+              onClick={() => onViewProfile(user)}
+              className="font-medium text-gray-900 hover:text-blue-600 truncate max-w-[220px] sm:max-w-[260px] md:max-w-[320px] text-left"
+            >
+              {user.name || 'Unnamed User'}
+            </button>
+            <div className="text-sm text-gray-600 truncate max-w-[220px] sm:max-w-[260px] md:max-w-[320px]">
+              {user.email}
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="text-xs text-gray-400">Joined {formatDate(user.createdAt)}</div>
+              {user.company && <div className="text-xs text-gray-400">• {user.company}</div>}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <Badge className={getStatusColor(user.status)}>{user.status || 'ACTIVE'}</Badge>
+          <Badge className={getRoleColor(user.role)}>{user.role}</Badge>
+          {perms.canManageUsers && (
+            <Select value={user.role} onValueChange={(val) => handleRoleChange(user.id, val as UserItem['role'])}>
+              <SelectTrigger className="w-28 h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CLIENT">Client</SelectItem>
+                <SelectItem value="TEAM_MEMBER">Team Member</SelectItem>
+                <SelectItem value="TEAM_LEAD">Team Lead</SelectItem>
+                <SelectItem value="STAFF">Staff</SelectItem>
+                <SelectItem value="ADMIN">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          <UserActions
+            user={user}
+            onViewProfile={onViewProfile}
+            isLoading={isUpdating}
+          />
+        </div>
+      </div>
+    ),
+    [onViewProfile, perms.canManageUsers, handleRoleChange, isUpdating]
+  )
+
   return (
     <Card>
       <CardHeader>
@@ -95,72 +151,27 @@ export const UsersTable = memo(function UsersTable({
         <CardDescription>Search, filter and manage users</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="max-h-[60vh] overflow-y-auto pr-1">
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <UserRowSkeleton key={i} />
-              ))}
-            </div>
-          ) : users.length ? (
-            <div className="space-y-2">
-              {users.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm w-full"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                      {(user.name || user.email).charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <button
-                        onClick={() => onViewProfile(user)}
-                        className="font-medium text-gray-900 hover:text-blue-600 truncate max-w-[220px] sm:max-w-[260px] md:max-w-[320px] text-left"
-                      >
-                        {user.name || 'Unnamed User'}
-                      </button>
-                      <div className="text-sm text-gray-600 truncate max-w-[220px] sm:max-w-[260px] md:max-w-[320px]">
-                        {user.email}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="text-xs text-gray-400">Joined {formatDate(user.createdAt)}</div>
-                        {user.company && <div className="text-xs text-gray-400">• {user.company}</div>}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <Badge className={getStatusColor(user.status)}>{user.status || 'ACTIVE'}</Badge>
-                    <Badge className={getRoleColor(user.role)}>{user.role}</Badge>
-                    {perms.canManageUsers && (
-                      <Select value={user.role} onValueChange={(val) => handleRoleChange(user.id, val as UserItem['role'])}>
-                        <SelectTrigger className="w-28 h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="CLIENT">Client</SelectItem>
-                          <SelectItem value="TEAM_MEMBER">Team Member</SelectItem>
-                          <SelectItem value="TEAM_LEAD">Team Lead</SelectItem>
-                          <SelectItem value="STAFF">Staff</SelectItem>
-                          <SelectItem value="ADMIN">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                    <UserActions
-                      user={user}
-                      onViewProfile={onViewProfile}
-                      isLoading={isUpdating}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-gray-500 text-sm py-6 text-center">
-              No users found matching your criteria.
-            </div>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="max-h-[60vh] space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <UserRowSkeleton key={i} />
+            ))}
+          </div>
+        ) : users.length ? (
+          <VirtualScroller
+            items={users}
+            itemHeight={96}
+            maxHeight="60vh"
+            renderItem={(user) => renderUserRow(user)}
+            overscan={5}
+            getKey={(user) => user.id}
+            className="pr-1"
+          />
+        ) : (
+          <div className="h-[60vh] flex items-center justify-center text-gray-500 text-sm">
+            No users found matching your criteria.
+          </div>
+        )}
       </CardContent>
     </Card>
   )
