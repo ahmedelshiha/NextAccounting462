@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import { requireTenantContext } from '@/lib/tenant-utils'
+import { tenantContext } from '@/lib/tenant-context'
 import { hasPermission, PERMISSIONS } from '@/lib/permissions'
 import { tenantFilter } from '@/lib/tenant'
 import { UserItem, UserStats } from './contexts/UsersContextProvider'
