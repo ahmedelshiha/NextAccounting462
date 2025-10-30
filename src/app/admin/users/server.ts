@@ -6,6 +6,7 @@ import { tenantContext } from '@/lib/tenant-context'
 import { hasPermission, PERMISSIONS } from '@/lib/permissions'
 import { tenantFilter } from '@/lib/tenant'
 import { UserItem, UserStats } from './contexts/UsersContextProvider'
+import { AvailabilityStatus } from '@prisma/client'
 
 /**
  * ✅ Server-side Data Fetching for Admin Users Page
