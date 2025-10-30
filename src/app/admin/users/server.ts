@@ -120,7 +120,7 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
         where: { ...tenantFilter(tenantId), role: 'ADMIN' }
       }),
       prisma.user.count({
-        where: { ...tenantFilter(tenantId), role: 'TEAM_MEMBER' }
+        where: { ...tenantFilter(tenantId), role: 'STAFF' }
       }),
       prisma.user.count({
         where: { ...tenantFilter(tenantId), role: 'CLIENT' }
