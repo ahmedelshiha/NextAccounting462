@@ -64,7 +64,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchPerm
       select: { role: true, tenantId: true },
     })
 
-    if (!user || !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+    if (!user || !hasRole(user.role, ['ADMIN','SUPER_ADMIN'])) {
       return NextResponse.json(
         { error: 'Forbidden: Only admins can modify permissions', success: false },
         { status: 403 }
