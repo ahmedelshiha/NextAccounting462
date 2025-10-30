@@ -114,8 +114,22 @@ export async function fetchUsersServerSide(
  */
 export async function fetchStatsServerSide(): Promise<UserStats> {
   try {
-    const ctx = requireTenantContext()
-    if (!ctx.userId) throw new Error('Unauthorized')
+    const ctx = tenantContext.getContextOrNull()
+    if (!ctx || !ctx.userId) {
+      // No tenant context available during static generation/build — return empty stats
+      return {
+        total: 0,
+        clients: 0,
+        staff: 0,
+        admins: 0,
+        newThisMonth: 0,
+        newLastMonth: 0,
+        growth: 0,
+        activeUsers: 0,
+        registrationTrends: [],
+        topUsers: []
+      }
+    }
 
     const tenantId = ctx.tenantId
 
