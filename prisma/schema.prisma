@@ -1555,7 +1555,7 @@ model UserWorkflow {
 
   // Relations
   tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User            @relation("WorkflowUser", fields: [userId], references: [id], onDelete: Cascade)
   triggeredByUser User            @relation("WorkflowTriggeredBy", fields: [triggeredBy], references: [id])
   approvedByUser  User?           @relation("WorkflowApprovedBy", fields: [approvedBy], references: [id])
   steps           WorkflowStep[]
