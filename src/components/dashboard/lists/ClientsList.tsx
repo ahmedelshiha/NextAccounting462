@@ -6,6 +6,7 @@ import AdvancedDataTable from '@/components/dashboard/tables/AdvancedDataTable'
 import type { Column, FilterConfig } from '@/types/dashboard'
 import { apiFetch } from '@/lib/api'
 import { useTranslations } from '@/lib/i18n'
+import { hasRole } from '@/lib/permissions'
 
 interface UserRow {
   id: string | number

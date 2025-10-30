@@ -1,5 +1,6 @@
 import { getSessionOrBypass } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { hasRole } from '@/lib/permissions'
 import StandardPage from '@/components/dashboard/templates/StandardPage'
 import type { TabItem, FilterConfig } from '@/types/dashboard'
 
