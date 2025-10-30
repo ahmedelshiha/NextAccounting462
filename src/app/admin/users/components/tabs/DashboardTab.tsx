@@ -139,6 +139,41 @@ export function DashboardTab({
     }
   }
 
+  const handleApplyBulkAction = useCallback(async () => {
+    if (!bulkActionType || !bulkActionValue || selectedUserIds.size === 0) {
+      toast.error('Please select an action and value')
+      return
+    }
+
+    setIsApplyingBulkAction(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Show success message
+      let actionDescription = ''
+      if (bulkActionType === 'role') {
+        actionDescription = `Changed role to ${bulkActionValue}`
+      } else if (bulkActionType === 'status') {
+        actionDescription = `Changed status to ${bulkActionValue}`
+      } else if (bulkActionType === 'department') {
+        actionDescription = `Changed department to ${bulkActionValue}`
+      }
+
+      toast.success(`Applied to ${selectedUserIds.size} users: ${actionDescription}`)
+
+      // Reset selection
+      setSelectedUserIds(new Set())
+      setBulkActionType('')
+      setBulkActionValue('')
+    } catch (error) {
+      toast.error('Failed to apply bulk action')
+      console.error('Bulk action error:', error)
+    } finally {
+      setIsApplyingBulkAction(false)
+    }
+  }, [bulkActionType, bulkActionValue, selectedUserIds.size])
+
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Quick Actions Bar */}
