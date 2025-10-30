@@ -80,9 +80,9 @@ model User {
   workflowsAsUser           UserWorkflow[]          @relation("WorkflowUser")
   workflowsTriggered        UserWorkflow[]          @relation("WorkflowTriggeredBy")
   workflowsApproved         UserWorkflow[]          @relation("WorkflowApprovedBy")
-  workflowStepsApproved     WorkflowStep[]
-  workflowTemplatesCreated  WorkflowTemplate[]
-  workflowHistoryChanges    WorkflowHistory[]
+  workflowStepsApproved     WorkflowStep[]          @relation("WorkflowStepApprovedBy")
+  workflowTemplatesCreated  WorkflowTemplate[]      @relation("WorkflowTemplateCreatedBy")
+  workflowHistoryChanges    WorkflowHistory[]       @relation("WorkflowHistoryChangedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
