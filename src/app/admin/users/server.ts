@@ -165,6 +165,8 @@ export async function fetchStatsServerSide(tenantId: string): Promise<UserStats>
 
     const growth = newLastMonth > 0 ? ((newThisMonth - newLastMonth) / newLastMonth) * 100 : 0
 
+    console.log(`[fetchStatsServerSide] Fetched stats for tenant ${tenantId}: ${total} total users, ${active} active`)
+
     return {
       total,
       clients: clientCount,
