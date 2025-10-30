@@ -1,12 +1,13 @@
 'use client'
 
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Users, RefreshCw, Download, Loader2, Search } from 'lucide-react'
 import { usePermissions } from '@/lib/use-permissions'
 import { useUsersContext } from '../contexts/UsersContextProvider'
+import { useDebouncedSearch } from '../hooks/useDebouncedSearch'
 
 interface DashboardHeaderProps {
   onRefresh: () => Promise<void>
@@ -23,12 +24,18 @@ export const DashboardHeader = memo(function DashboardHeader({
 }: DashboardHeaderProps) {
   const perms = usePermissions()
   const { search, setSearch, roleFilter, setRoleFilter, statusFilter, setStatusFilter } = useUsersContext()
+  const [localSearch, setLocalSearch] = useState(search)
+
+  // ✅ Debounce search input (400ms) to reduce filtering operations
+  const debouncedSearch = useDebouncedSearch(localSearch, setSearch)
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearch(e.target.value)
+      const value = e.target.value
+      setLocalSearch(value)
+      debouncedSearch(value)
     },
-    [setSearch]
+    [debouncedSearch]
   )
 
   const handleRoleFilterChange = useCallback(
