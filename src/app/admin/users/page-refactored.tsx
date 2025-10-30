@@ -178,8 +178,10 @@ export default function AdminUsersPage() {
     [savePermissions]
   )
 
-  // Show minimal skeleton while loading critical data
-  if (statsLoading && usersLoading) {
+  // ✅ OPTIMIZED: With server-provided data, we rarely need skeleton
+  // Only show skeleton if data is missing AND still loading
+  // (e.g., if user manually triggered refresh)
+  if (!context.users.length && !context.stats && statsLoading && usersLoading) {
     return <PageLoadingSkeleton />
   }
 
