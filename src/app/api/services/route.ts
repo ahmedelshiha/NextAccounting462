@@ -4,6 +4,7 @@ import { withTenantContext } from '@/lib/api-wrapper'
 import { tenantContext } from '@/lib/tenant-context'
 import { requireTenantContext } from '@/lib/tenant-utils'
 import { getTenantFromRequest, tenantFilter, isMultiTenancyEnabled } from '@/lib/tenant'
+import { hasRole } from '@/lib/permissions'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
