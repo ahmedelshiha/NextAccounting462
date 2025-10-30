@@ -218,7 +218,7 @@ export function withTenantContext(
         )
       }
 
-      if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+      if (allowedRoles.length > 0 && !hasRole(user.role, allowedRoles)) {
         return attachRequestId(
           NextResponse.json(
             { error: 'Forbidden', message: 'Insufficient permissions' },
