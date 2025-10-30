@@ -128,7 +128,7 @@ export const DELETE = withTenantContext(async (request: NextRequest, context: { 
     }
 
     const isOwner = booking.clientId === ctx.userId
-    const isAdminOrStaff = ['ADMIN', 'STAFF'].includes(ctx.role ?? '')
+    const isAdminOrStaff = hasRole(ctx.role ?? '', ['ADMIN', 'STAFF'])
 
     if (!isOwner && !isAdminOrStaff) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
