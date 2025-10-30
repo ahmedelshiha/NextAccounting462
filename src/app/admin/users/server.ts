@@ -74,7 +74,7 @@ export async function fetchUsersServerSide(
       role: (user.role as 'ADMIN' | 'TEAM_MEMBER' | 'TEAM_LEAD' | 'STAFF' | 'CLIENT') || 'TEAM_MEMBER',
       createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : String(user.createdAt),
       lastLoginAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : String(user.updatedAt),
-      isActive: user.availabilityStatus !== 'UNAVAILABLE',
+      isActive: user.availabilityStatus === 'AVAILABLE',
       avatar: user.image || undefined,
       company: user.department || undefined,
       location: user.position || undefined,
@@ -114,7 +114,7 @@ export async function fetchStatsServerSide(): Promise<UserStats> {
     const [total, active, admins, staffCount, clientCount, newThisMonth, newLastMonth] = await Promise.all([
       prisma.user.count({ where: tenantFilter(tenantId) }),
       prisma.user.count({
-        where: { ...tenantFilter(tenantId), availabilityStatus: { not: 'UNAVAILABLE' } }
+        where: { ...tenantFilter(tenantId), availabilityStatus: 'AVAILABLE' }
       }),
       prisma.user.count({
         where: { ...tenantFilter(tenantId), role: 'ADMIN' }
