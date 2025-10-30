@@ -66,6 +66,9 @@ export function DashboardTab({
   })
 
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
+  const [bulkActionType, setBulkActionType] = useState<string>('')
+  const [bulkActionValue, setBulkActionValue] = useState<string>('')
+  const [isApplyingBulkAction, setIsApplyingBulkAction] = useState(false)
 
   // Filter users based on active filters
   const filteredUsers = users.filter((user) => {
