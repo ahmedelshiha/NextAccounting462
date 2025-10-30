@@ -181,11 +181,11 @@ export const UsersTable = memo(function UsersTable({
         {users.length > 0 && (
           <div className="flex items-center gap-2 text-sm">
             <Checkbox
-              checked={allSelected}
-              indeterminate={someSelected}
+              checked={allSelected || someSelected}
               onCheckedChange={handleSelectAllChange}
-              aria-label="Select all users"
+              aria-label={allSelected ? 'Deselect all users' : 'Select all users'}
               title={allSelected ? 'Deselect all' : 'Select all'}
+              className={someSelected ? 'opacity-50' : ''}
             />
             <span className="text-gray-500">
               {selectedUserIds.size > 0 ? `${selectedUserIds.size} selected` : 'Select all'}
