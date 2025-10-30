@@ -5,6 +5,7 @@ import { withTenantContext } from '@/lib/api-wrapper'
 import { tenantContext } from '@/lib/tenant-context'
 import { requireTenantContext } from '@/lib/tenant-utils'
 import { getTenantFromRequest, tenantFilter } from '@/lib/tenant'
+import { hasRole } from '@/lib/permissions'
 
 // GET /api/posts/[slug] - Get post by slug
 export const GET = withTenantContext(async (request: NextRequest, context: { params: Promise<{ slug: string }> }) => {
