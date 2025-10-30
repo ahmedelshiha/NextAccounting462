@@ -1,5 +1,6 @@
 import { getSessionOrBypass } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { hasRole } from '@/lib/permissions'
 import ListPage from '@/components/dashboard/templates/ListPage'
 import type { Column, RowAction, TabItem, FilterConfig } from '@/types/dashboard'
 
