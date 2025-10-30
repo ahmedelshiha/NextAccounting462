@@ -24,7 +24,12 @@ export const useMenuCustomizationFeature = () => {
     if (userId) return isMenuCustomizationEnabledForUser(userId)
     // Fallback to role-based check for better UX during session loading
     const adminRoles = ['ADMIN', 'SUPER_ADMIN', 'TEAM_LEAD', 'STAFF']
-    return Boolean(role && adminRoles.includes(role))
+    try {
+      const { hasRole } = await import('@/lib/permissions')
+      return Boolean(role && hasRole(role, adminRoles))
+    } catch {
+      return Boolean(role && adminRoles.includes(role))
+    }
   })()
 
   return {
