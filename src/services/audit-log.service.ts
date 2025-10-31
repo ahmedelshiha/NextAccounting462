@@ -316,4 +316,35 @@ export class AuditLogService {
 
     return csvContent
   }
+
+  /**
+   * Query cache for frequently accessed data
+   */
+  private static queryCache = new Map<string, { data: any; timestamp: number }>()
+  private static readonly QUERY_CACHE_DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
+
+  private static getQueryCache(key: string): any {
+    const cached = this.queryCache.get(key)
+    if (cached && Date.now() - cached.timestamp < this.QUERY_CACHE_DEFAULT_TTL) {
+      return cached.data
+    }
+    this.queryCache.delete(key)
+    return null
+  }
+
+  private static setQueryCache(key: string, data: any, ttl: number = this.QUERY_CACHE_DEFAULT_TTL): void {
+    this.queryCache.set(key, {
+      data,
+      timestamp: Date.now()
+    })
+    // Auto-cleanup old cache entries
+    if (this.queryCache.size > 100) {
+      const now = Date.now()
+      for (const [k, v] of this.queryCache.entries()) {
+        if (now - v.timestamp > ttl) {
+          this.queryCache.delete(k)
+        }
+      }
+    }
+  }
 }
