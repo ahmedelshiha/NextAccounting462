@@ -125,6 +125,7 @@ interface UsersContextType {
   // Helpers
   openUserProfile: (user: UserItem) => void
   closeUserProfile: () => void
+  refreshUsers: () => Promise<void>
 }
 
 // Create Context
