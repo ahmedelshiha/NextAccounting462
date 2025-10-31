@@ -513,13 +513,27 @@ Week 11-12: ⏳ Phase 4d - Audit & Admin
   - API endpoints and integration guide
   - Used for: API reference, integration testing
 
-### Phase 4b: Workflow Engine (⏳ Planning)
+### Phase 4b: Workflow Engine (✅ Complete)
 - [`docs/PHASE_4b_WORKFLOW_ENGINE_PLAN.md`](./PHASE_4b_WORKFLOW_ENGINE_PLAN.md)
   - Complete Phase 4b implementation plan
   - Workflow types, data models, components
   - API endpoints and UI designs
-  - 50 hours, 2 weeks, starts Week 3
-  - Used for: Development reference, sprint planning
+  - 50 hours, 2 weeks (COMPLETE)
+  - Used for: Development reference, sprint planning, completed Oct 2025
+
+### Phase 4c: Bulk Operations (✅ Complete)
+- Phase 4c Bulk Operations Implementation
+  - 5-step wizard for bulk operations
+  - Large-scale execution support (1000+ users)
+  - Dry-run and rollback capabilities
+  - 45 hours, 2 weeks (COMPLETE)
+  - Files created:
+    - Database migration: 20250305_phase4c_bulk_operations
+    - Service: src/services/bulk-operations.service.ts
+    - API endpoints: src/app/api/admin/bulk-operations/route.ts and [id]/route.ts and preview/route.ts
+    - UI components: 6 components in src/app/admin/users/components/bulk-operations/
+    - Tests: e2e/tests/admin-users-phase4c-bulk-operations.spec.ts (453 lines) and a11y variant (404 lines)
+  - Used for: Bulk operation management, user operations at scale
 
 ### Project Status Reports
 - [`docs/PROJECT_STATUS_REPORT.md`](./PROJECT_STATUS_REPORT.md)
