@@ -11,7 +11,7 @@ import prisma from '@/lib/prisma'
 export const POST = withTenantContext(async (request: NextRequest) => {
   try {
     const ctx = requireTenantContext()
-    if (!ctx.userId) {
+    if (!ctx.userId || !ctx.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -28,7 +28,7 @@ export const POST = withTenantContext(async (request: NextRequest) => {
     // Get users for preview
     const users = await prisma.user.findMany({
       where: {
-        tenantId: ctx.tenantId,
+        tenantId: ctx.tenantId as string,
         id: { in: selectedUserIds }
       },
       select: {
