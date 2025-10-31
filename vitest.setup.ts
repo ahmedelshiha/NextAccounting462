@@ -389,7 +389,12 @@ vi.mock('@/lib/permissions', async () => {
 })
 
 // Polyfill Web APIs (Blob, File, URL) for jsdom/Node test environments
-if (typeof (globalThis as any).Blob === 'undefined') {
+// Create a blob storage for mock URLs
+const testBlobStore = new Map<string, any>()
+let blobIdCounter = 0
+
+// Ensure Blob exists and works properly
+if (typeof (globalThis as any).Blob === 'undefined' || !((globalThis as any).Blob && typeof (globalThis as any).Blob === 'function')) {
   class NodeBlob {
     parts: any[]
     mimeType: string
@@ -408,63 +413,50 @@ if (typeof (globalThis as any).Blob === 'undefined') {
   ;(globalThis as any).Blob = NodeBlob as any
 }
 
-// Ensure URL is properly polyfilled with createObjectURL and revokeObjectURL
-if (typeof (globalThis as any).URL === 'undefined' || !((globalThis as any).URL && typeof (globalThis as any).URL.createObjectURL === 'function')) {
-  const blobStore = new Map<string, any>()
-  const counter = { id: 0 }
-
-  if (typeof (globalThis as any).URL === 'undefined') {
-    class NodeURL {
-      href: string
-      protocol: string
-      hostname: string
-      pathname: string
-      search: string
-      hash: string
-
-      constructor(url: string, base?: string) {
-        this.href = url
-        this.protocol = url.split(':')[0] + ':'
-        const path = url.replace(/^[^:]+:\/\/[^\/]+/, '')
-        const [pathname, search] = path.split('?')
-        const [cleanPath, hash] = (search || '').split('#')
-        this.pathname = pathname
-        this.search = search ? '?' + cleanPath : ''
-        this.hash = hash ? '#' + hash : ''
-
-        try {
-          const u = new URL(url, base)
-          this.hostname = u.hostname
-        } catch {
-          this.hostname = ''
-        }
-      }
-
-      toString() { return this.href }
-      static createObjectURL(blob: any) {
-        const id = `blob:${++counter.id}`
-        blobStore.set(id, blob)
-        return id
-      }
-      static revokeObjectURL(url: string) {
-        blobStore.delete(url)
+// Ensure URL.createObjectURL and URL.revokeObjectURL exist
+try {
+  if (!((globalThis as any).URL && typeof (globalThis as any).URL.createObjectURL === 'function')) {
+    if (typeof (globalThis as any).URL !== 'function') {
+      // URL doesn't exist, create a minimal one
+      ;(globalThis as any).URL = class {
+        constructor(public href: string) {}
       }
     }
-    ;(globalThis as any).URL = NodeURL as any
-  } else {
-    // Extend existing URL with createObjectURL if it doesn't exist
+    // Add createObjectURL to URL
+    ;(globalThis as any).URL.createObjectURL = (blob: any) => {
+      const id = `blob:mock-${++blobIdCounter}`
+      testBlobStore.set(id, blob)
+      return id
+    }
+    ;(globalThis as any).URL.revokeObjectURL = (url: string) => {
+      testBlobStore.delete(url)
+    }
+  }
+} catch (err) {
+  // Fallback
+  try {
+    if (!(globalThis as any).URL) {
+      ;(globalThis as any).URL = {}
+    }
     if (typeof (globalThis as any).URL.createObjectURL !== 'function') {
-      (globalThis as any).URL.createObjectURL = (blob: any) => {
-        const id = `blob:${++counter.id}`
-        blobStore.set(id, blob)
+      ;(globalThis as any).URL.createObjectURL = (blob: any) => {
+        const id = `blob:mock-${++blobIdCounter}`
+        testBlobStore.set(id, blob)
         return id
       }
     }
     if (typeof (globalThis as any).URL.revokeObjectURL !== 'function') {
-      (globalThis as any).URL.revokeObjectURL = (url: string) => {
-        blobStore.delete(url)
+      ;(globalThis as any).URL.revokeObjectURL = (url: string) => {
+        testBlobStore.delete(url)
       }
     }
+  } catch {}
+}
+
+// Stub HTMLAnchorElement.prototype.click to prevent navigation in tests
+if (typeof (globalThis as any).HTMLAnchorElement !== 'undefined' && typeof (globalThis as any).HTMLAnchorElement.prototype.click !== 'function') {
+  ;(globalThis as any).HTMLAnchorElement.prototype.click = function() {
+    // Stub: don't actually navigate in tests
   }
 }
 
