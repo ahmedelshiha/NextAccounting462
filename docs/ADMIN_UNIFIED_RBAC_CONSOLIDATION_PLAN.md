@@ -85,7 +85,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 │   └── User selection
 ├── Entities Tab (NEW)
 │   ├── Clients List
-│   │   ├── Search, filter, sort
+│   ���   ├── Search, filter, sort
 │   │   ├── Create/Edit/Delete client modals
 │   │   ├── Client detail panel
 │   │   ├── Bulk actions for clients
@@ -943,6 +943,53 @@ Migration tasks (dashboard add-user):
 - Preserve the existing `/admin/clients/new` route as a temporary shim that redirects to the new create flow with a clear deprecation period.
 - Add E2E tests to verify the Add user flow from the dashboard quick-action, from Entities tab, and via the legacy route.
 - Ensure RBAC checks and audit logging are applied for user creation in the unified flow.
+
+---
+
+### Modal & Component Deduplication Audit
+
+Finding summary:
+- Existing components relevant to user creation and management:
+  - UserProfileDialog (src/app/admin/users/components/UserProfileDialog) — used to view/edit user details.
+  - UnifiedPermissionModal (src/components/admin/permissions/UnifiedPermissionModal.tsx) — single permission modal used across user/role flows.
+  - Client creation flow (src/app/admin/clients/new/page.tsx) — includes the working create-user API call and client onboarding form used today.
+- Risk: Creating a new standalone "CreateUserModal" for the unified Users page would duplicate validation, form fields, and submit logic already present in the clients/new flow and the UserProfileDialog edit flow.
+
+Recommendations to avoid duplication:
+1. Extract a single reusable UserForm component (e.g., src/components/admin/shared/UserForm.tsx) that contains:
+   - All form fields required for user creation and editing (name, email, role, temporary password generation options, onboarding flags, preferences)
+   - Centralized validation using existing Zod schemas (reuse or extend schemas from src/schemas/clients and create src/schemas/users as needed)
+   - A single submit handler interface (onCreate, onUpdate callbacks) that callers can implement to call the appropriate API (/api/auth/register or unified /api/admin/entities/users)
+2. Replace inline form code in /admin/clients/new with the new UserForm to preserve existing create flow while enabling reuse.
+3. Implement a lightweight CreateUserModal that simply wraps UserForm and handles modal presentation; use the same modal component for dashboard quick-action and Entities tab create button.
+4. Reuse existing UserProfileDialog for editing users (it should consume the same UserForm component in edit mode or delegate to a dedicated EditUserForm wrapper).
+5. Keep UnifiedPermissionModal as the single source of truth for permission changes — do not create additional permission modal variants.
+6. Centralize permission and role saving logic in src/app/admin/users/hooks/useUserPermissions.ts and reuse it across UnifiedPermissionModal and any role/permission UI.
+7. Lazy-load heavy modal wrappers (CreateUserModal, UserProfileDialog, UnifiedPermissionModal) with dynamic imports and Suspense to avoid bundle inflation.
+8. Add migration and refactor tasks to Phase 2/3 to ensure changes are incremental and verified:
+   - Phase 2: Extract UserForm and user schemas; update /admin/clients/new to use it (smoke test)
+   - Phase 2: Create CreateUserModal wrapper and wire dashboard quick-action to open it (feature-flagged)
+   - Phase 3: Replace any duplicate inline forms across the admin area with the shared UserForm; remove retired code
+   - Add E2E coverage for Add User flow from dashboard, entities tab, and legacy route
+
+Missing items identified:
+- Centralized user Zod schema (src/schemas/users) — currently client schemas exist but user schema parity is not guaranteed. Create and reconcile schemas.
+- Shared UserForm component does not exist yet and should be implemented before wiring the dashboard Add action.
+- Tests: unit tests for UserForm validation and integration tests for the modal flows are missing and must be added.
+
+Implementation notes:
+- Maintain existing API compatibility by keeping /admin/clients/new as a shim until the unified flow is feature-complete.
+- Ensure RBAC checks are performed on server-side routes (both old and new endpoints) — do not rely solely on client-side guards.
+- Preserve audit logging when moving create-user logic by ensuring server endpoints call AuditLogService or equivalent.
+
+Action items (short):
+- Create src/components/admin/shared/UserForm.tsx and src/schemas/users.ts
+- Refactor src/app/admin/clients/new/page.tsx to use UserForm
+- Implement CreateUserModal wrapper and wire quick-action (feature flagged)
+- Add E2E tests for add-user flows and unit tests for UserForm
+- Remove duplicate form code during Phase 3 cleanup
+
+---
 
 Workflows Tab (Phase 4b)
 ├── Workflow management ✅ MAINTAINED
