@@ -44,20 +44,18 @@ describe('Communication Settings Export/Import UI', () => {
     fireEvent.click(getByText('Export') as any)
     await waitFor(() => expect((global.fetch as any).mock.calls.some((c: any[]) => String(c[0]).endsWith('/api/admin/communication-settings/export'))).toBe(true))
 
-    const importButtons = container.querySelectorAll('button')
-    const importButton = Array.from(importButtons).find(btn => btn.textContent === 'Import' && !btn.disabled)
-    fireEvent.click(importButton as any)
-    await waitFor(() => getByText('Import Communication Settings'))
+    const importButtons = Array.from(screen.getAllByText('Import'))
+    fireEvent.click(importButtons[0] as any)
+    await waitFor(() => screen.getByText('Import Communication Settings'))
 
-    const input = container.querySelector('input[type="file"]') as HTMLInputElement
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
     const file = new File([JSON.stringify({ settings: { email: {} } })], 'communication.json', { type: 'application/json' })
     const dt = { files: [file] } as any
     fireEvent.change(input, dt)
 
     // Find the confirm Import button (should be in the modal/dialog)
-    const confirmButtons = container.querySelectorAll('button')
-    const confirmImport = Array.from(confirmButtons).find(btn => btn.textContent === 'Import' && !btn.hasAttribute('disabled'))
-    fireEvent.click(confirmImport as any)
+    const confirmButtons = Array.from(screen.getAllByText('Import'))
+    fireEvent.click(confirmButtons[confirmButtons.length - 1] as any)
     await waitFor(() => expect((global.fetch as any).mock.calls.some((c: any[]) => String(c[0]).endsWith('/api/admin/communication-settings/import'))).toBe(true))
   })
 })
