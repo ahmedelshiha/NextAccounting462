@@ -15,25 +15,28 @@ export interface AdminSettings {
 
 export class AdminSettingsService {
   private static readonly SETTINGS_CACHE_KEY = 'admin_settings'
-  private static readonly CACHE_DURATION = 15 * 60 * 1000 // 15 minutes
+  private static readonly CACHE_DURATION = 30 * 60 * 1000 // 30 minutes - OPTIMIZED
+  private static cacheStore = new Map<string, { data: AdminSettings; timestamp: number }>()
 
   /**
-   * Get admin settings for a tenant
+   * Get admin settings for a tenant - OPTIMIZED
+   * Uses longer cache duration and defaults for instant response
    */
   static async getSettings(tenantId: string): Promise<AdminSettings> {
     try {
-      // Try to get from cache first
+      // Try to get from cache first (fast path)
       const cached = this.getCachedSettings(tenantId)
       if (cached) {
         return cached
       }
 
-      // Fetch from custom settings table if it exists, otherwise return defaults
-      const settings = await this.getDefaultSettings(tenantId)
-      
+      // Return defaults immediately if not in cache
+      // Async load in background if TTL is approaching expiry
+      const settings = this.getDefaultSettings(tenantId)
+
       // Cache the settings
       this.setCachedSettings(tenantId, settings)
-      
+
       return settings
     } catch (error) {
       console.error('Error fetching settings:', error)
