@@ -225,18 +225,61 @@ export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarT
           </div>
 
           {/* Center section - Search */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="w-full">
+          <div className="hidden md:flex flex-1 max-w-md mx-8" ref={searchRef}>
+            <form onSubmit={handleSearchSubmit} className="w-full">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="Search admin panel..."
+                  placeholder="Search users, services, bookings..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchInputChange}
+                  onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
                   className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-input text-foreground"
+                  aria-label="Global search"
+                  aria-autocomplete="list"
+                  aria-controls={showResults ? 'search-results' : undefined}
+                  aria-expanded={showResults}
                 />
+                {isSearching && <div className="absolute right-3 top-1/2 transform -translate-y-1/2"><div className="h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}
               </div>
+
+              {/* Search Results Dropdown */}
+              {showResults && searchResults.length > 0 && (
+                <div id="search-results" className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                  <ul className="divide-y divide-border">
+                    {searchResults.map((result, index) => (
+                      <li key={`${result.type}-${result.id}-${index}`}>
+                        <button
+                          type="button"
+                          onClick={() => handleSearchResultClick(result)}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors flex items-center justify-between group"
+                        >
+                          <div>
+                            <div className="font-medium text-sm text-foreground">{result.name || result.title}</div>
+                            <div className="text-xs text-muted-foreground">{result.description || `Type: ${result.type}`}</div>
+                          </div>
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700 group-hover:bg-gray-200 transition-colors">{result.type}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {searchResults.length > 0 && (
+                    <button
+                      type="submit"
+                      className="w-full px-4 py-2 text-center text-sm text-blue-600 hover:bg-gray-50 font-medium border-t border-border transition-colors"
+                    >
+                      View all results for "{searchQuery}"
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {showResults && searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-50 p-4 text-center text-sm text-muted-foreground">
+                  No results found for "{searchQuery}"
+                </div>
+              )}
             </form>
           </div>
 
