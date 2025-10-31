@@ -45,7 +45,19 @@ export async function GET(request: NextRequest) {
       offset
     })
 
-    return NextResponse.json(result)
+    // Add caching headers for responses
+    const response = NextResponse.json(result)
+
+    // Cache GET requests for 5 minutes (immutable data)
+    if (request.method === 'GET' && !search) {
+      response.headers.set('Cache-Control', 'private, max-age=300')
+      response.headers.set('CDN-Cache-Control', 'max-age=300, stale-while-revalidate=600')
+    } else {
+      // Don't cache search results or mutations
+      response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    }
+
+    return response
   } catch (error) {
     console.error('Error fetching audit logs:', error)
     return NextResponse.json(
