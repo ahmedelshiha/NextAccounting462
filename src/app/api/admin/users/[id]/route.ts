@@ -68,22 +68,24 @@ export const PATCH = withTenantContext(async (request: NextRequest, context: { p
     if (parsed.data.role !== undefined && oldUser?.role !== parsed.data.role) {
       // Log role change to comprehensive audit trail
       try {
-        await AuditLogService.createAuditLog({
-          tenantId: tenantId,
-          userId: ctx.userId,
-          action: 'user.role.update',
-          resource: `user:${id}`,
-          metadata: {
-            targetUserId: id,
-            targetEmail: updated.email,
-            targetName: updated.name,
-            oldRole: oldUser?.role,
-            newRole: parsed.data.role,
-            timestamp: new Date().toISOString()
-          },
-          ipAddress: ip,
-          userAgent: request.headers.get('user-agent') || undefined
-        })
+        if (tenantId) {
+          await AuditLogService.createAuditLog({
+            tenantId: tenantId,
+            userId: ctx.userId,
+            action: 'user.role.update',
+            resource: `user:${id}`,
+            metadata: {
+              targetUserId: id,
+              targetEmail: updated.email,
+              targetName: updated.name,
+              oldRole: oldUser?.role,
+              newRole: parsed.data.role,
+              timestamp: new Date().toISOString()
+            },
+            ipAddress: ip,
+            userAgent: request.headers.get('user-agent') || undefined
+          })
+        }
       } catch (auditError) {
         console.error('Failed to create audit log for role change:', auditError)
         // Log to simple audit as fallback
