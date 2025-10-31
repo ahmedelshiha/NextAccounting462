@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { hasPermission } from "@/lib/permissions"
+import { hasPermission, PERMISSIONS } from "@/lib/permissions"
 import Avatar from "./UserProfileDropdown/Avatar"
 import UserInfo from "./UserProfileDropdown/UserInfo"
 import { ThemeSelector } from "./UserProfileDropdown/ThemeSelector"
