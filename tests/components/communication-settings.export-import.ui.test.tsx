@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, waitFor, fireEvent } from '@testing-library/react'
+import { render, waitFor, fireEvent, screen } from '@testing-library/react'
 vi.mock('@/components/PermissionGate', () => ({ __esModule: true, default: ({ children }: any) => <>{children}</>, PermissionGate: ({ children }: any) => <>{children}</> }))
 import CommunicationSettingsPage from '@/app/admin/settings/communication/page'
 
@@ -9,6 +9,8 @@ vi.mock('@/lib/auth', () => ({ authOptions: {} }))
 const originalFetch = global.fetch as any
 
 beforeEach(() => {
+  // Stub URL.createObjectURL for jsdom environment
+  (global as any).URL = { ...(global as any).URL, createObjectURL: vi.fn(() => 'blob:mock') }
   global.fetch = vi.fn(async (url: any, opts: any) => {
     const u = String(url)
     if (u.endsWith('/api/admin/communication-settings') && (!opts || opts.method === 'GET')) {
