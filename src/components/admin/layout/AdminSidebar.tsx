@@ -145,6 +145,16 @@ function AdminSidebar(props: AdminSidebarProps) {
       section: 'system',
       items: [
         { name: 'User Management', href: '/admin/users', icon: Users, permission: PERMISSIONS.USERS_MANAGE },
+        { name: 'Permissions', href: '/admin/permissions', icon: Shield, permission: PERMISSIONS.PERMISSIONS_MANAGE },
+        { name: 'Roles', href: '/admin/roles', icon: Briefcase, permission: PERMISSIONS.PERMISSIONS_MANAGE },
+        { name: 'Audits', href: '/admin/audits', icon: FileText, permission: PERMISSIONS.AUDIT_LOGS_VIEW },
+        { name: 'Compliance', href: '/admin/compliance', icon: CheckSquare, permission: PERMISSIONS.COMPLIANCE_VIEW },
+        { name: 'Integrations', href: '/admin/integrations', icon: Briefcase, permission: PERMISSIONS.INTEGRATIONS_MANAGE },
+        { name: 'Security', href: '/admin/security', icon: Shield, permission: PERMISSIONS.SECURITY_SETTINGS_MANAGE },
+        { name: 'Posts', href: '/admin/posts', icon: FileText, permission: PERMISSIONS.POSTS_MANAGE },
+        { name: 'Newsletter', href: '/admin/newsletter', icon: Mail, permission: PERMISSIONS.NEWSLETTER_MANAGE },
+        { name: 'Notifications', href: '/admin/notifications', icon: Bell, permission: PERMISSIONS.NOTIFICATIONS_MANAGE },
+        { name: 'Performance Metrics', href: '/admin/perf-metrics', icon: BarChart3, permission: PERMISSIONS.ANALYTICS_VIEW },
       ]
     }
   ]
