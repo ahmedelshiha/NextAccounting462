@@ -200,15 +200,15 @@ export const UsersTable = memo(function UsersTable({
           <CardDescription>Search, filter and manage users</CardDescription>
         </div>
         {users.length > 0 && (
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm" role="toolbar" aria-label="Table selection actions">
             <Checkbox
               checked={allSelected || someSelected}
               onCheckedChange={handleSelectAllChange}
               aria-label={allSelected ? 'Deselect all users' : 'Select all users'}
-              title={allSelected ? 'Deselect all' : 'Select all'}
+              title={allSelected ? 'Deselect all users' : 'Select all users'}
               className={someSelected ? 'opacity-50' : ''}
             />
-            <span className="text-gray-500">
+            <span className="text-gray-500" aria-live="polite">
               {selectedUserIds.size > 0 ? `${selectedUserIds.size} selected` : 'Select all'}
             </span>
           </div>
@@ -216,23 +216,29 @@ export const UsersTable = memo(function UsersTable({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="max-h-[60vh] space-y-2">
+          <div className="max-h-[60vh] space-y-2" role="status" aria-label="Loading users">
             {Array.from({ length: 5 }).map((_, i) => (
               <UserRowSkeleton key={i} />
             ))}
           </div>
         ) : users.length ? (
-          <VirtualScroller
-            items={users}
-            itemHeight={96}
-            maxHeight="60vh"
-            renderItem={(user) => renderUserRow(user)}
-            overscan={5}
-            getKey={(user) => user.id}
-            className="pr-1"
-          />
+          <div
+            role="grid"
+            aria-label="User directory table"
+            aria-rowcount={users.length}
+          >
+            <VirtualScroller
+              items={users}
+              itemHeight={96}
+              maxHeight="60vh"
+              renderItem={(user) => renderUserRow(user)}
+              overscan={5}
+              getKey={(user) => user.id}
+              className="pr-1"
+            />
+          </div>
         ) : (
-          <div className="h-[60vh] flex items-center justify-center text-gray-500 text-sm">
+          <div className="h-[60vh] flex items-center justify-center text-gray-500 text-sm" role="status">
             No users found matching your criteria.
           </div>
         )}
