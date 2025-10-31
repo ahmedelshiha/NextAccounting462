@@ -4,7 +4,7 @@ import { useMemo, type Ref, memo, type ReactNode } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
-import { ChevronDown, User as UserIcon, Settings, LogOut } from "lucide-react"
+import { ChevronDown, User as UserIcon, Settings, LogOut, LayoutDashboard } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
