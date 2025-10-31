@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     const result = await AuditLogService.fetchAuditLogs({
       tenantId,
       action,
-      userId,
+      userId: filterUserId,
       resource,
       startDate,
       endDate,
@@ -88,6 +88,12 @@ export async function GET(request: NextRequest) {
       // Don't cache search results or mutations
       response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
     }
+
+    // Add security headers
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    response.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('X-RateLimit-Remaining', String(remaining))
+    response.headers.set('X-RateLimit-Reset', String(Math.ceil(resetTime / 1000)))
 
     return response
   } catch (error) {
