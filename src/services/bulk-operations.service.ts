@@ -263,7 +263,7 @@ export class BulkOperationsService {
       // Process each user
       for (const user of affectedUsers) {
         try {
-          const result = await this.processUserOperation(user, operation.operationConfig as OperationConfig)
+          const result = await this.processUserOperation(user, (operation.operationConfig as any) as OperationConfig)
 
           // Create result record
           await prisma.bulkOperationResult.create({
