@@ -929,11 +929,20 @@ Retired:
 Dashboard Tab (Phase 4a)
 ├── User list & selection ✅ ENHANCED
 │   └─ Add client/team bulk operations
+│   └─ Note: Dashboard displays a ➕ "Add user" icon in the quick-actions area. The icon is present in the UI but is not yet wired to the create-user flow (see migration tasks below).
 ├── Pending operations ✅ MAINTAINED
 ├── Quick actions ✅ ENHANCED
 │   └─ Add client/team actions
+│   └─ The existing create-user flow currently lives at `/admin/clients/new` (working implementation). As part of consolidation we will migrate this flow into the unified Users dashboard (either as a Users create modal or routed form) and preserve backwards compatibility via shims/redirects.
 └── Stats cards ✅ ENHANCED
    └─ Include client/team metrics
+
+Migration tasks (dashboard add-user):
+- Migrate the create-user form from `/admin/clients/new` into the Users dashboard (Dashboard quick action or Entities sub-tab) and ensure parity of fields, validation, and server-side handling.
+- Wire the ➕ Add user icon to open the Users create modal or navigate to the unified create route.
+- Preserve the existing `/admin/clients/new` route as a temporary shim that redirects to the new create flow with a clear deprecation period.
+- Add E2E tests to verify the Add user flow from the dashboard quick-action, from Entities tab, and via the legacy route.
+- Ensure RBAC checks and audit logging are applied for user creation in the unified flow.
 
 Workflows Tab (Phase 4b)
 ├── Workflow management ✅ MAINTAINED
@@ -1152,7 +1161,7 @@ This revised plan consolidates all user/RBAC/entity management into a **single u
 
 ---
 
-**Status:** ✅ Ready for Team Review & Approval
+**Status:** ��� Ready for Team Review & Approval
 
 Next Step: Engineering team review and sign-off before Phase 0 begins.
 
