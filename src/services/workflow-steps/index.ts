@@ -1,12 +1,21 @@
 export { BaseStepHandler, type WorkflowContext, type StepHandlerResult } from './base-handler'
-export { CreateAccountStepHandler, createAccountHandler } from './create-account'
-export { ProvisionAccessStepHandler, provisionAccessHandler } from './provision-access'
-export { SendEmailStepHandler, sendEmailHandler } from './send-email'
-export { AssignRoleStepHandler, assignRoleHandler } from './assign-role'
-export { DisableAccountStepHandler, disableAccountHandler } from './disable-account'
-export { ArchiveDataStepHandler, archiveDataHandler } from './archive-data'
-export { RequestApprovalStepHandler, requestApprovalHandler } from './request-approval'
-export { SyncPermissionsStepHandler, syncPermissionsHandler } from './sync-permissions'
+export { CreateAccountStepHandler } from './create-account'
+export { ProvisionAccessStepHandler } from './provision-access'
+export { SendEmailStepHandler } from './send-email'
+export { AssignRoleStepHandler } from './assign-role'
+export { DisableAccountStepHandler } from './disable-account'
+export { ArchiveDataStepHandler } from './archive-data'
+export { RequestApprovalStepHandler } from './request-approval'
+export { SyncPermissionsStepHandler } from './sync-permissions'
+
+import { createAccountHandler } from './create-account'
+import { provisionAccessHandler } from './provision-access'
+import { sendEmailHandler } from './send-email'
+import { assignRoleHandler } from './assign-role'
+import { disableAccountHandler } from './disable-account'
+import { archiveDataHandler } from './archive-data'
+import { requestApprovalHandler } from './request-approval'
+import { syncPermissionsHandler } from './sync-permissions'
 
 export const stepHandlersMap: Record<string, any> = {
   CREATE_ACCOUNT: createAccountHandler,
@@ -17,6 +26,17 @@ export const stepHandlersMap: Record<string, any> = {
   ARCHIVE_DATA: archiveDataHandler,
   REQUEST_APPROVAL: requestApprovalHandler,
   SYNC_PERMISSIONS: syncPermissionsHandler
+}
+
+export {
+  createAccountHandler,
+  provisionAccessHandler,
+  sendEmailHandler,
+  assignRoleHandler,
+  disableAccountHandler,
+  archiveDataHandler,
+  requestApprovalHandler,
+  syncPermissionsHandler
 }
 
 export function getStepHandler(actionType: string) {
