@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withTenantContext } from '@/lib/api-wrapper'
 import { requireTenantContext } from '@/lib/tenant-utils'
 import { bulkOperationsService } from '@/services/bulk-operations.service'
+import prisma from '@/lib/prisma'
 
 /**
  * GET /api/admin/bulk-operations/[id]
@@ -41,13 +42,13 @@ export const GET = withTenantContext(async (
  * PATCH /api/admin/bulk-operations/[id]
  * Update a bulk operation
  */
-export async function PATCH(
+export const PATCH = withTenantContext(async (
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
-    const session = await getServerSession()
-    if (!session?.user) {
+    const ctx = requireTenantContext()
+    if (!ctx.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -67,14 +68,7 @@ export async function PATCH(
     }
 
     // Verify access
-    const membership = await prisma.tenantMembership.findFirst({
-      where: {
-        tenantId: operation.tenantId,
-        userId: session.user.id
-      }
-    })
-
-    if (!membership) {
+    if (operation.tenantId !== ctx.tenantId) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
@@ -95,14 +89,14 @@ export async function PATCH(
       case 'approve':
         result = await bulkOperationsService.approveBulkOperation(
           params.id,
-          session.user.id
+          ctx.userId
         )
         break
 
       case 'reject':
         result = await bulkOperationsService.rejectBulkOperation(
           params.id,
-          session.user.id,
+          ctx.userId,
           body.reason
         )
         break
@@ -110,14 +104,14 @@ export async function PATCH(
       case 'cancel':
         result = await bulkOperationsService.cancelBulkOperation(
           params.id,
-          session.user.id
+          ctx.userId
         )
         break
 
       case 'rollback':
         await bulkOperationsService.rollbackBulkOperation(
           params.id,
-          session.user.id
+          ctx.userId
         )
         result = { success: true }
         break
@@ -141,19 +135,19 @@ export async function PATCH(
       { status: 500 }
     )
   }
-}
+})
 
 /**
  * DELETE /api/admin/bulk-operations/[id]
  * Delete a bulk operation (draft only)
  */
-export async function DELETE(
+export const DELETE = withTenantContext(async (
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
-    const session = await getServerSession()
-    if (!session?.user) {
+    const ctx = requireTenantContext()
+    if (!ctx.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -163,14 +157,7 @@ export async function DELETE(
     }
 
     // Verify access
-    const membership = await prisma.tenantMembership.findFirst({
-      where: {
-        tenantId: operation.tenantId,
-        userId: session.user.id
-      }
-    })
-
-    if (!membership) {
+    if (operation.tenantId !== ctx.tenantId) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
@@ -195,4 +182,4 @@ export async function DELETE(
       { status: 500 }
     )
   }
-}
+})
