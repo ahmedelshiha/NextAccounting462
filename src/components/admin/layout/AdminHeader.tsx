@@ -72,19 +72,92 @@ function useBreadcrumbs() {
 export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarToggle }: AdminHeaderProps) {
   const { data: session } = useSession()
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [showResults, setShowResults] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const profileTriggerRef = useRef<HTMLButtonElement | null>(null)
   const { unreadCount } = useClientNotifications()
   const breadcrumbs = useBreadcrumbs()
   const router = useRouter()
+  const searchRef = useRef<HTMLDivElement | null>(null)
 
-  const handleSearch = (e: React.FormEvent) => {
+  // Debounced search function
+  const performSearch = useCallback(debounce(async (query: string) => {
+    if (!query.trim() || query.length < 2) {
+      setSearchResults([])
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      // Search across multiple resources
+      const response = await fetch('/api/admin/search?q=' + encodeURIComponent(query), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setSearchResults(data.results || [])
+        setShowResults(true)
+      }
+    } catch (error) {
+      console.error('Search error:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }, 300), [])
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value
+    setSearchQuery(query)
+    performSearch(query)
+  }
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      // TODO: Implement global search functionality
-      console.log('Searching for:', searchQuery)
+      // Navigate to global search results page
+      router.push(`/admin/search?q=${encodeURIComponent(searchQuery)}`)
+      setShowResults(false)
     }
   }
+
+  const handleSearchResultClick = (result: any) => {
+    // Navigate to the appropriate resource based on type
+    switch (result.type) {
+      case 'user':
+        router.push(`/admin/users?user=${result.id}`)
+        break
+      case 'service':
+        router.push(`/admin/services/${result.id}`)
+        break
+      case 'booking':
+        router.push(`/admin/bookings/${result.id}`)
+        break
+      case 'invoice':
+        router.push(`/admin/invoices/${result.id}`)
+        break
+      default:
+        router.push(`/admin/${result.type}/${result.id}`)
+    }
+    setShowResults(false)
+    setSearchQuery('')
+  }
+
+  // Close results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/login' })
