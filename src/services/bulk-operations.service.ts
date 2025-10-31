@@ -254,7 +254,7 @@ export class BulkOperationsService {
       // Get affected users
       const affectedUsers = await this.filterUsers(
         operation.tenantId,
-        operation.userFilter as UserFilterConfig
+        (operation.userFilter as any) as UserFilterConfig
       )
 
       let successCount = 0
