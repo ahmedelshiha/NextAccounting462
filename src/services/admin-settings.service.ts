@@ -145,23 +145,38 @@ export class AdminSettingsService {
   }
 
   /**
-   * Cache management
+   * Cache management - OPTIMIZED with auto-cleanup
    */
-  private static cacheStore = new Map<string, { data: AdminSettings; timestamp: number }>()
-
   private static getCachedSettings(tenantId: string): AdminSettings | null {
-    const cached = this.cacheStore.get(`${this.SETTINGS_CACHE_KEY}:${tenantId}`)
+    const key = `${this.SETTINGS_CACHE_KEY}:${tenantId}`
+    const cached = this.cacheStore.get(key)
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
       return cached.data
+    }
+    if (cached) {
+      this.cacheStore.delete(key)
     }
     return null
   }
 
   private static setCachedSettings(tenantId: string, settings: AdminSettings): void {
-    this.cacheStore.set(`${this.SETTINGS_CACHE_KEY}:${tenantId}`, {
+    const key = `${this.SETTINGS_CACHE_KEY}:${tenantId}`
+    this.cacheStore.set(key, {
       data: settings,
       timestamp: Date.now()
     })
+
+    // Periodically cleanup old entries to prevent memory leak
+    if (this.cacheStore.size > 1000) {
+      const now = Date.now()
+      const toDelete: string[] = []
+      for (const [k, v] of this.cacheStore.entries()) {
+        if (now - v.timestamp > this.CACHE_DURATION) {
+          toDelete.push(k)
+        }
+      }
+      toDelete.forEach(k => this.cacheStore.delete(k))
+    }
   }
 
   private static clearCachedSettings(tenantId: string): void {
