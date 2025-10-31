@@ -206,7 +206,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       {/* Information */}
       <Alert className="bg-blue-50 border-blue-200">
         <AlertDescription className="text-blue-800 text-sm">
-          <strong>ℹ️ Note:</strong> After reviewing the preview, you can proceed to execute this operation. You'll have the ability to rollback within 30 days if needed.
+          <strong>ℹ️ Note:</strong> After reviewing the preview, you can proceed to execute this operation. You&apos;ll have the ability to rollback within 30 days if needed.
         </AlertDescription>
       </Alert>
 
