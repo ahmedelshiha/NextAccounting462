@@ -1,13 +1,14 @@
 'use client'
 
-import React, { useState, Suspense } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { TabNavigation, TabType } from './components/TabNavigation'
 import {
   DashboardTab,
   WorkflowsTab,
   BulkOperationsTab,
   AuditTab,
-  AdminTab
+  AdminTab,
+  RbacTab
 } from './components/tabs'
 import { useUsersContext } from './contexts/UsersContextProvider'
 import { toast } from 'sonner'
@@ -34,6 +35,18 @@ import { toast } from 'sonner'
  */
 export function EnterpriseUsersPage() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard')
+
+  // Initialize tab from URL query (?tab=...)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const tab = params.get('tab') as TabType | null
+      const validTabs: TabType[] = ['dashboard', 'workflows', 'bulk-operations', 'audit', 'admin', 'rbac']
+      if (tab && (validTabs as string[]).includes(tab)) {
+        setActiveTab(tab)
+      }
+    }
+  }, [])
   const context = useUsersContext()
 
   // Handler for Add User action
@@ -152,6 +165,9 @@ export function EnterpriseUsersPage() {
 
         {/* Audit Tab */}
         {activeTab === 'audit' && <AuditTab />}
+
+        {/* RBAC Tab */}
+        {activeTab === 'rbac' && <RbacTab />}
 
         {/* Admin Settings Tab */}
         {activeTab === 'admin' && <AdminTab />}
