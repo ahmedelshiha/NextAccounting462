@@ -306,7 +306,8 @@ export function UsersContextProvider({ children, initialUsers = [], initialStats
 
     // Helpers
     openUserProfile,
-    closeUserProfile
+    closeUserProfile,
+    refreshUsers
   }
 
   return <UsersContext.Provider value={value}>{children}</UsersContext.Provider>
