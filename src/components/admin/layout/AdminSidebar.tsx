@@ -150,9 +150,10 @@ function AdminSidebar(props: AdminSidebarProps) {
   )
 
   const toggleSection = (section: string) => {
-    const newSections = expandedSections.includes(section)
-      ? expandedSections.filter(s => s !== section)
-      : [...expandedSections, section]
+    const sections = expandedSections || []
+    const newSections = sections.includes(section)
+      ? sections.filter(s => s !== section)
+      : [...sections, section]
     setExpandedGroups(newSections)
   }
 
