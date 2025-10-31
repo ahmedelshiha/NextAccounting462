@@ -55,21 +55,70 @@ export function EnterpriseUsersPage() {
   }
 
   // Handler for Export action
-  const handleExport = () => {
-    toast.loading('Preparing export...')
-    // TODO: Implement export functionality
-    setTimeout(() => {
-      toast.success('Export ready! (Feature in Phase 4d)')
-    }, 1000)
+  const handleExport = async () => {
+    const toastId = toast.loading('Preparing export...')
+    try {
+      // Build CSV headers
+      const headers = ['ID', 'Name', 'Email', 'Role', 'Status', 'Created At', 'Last Login']
+
+      // Build CSV rows
+      const rows = context.users.map(user => [
+        user.id,
+        user.name || '',
+        user.email,
+        user.role,
+        user.isActive ? 'ACTIVE' : 'INACTIVE',
+        new Date(user.createdAt).toLocaleDateString(),
+        new Date(user.lastLoginAt).toLocaleDateString()
+      ])
+
+      // Create CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => {
+          const value = String(cell || '')
+          return value.includes(',') || value.includes('"') ? `"${value.replace(/"/g, '""')}"` : value
+        }).join(','))
+      ].join('\n')
+
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `users-export-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast.dismiss(toastId)
+      toast.success(`Exported ${context.users.length} users successfully`)
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.dismiss(toastId)
+      toast.error('Failed to export users')
+    }
   }
 
   // Handler for Refresh action
-  const handleRefresh = () => {
-    toast.loading('Refreshing data...')
-    // TODO: Implement refresh functionality
-    setTimeout(() => {
-      toast.success('Data refreshed')
-    }, 500)
+  const handleRefresh = async () => {
+    const toastId = toast.loading('Refreshing data...')
+    try {
+      // Trigger data refresh through context or API
+      if (context.refreshUsers) {
+        await context.refreshUsers()
+      }
+
+      toast.dismiss(toastId)
+      toast.success('Data refreshed successfully')
+    } catch (error) {
+      console.error('Refresh error:', error)
+      toast.dismiss(toastId)
+      toast.error('Failed to refresh data')
+    }
   }
 
   return (

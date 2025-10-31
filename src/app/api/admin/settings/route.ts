@@ -1,18 +1,17 @@
-import { getServerSession } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
+import { withTenantContext } from '@/lib/api-wrapper'
+import { requireTenantContext } from '@/lib/tenant-utils'
 import { AdminSettingsService } from '@/services/admin-settings.service'
-import { authOptions } from '@/lib/auth'
 
-export async function GET(request: NextRequest) {
+export const GET = withTenantContext(async (request: NextRequest) => {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user) {
+    const ctx = requireTenantContext()
+    
+    if (!ctx.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const user = session.user as any
-    const tenantId = user.tenantId
+    const tenantId = ctx.tenantId
 
     if (!tenantId) {
       return NextResponse.json({ error: 'Tenant ID not found' }, { status: 400 })
@@ -42,34 +41,31 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})
 
-export async function POST(request: NextRequest) {
+export const POST = withTenantContext(async (request: NextRequest) => {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user) {
+    const ctx = requireTenantContext()
+    
+    if (!ctx.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const user = session.user as any
-    const tenantId = user.tenantId
+    const tenantId = ctx.tenantId
 
     if (!tenantId) {
       return NextResponse.json({ error: 'Tenant ID not found' }, { status: 400 })
     }
 
     const body = await request.json()
+    const settings = await AdminSettingsService.saveSettings(tenantId, body)
 
-    // Update settings
-    const updatedSettings = await AdminSettingsService.updateSettings(tenantId, body)
-
-    return NextResponse.json(updatedSettings)
+    return NextResponse.json(settings)
   } catch (error) {
-    console.error('Error updating settings:', error)
+    console.error('Error saving settings:', error)
     return NextResponse.json(
-      { error: 'Failed to update settings' },
+      { error: 'Failed to save settings' },
       { status: 500 }
     )
   }
-}
+})
