@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react'
 import { TabNavigation, TabType } from './components/TabNavigation'
 import {
   DashboardTab,
+  EntitiesTab,
   WorkflowsTab,
   BulkOperationsTab,
   AuditTab,
@@ -41,7 +42,7 @@ export function EnterpriseUsersPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const tab = params.get('tab') as TabType | null
-      const validTabs: TabType[] = ['dashboard', 'workflows', 'bulk-operations', 'audit', 'admin', 'rbac']
+      const validTabs: TabType[] = ['dashboard', 'entities', 'workflows', 'bulk-operations', 'audit', 'rbac', 'admin']
       if (tab && (validTabs as string[]).includes(tab)) {
         setActiveTab(tab)
       }
@@ -156,6 +157,9 @@ export function EnterpriseUsersPage() {
             />
           </Suspense>
         )}
+
+        {/* Entities Tab */}
+        {activeTab === 'entities' && <EntitiesTab />}
 
         {/* Workflows Tab */}
         {activeTab === 'workflows' && <WorkflowsTab />}
