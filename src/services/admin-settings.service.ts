@@ -1,0 +1,167 @@
+import { prisma } from '@/lib/prisma'
+
+export interface AdminSettings {
+  tenantId: string
+  auditRetentionDays: number
+  emailNotificationsEnabled: boolean
+  detailedLoggingEnabled: boolean
+  batchSize: number
+  cacheDurationMinutes: number
+  webhookUrl?: string
+  webhookEnabled: boolean
+  featureFlags?: Record<string, boolean>
+  updatedAt?: Date
+}
+
+export class AdminSettingsService {
+  private static readonly SETTINGS_CACHE_KEY = 'admin_settings'
+  private static readonly CACHE_DURATION = 15 * 60 * 1000 // 15 minutes
+
+  /**
+   * Get admin settings for a tenant
+   */
+  static async getSettings(tenantId: string): Promise<AdminSettings> {
+    try {
+      // Try to get from cache first
+      const cached = this.getCachedSettings(tenantId)
+      if (cached) {
+        return cached
+      }
+
+      // Fetch from custom settings table if it exists, otherwise return defaults
+      const settings = await this.getDefaultSettings(tenantId)
+      
+      // Cache the settings
+      this.setCachedSettings(tenantId, settings)
+      
+      return settings
+    } catch (error) {
+      console.error('Error fetching settings:', error)
+      return this.getDefaultSettings(tenantId)
+    }
+  }
+
+  /**
+   * Update admin settings for a tenant
+   */
+  static async updateSettings(tenantId: string, updates: Partial<AdminSettings>): Promise<AdminSettings> {
+    try {
+      // Update settings in database (would need to implement actual persistence)
+      const currentSettings = await this.getSettings(tenantId)
+      const updatedSettings = {
+        ...currentSettings,
+        ...updates,
+        tenantId,
+        updatedAt: new Date()
+      }
+
+      // Clear cache
+      this.clearCachedSettings(tenantId)
+
+      // In a real implementation, this would persist to database
+      // For now, we'll just return the updated settings
+      this.setCachedSettings(tenantId, updatedSettings)
+
+      return updatedSettings
+    } catch (error) {
+      console.error('Error updating settings:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get default settings for a tenant
+   */
+  static getDefaultSettings(tenantId: string): AdminSettings {
+    return {
+      tenantId,
+      auditRetentionDays: 90,
+      emailNotificationsEnabled: true,
+      detailedLoggingEnabled: true,
+      batchSize: 500,
+      cacheDurationMinutes: 15,
+      webhookEnabled: false,
+      featureFlags: {
+        enablePhase4Enterprise: true,
+        enableAuditLogs: true,
+        enableWorkflows: true,
+        enableBulkOperations: true,
+        enableAdvancedFiltering: true
+      }
+    }
+  }
+
+  /**
+   * Get feature flags for a tenant
+   */
+  static async getFeatureFlags(tenantId: string): Promise<Record<string, boolean>> {
+    const settings = await this.getSettings(tenantId)
+    return settings.featureFlags || {}
+  }
+
+  /**
+   * Check if a feature is enabled
+   */
+  static async isFeatureEnabled(tenantId: string, featureName: string): Promise<boolean> {
+    const flags = await this.getFeatureFlags(tenantId)
+    return flags[featureName] ?? false
+  }
+
+  /**
+   * Get audit configuration
+   */
+  static async getAuditConfig(tenantId: string): Promise<{
+    retentionDays: number
+    emailNotificationsEnabled: boolean
+    detailedLoggingEnabled: boolean
+  }> {
+    const settings = await this.getSettings(tenantId)
+    return {
+      retentionDays: settings.auditRetentionDays,
+      emailNotificationsEnabled: settings.emailNotificationsEnabled,
+      detailedLoggingEnabled: settings.detailedLoggingEnabled
+    }
+  }
+
+  /**
+   * Get workflow configuration
+   */
+  static async getWorkflowConfig(tenantId: string): Promise<{
+    batchSize: number
+    emailNotificationsEnabled: boolean
+    webhookEnabled: boolean
+    webhookUrl?: string
+  }> {
+    const settings = await this.getSettings(tenantId)
+    return {
+      batchSize: settings.batchSize,
+      emailNotificationsEnabled: settings.emailNotificationsEnabled,
+      webhookEnabled: settings.webhookEnabled,
+      webhookUrl: settings.webhookUrl
+    }
+  }
+
+  /**
+   * Cache management
+   */
+  private static cacheStore = new Map<string, { data: AdminSettings; timestamp: number }>()
+
+  private static getCachedSettings(tenantId: string): AdminSettings | null {
+    const cached = this.cacheStore.get(`${this.SETTINGS_CACHE_KEY}:${tenantId}`)
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      return cached.data
+    }
+    return null
+  }
+
+  private static setCachedSettings(tenantId: string, settings: AdminSettings): void {
+    this.cacheStore.set(`${this.SETTINGS_CACHE_KEY}:${tenantId}`, {
+      data: settings,
+      timestamp: Date.now()
+    })
+  }
+
+  private static clearCachedSettings(tenantId: string): void {
+    this.cacheStore.delete(`${this.SETTINGS_CACHE_KEY}:${tenantId}`)
+  }
+}

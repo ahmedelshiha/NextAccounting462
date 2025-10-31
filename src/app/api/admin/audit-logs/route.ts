@@ -1,73 +1,56 @@
-import { NextResponse, type NextRequest } from 'next/server'
-import prisma from '@/lib/prisma'
-import { withTenantContext } from '@/lib/api-wrapper'
-import { requireTenantContext } from '@/lib/tenant-utils'
-import { verifySuperAdminStepUp, stepUpChallenge } from '@/lib/security/step-up'
-import { logAudit } from '@/lib/audit'
+import { getServerSession } from 'next-auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { AuditLogService } from '@/services/audit-log.service'
+import { authOptions } from '@/lib/auth'
 
-function getPagination(url: URL) {
-  const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10))
-  const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20', 10)))
-  const skip = (page - 1) * limit
-  return { page, limit, skip }
-}
-
-export const GET = withTenantContext(async (req: NextRequest) => {
+export async function GET(request: NextRequest) {
   try {
-    const ctx = requireTenantContext()
-    const role = (ctx?.role as string | undefined)
-    if (!ctx || role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Super admin access required' }, { status: 403 })
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Optional step-up MFA for sensitive super admin endpoints
-    const userId = String(ctx.userId || '')
-    const tenantId = ctx.tenantId
-    const stepOk = await verifySuperAdminStepUp(req, userId, tenantId)
-    if (!stepOk) {
-      try { await logAudit({ action: 'auth.mfa.stepup.denied', actorId: userId, targetId: userId }) } catch {}
-      return stepUpChallenge()
+    const user = session.user as any
+    const tenantId = user.tenantId
+
+    if (!tenantId) {
+      return NextResponse.json({ error: 'Tenant ID not found' }, { status: 400 })
     }
 
-    const url = new URL(req.url)
-    const { page, limit, skip } = getPagination(url)
-    const action = url.searchParams.get('action') || undefined
-    const q = url.searchParams.get('q') || ''
-    const from = url.searchParams.get('from')
-    const to = url.searchParams.get('to')
+    // Parse query parameters
+    const searchParams = request.nextUrl.searchParams
+    const action = searchParams.get('action') || undefined
+    const userId = searchParams.get('userId') || undefined
+    const resource = searchParams.get('resource') || undefined
+    const search = searchParams.get('search') || undefined
+    const startDate = searchParams.get('startDate')
+      ? new Date(searchParams.get('startDate')!)
+      : undefined
+    const endDate = searchParams.get('endDate')
+      ? new Date(searchParams.get('endDate')!)
+      : undefined
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 1000)
+    const offset = parseInt(searchParams.get('offset') || '0')
 
-    const where: any = {}
-    if (action) where.action = { contains: action, mode: 'insensitive' }
-    if (q) {
-      where.OR = [
-        { action: { contains: q, mode: 'insensitive' } },
-        { resource: { contains: q, mode: 'insensitive' } },
-        { ipAddress: { contains: q, mode: 'insensitive' } },
-        { userId: { contains: q, mode: 'insensitive' } },
-      ]
-    }
-    if (from || to) {
-      where.createdAt = {}
-      if (from) where.createdAt.gte = new Date(from)
-      if (to) where.createdAt.lte = new Date(to)
-    }
-
-    const [total, rows] = await Promise.all([
-      prisma.auditLog.count({ where }),
-      prisma.auditLog.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-        select: { id: true, tenantId: true, userId: true, action: true, resource: true, metadata: true, ipAddress: true, userAgent: true, createdAt: true },
-      }),
-    ])
-
-    return NextResponse.json({
-      data: rows,
-      pagination: { page, limit, total },
+    const result = await AuditLogService.fetchAuditLogs({
+      tenantId,
+      action,
+      userId,
+      resource,
+      startDate,
+      endDate,
+      search,
+      limit,
+      offset
     })
-  } catch (e) {
-    return NextResponse.json({ error: 'Failed to load audit logs' }, { status: 500 })
+
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error('Error fetching audit logs:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch audit logs' },
+      { status: 500 }
+    )
   }
-})
+}
