@@ -116,6 +116,8 @@ export const UsersTable = memo(function UsersTable({
       <div
         key={user.id}
         className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-sm w-full"
+        role="row"
+        aria-label={`User row for ${user.name || user.email}`}
       >
         <div className="flex items-center gap-4 min-w-0">
           <Checkbox
@@ -124,13 +126,17 @@ export const UsersTable = memo(function UsersTable({
             aria-label={`Select ${user.name || user.email}`}
             className="shrink-0"
           />
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shrink-0">
+          <div
+            className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shrink-0"
+            aria-hidden="true"
+          >
             {(user.name || user.email).charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
             <button
               onClick={() => onViewProfile(user)}
-              className="font-medium text-gray-900 hover:text-blue-600 truncate max-w-[220px] sm:max-w-[260px] md:max-w-[320px] text-left"
+              className="font-medium text-gray-900 hover:text-blue-600 truncate max-w-[220px] sm:max-w-[260px] md:max-w-[320px] text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              aria-label={`View profile for ${user.name || user.email}`}
             >
               {user.name || 'Unnamed User'}
             </button>
@@ -144,11 +150,26 @@ export const UsersTable = memo(function UsersTable({
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <Badge className={getStatusColor(user.status)}>{user.status || 'ACTIVE'}</Badge>
-          <Badge className={getRoleColor(user.role)}>{user.role}</Badge>
+          <div
+            className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(user.status)}`}
+            role="status"
+            aria-label={`Status: ${user.status || 'ACTIVE'}`}
+          >
+            {user.status || 'ACTIVE'}
+          </div>
+          <div
+            className={`px-2 py-1 rounded text-xs font-medium ${getRoleColor(user.role)}`}
+            role="status"
+            aria-label={`Role: ${user.role}`}
+          >
+            {user.role}
+          </div>
           {perms.canManageUsers && (
             <Select value={user.role} onValueChange={(val) => handleRoleChange(user.id, val as UserItem['role'])}>
-              <SelectTrigger className="w-28 h-8">
+              <SelectTrigger
+                className="w-28 h-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label={`Change role for ${user.name || user.email}`}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
