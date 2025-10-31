@@ -225,9 +225,14 @@ export class AuditLogService {
   }
 
   /**
-   * Get audit statistics
+   * Get audit statistics - OPTIMIZED with caching
    */
   static async getAuditStats(tenantId: string, days: number = 30): Promise<any> {
+    // Check cache first
+    const cacheKey = `stats:${tenantId}:${days}`
+    const cached = this.getQueryCache(cacheKey)
+    if (cached) return cached
+
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
 
@@ -272,7 +277,7 @@ export class AuditLogService {
       })
     ])
 
-    return {
+    const result = {
       totalLogs,
       logsByAction: logsByAction.map(item => ({
         action: item.action,
@@ -283,6 +288,10 @@ export class AuditLogService {
         count: item._count.id
       }))
     }
+
+    // Cache stats for 10 minutes
+    this.setQueryCache(cacheKey, result, 10 * 60 * 1000)
+    return result
   }
 
   /**
