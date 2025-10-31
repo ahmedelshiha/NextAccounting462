@@ -1587,7 +1587,7 @@ model WorkflowStep {
   updatedAt       DateTime       @updatedAt
 
   workflow        UserWorkflow   @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  approvedByUser  User?          @relation(fields: [approvedBy], references: [id])
+  approvedByUser  User?          @relation("WorkflowStepApprovedBy", fields: [approvedBy], references: [id])
 
   @@index([workflowId, stepNumber])
   @@index([status])
@@ -1644,7 +1644,7 @@ model WorkflowHistory {
   createdAt        DateTime      @default(now())
 
   workflow         UserWorkflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  changedByUser    User          @relation(fields: [changedBy], references: [id])
+  changedByUser    User          @relation("WorkflowHistoryChangedBy", fields: [changedBy], references: [id])
 
   @@index([workflowId, createdAt])
   @@map("workflow_history")
