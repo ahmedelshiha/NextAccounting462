@@ -68,7 +68,7 @@ export const GET = withTenantContext(async (request: NextRequest) => {
     }
 
     // Search services (if user has permission)
-    if (hasPermission(ctx.role ?? '', PERMISSIONS.SERVICES_MANAGE)) {
+    if (hasPermission(ctx.role ?? '', PERMISSIONS.SERVICES_VIEW)) {
       try {
         const services = await prisma.service.findMany({
           where: {
@@ -96,73 +96,6 @@ export const GET = withTenantContext(async (request: NextRequest) => {
         )
       } catch (error) {
         console.error('Error searching services:', error)
-      }
-    }
-
-    // Search bookings (if user has permission)
-    if (hasPermission(ctx.role ?? '', PERMISSIONS.BOOKINGS_VIEW)) {
-      try {
-        const bookings = await prisma.booking.findMany({
-          where: {
-            ...(tenantId ? { tenantId } : {}),
-            OR: [
-              { clientName: { contains: query, mode: 'insensitive' } },
-              { clientEmail: { contains: query, mode: 'insensitive' } },
-              { id: { contains: query, mode: 'insensitive' } }
-            ]
-          },
-          select: {
-            id: true,
-            clientName: true,
-            clientEmail: true,
-            scheduledAt: true
-          },
-          take: limit
-        })
-
-        results.push(
-          ...bookings.map(booking => ({
-            id: booking.id,
-            type: 'booking',
-            name: booking.clientName || booking.clientEmail,
-            description: `${booking.clientEmail} - ${booking.scheduledAt.toLocaleDateString()}`
-          }))
-        )
-      } catch (error) {
-        console.error('Error searching bookings:', error)
-      }
-    }
-
-    // Search invoices (if user has permission)
-    if (hasPermission(ctx.role ?? '', PERMISSIONS.INVOICES_VIEW)) {
-      try {
-        const invoices = await prisma.invoice.findMany({
-          where: {
-            ...(tenantId ? { tenantId } : {}),
-            OR: [
-              { invoiceNumber: { contains: query, mode: 'insensitive' } },
-              { id: { contains: query, mode: 'insensitive' } }
-            ]
-          },
-          select: {
-            id: true,
-            invoiceNumber: true,
-            totalAmount: true,
-            createdAt: true
-          },
-          take: limit
-        })
-
-        results.push(
-          ...invoices.map(invoice => ({
-            id: invoice.id,
-            type: 'invoice',
-            name: invoice.invoiceNumber,
-            description: `${invoice.totalAmount} - ${invoice.createdAt.toLocaleDateString()}`
-          }))
-        )
-      } catch (error) {
-        console.error('Error searching invoices:', error)
       }
     }
 

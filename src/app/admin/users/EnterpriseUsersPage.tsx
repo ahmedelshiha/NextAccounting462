@@ -69,7 +69,7 @@ export function EnterpriseUsersPage() {
         user.role,
         user.isActive ? 'ACTIVE' : 'INACTIVE',
         new Date(user.createdAt).toLocaleDateString(),
-        new Date(user.lastLoginAt).toLocaleDateString()
+        user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'
       ])
 
       // Create CSV content

@@ -36,7 +36,7 @@ import SETTINGS_REGISTRY from '@/lib/settings/registry'
 import useRovingTabIndex from '@/hooks/useRovingTabIndex'
 import SidebarHeader from './SidebarHeader'
 import SidebarFooter from './SidebarFooter'
-import { useSidebarCollapsed, useSidebarActions } from '@/stores/admin/layout.store.selectors'
+import { useSidebarCollapsed, useSidebarActions, useExpandedGroups } from '@/stores/admin/layout.store.selectors'
 import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
 import { applyCustomizationToNavigation } from '@/lib/menu/menuUtils'
 
@@ -69,11 +69,11 @@ function AdminSidebar(props: AdminSidebarProps) {
   const DEFAULT_WIDTH = 256
   const COLLAPSED_WIDTH = 64
 
-  // Integrate with centralized Zustand store where available. Fall back to legacy localStorage keys for migration.
-  // Use selectors to read/write collapsed state.
-  // Always use store values for state; props are legacy compatibility only
+  // Integrate with centralized Zustand store for state management
+  // Use selectors to read/write sidebar state
   const storeCollapsed = useSidebarCollapsed()
-  const { setCollapsed: storeSetCollapsed } = useSidebarActions()
+  const { setCollapsed: storeSetCollapsed, setExpandedGroups } = useSidebarActions()
+  const expandedSections = useExpandedGroups()
 
   // Fetch notification counts for badges
   const { data: counts } = useUnifiedData({
@@ -143,33 +143,17 @@ function AdminSidebar(props: AdminSidebarProps) {
     }
   ]
 
-  {/* Static link reference for telemetry test: <Link href="/admin/cron-telemetry">Cron Telemetry</Link> */}
-
   // Apply customization to navigation with memoization for performance
   const navigation = useMemo(
     () => applyCustomizationToNavigation(defaultNavigation, customization),
     [customization]
   )
 
-  const [expandedSections, setExpandedSections] = useState<string[]>(() => {
-    try {
-      const fromLs = typeof window !== 'undefined' ? window.localStorage.getItem('admin:sidebar:expanded') : null
-      if (fromLs) {
-        const parsed = JSON.parse(fromLs) as string[]
-        if (Array.isArray(parsed)) return parsed
-      }
-    } catch (e) {}
-    return ['dashboard', 'business']
-  })
-
-  useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') window.localStorage.setItem('admin:sidebar:expanded', JSON.stringify(expandedSections))
-    } catch (e) {}
-  }, [expandedSections])
-
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section])
+    const newSections = expandedSections.includes(section)
+      ? expandedSections.filter(s => s !== section)
+      : [...expandedSections, section]
+    setExpandedGroups(newSections)
   }
 
   const isActiveRoute = (href: string) => {
