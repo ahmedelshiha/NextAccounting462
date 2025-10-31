@@ -210,8 +210,7 @@ export class AuditLogService {
     const actions = await prisma.auditLog.groupBy({
       by: ['action'],
       where: {
-        tenantId,
-        action: { not: null }
+        tenantId
       },
       orderBy: {
         action: 'asc'
