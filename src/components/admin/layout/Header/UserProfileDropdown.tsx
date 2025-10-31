@@ -263,6 +263,19 @@ function UserProfileDropdownComponent({
           </div>
         </MenuSection>
 
+        {/* Admin Section - Show only to users with admin permissions */}
+        {(hasPermission(PERMISSIONS.ANALYTICS_VIEW) ||
+          hasPermission(PERMISSIONS.USERS_MANAGE) ||
+          hasPermission(PERMISSIONS.SYSTEM_ADMIN_SETTINGS_VIEW)) && (
+          <MenuSection title="Administration">
+            <MenuItem
+              href="/admin"
+              label="Admin Dashboard"
+              icon={LayoutDashboard}
+            />
+          </MenuSection>
+        )}
+
         {/* Profile Actions Section */}
         <MenuSection title="Profile">
           {onOpenProfilePanel && (
