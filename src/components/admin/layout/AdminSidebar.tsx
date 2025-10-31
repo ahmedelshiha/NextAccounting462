@@ -172,7 +172,7 @@ function AdminSidebar(props: AdminSidebarProps) {
 
     const isActive = isActiveRoute(item.href)
     const hasChildren = item.children && item.children.length > 0
-    const isExpanded = expandedSections.includes(item.href.split('/').pop() || '')
+    const isExpanded = (expandedSections || []).includes(item.href.split('/').pop() || '')
 
     const baseStyles = `
       transition-all duration-200 flex items-center rounded-lg font-medium relative
