@@ -14,10 +14,11 @@ This document tracks all failing tests that need to be fixed. Each test is categ
 - **Investigation (2025-10-31)**:
   - The page is wrapped in a PermissionGate requiring PERMISSIONS.ANALYTICS_VIEW. When tests render the page without mocking next-auth or permissions, the PermissionGate returns the fallback, hiding the posts UI.
   - The PostCard component does render an "Edit" button and a delete Button with aria-label/title "Delete post" (icon-only). The test attempts to find Edit (screen.getByText('Edit')) which should work when the page is rendered with permissions.
-- **Fix Required**:
-  - Mock next-auth session in the test (provide a user with role/permissions) OR mock PermissionGate to allow rendering
-  - Alternatively, update tests to query by accessible names (e.g., getByRole('button', { name: /Edit/i }) and getByLabelText('Delete post'))
-- **Status**: ⚠️ In Progress — root cause identified (PermissionGate/session mocking)
+- **Fix Implemented (2025-10-31)**:
+  - Mocked PermissionGate in this test to always render children
+  - Switched queries to screen-based (portal safe) and accessible selectors; disambiguated confirm buttons via role
+  - Adjusted API call assertion to account for GET query string (`/api/posts?limit=100`)
+- **Status**: ⚠️ In Progress — create flow passes; edit/delete still flaky due to async rendering; will stabilize with additional waits or targeting within card
 
 ---
 
