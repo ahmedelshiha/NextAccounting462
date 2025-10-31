@@ -239,7 +239,6 @@ export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarT
                   aria-label="Global search"
                   aria-autocomplete="list"
                   aria-controls={showResults ? 'search-results' : undefined}
-                  aria-expanded={showResults}
                 />
                 {isSearching && <div className="absolute right-3 top-1/2 transform -translate-y-1/2"><div className="h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}
               </div>
@@ -269,7 +268,7 @@ export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarT
                       type="submit"
                       className="w-full px-4 py-2 text-center text-sm text-blue-600 hover:bg-gray-50 font-medium border-t border-border transition-colors"
                     >
-                      View all results for "{searchQuery}"
+                      View all results for &quot;{searchQuery}&quot;
                     </button>
                   )}
                 </div>
@@ -277,7 +276,7 @@ export default function AdminHeader({ onMenuToggle, isMobileMenuOpen, onSidebarT
 
               {showResults && searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-50 p-4 text-center text-sm text-muted-foreground">
-                  No results found for "{searchQuery}"
+                  No results found for &quot;{searchQuery}&quot;
                 </div>
               )}
             </form>
