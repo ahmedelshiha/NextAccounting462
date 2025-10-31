@@ -226,6 +226,7 @@ model Tenant {
   users                 User[]
   userWorkflows         UserWorkflow[]
   workflowTemplates     WorkflowTemplate[]
+  bulkOperations        BulkOperation[]
 
   @@index([status])
 }
