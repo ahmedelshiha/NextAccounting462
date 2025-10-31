@@ -107,21 +107,31 @@ export const PATCH = withTenantContext(async (request: NextRequest, context: { p
     } else if (Object.keys(data).length > 0) {
       // Log other user updates
       try {
-        await AuditLogService.createAuditLog({
-          tenantId: tenantId,
-          userId: ctx.userId,
-          action: 'user.update',
-          resource: `user:${id}`,
-          metadata: {
-            targetUserId: id,
-            targetEmail: updated.email,
-            targetName: updated.name,
-            updatedFields: Object.keys(data),
-            timestamp: new Date().toISOString()
-          },
-          ipAddress: ip,
-          userAgent: request.headers.get('user-agent') || undefined
-        })
+        if (tenantId) {
+          await AuditLogService.createAuditLog({
+            tenantId: tenantId,
+            userId: ctx.userId,
+            action: 'user.update',
+            resource: `user:${id}`,
+            metadata: {
+              targetUserId: id,
+              targetEmail: updated.email,
+              targetName: updated.name,
+              updatedFields: Object.keys(data),
+              timestamp: new Date().toISOString()
+            },
+            ipAddress: ip,
+            userAgent: request.headers.get('user-agent') || undefined
+          })
+        } else {
+          // Fallback when tenantId is null
+          await logAudit({
+            action: 'user.update',
+            actorId: ctx.userId,
+            targetId: id,
+            details: { fields: Object.keys(data) }
+          })
+        }
       } catch (auditError) {
         console.error('Failed to create audit log for user update:', auditError)
         // Log to simple audit as fallback
