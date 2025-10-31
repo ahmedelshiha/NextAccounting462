@@ -12,6 +12,8 @@ beforeEach(() => {
   // Stub URL.createObjectURL for jsdom environment without clobbering URL constructor
   ;(window as any).URL = (window as any).URL || (global as any).URL
   ;(window as any).URL.createObjectURL = vi.fn(() => 'blob:mock')
+  ;(window as any).HTMLAnchorElement = (window as any).HTMLAnchorElement || (global as any).HTMLAnchorElement
+  if ((window as any).HTMLAnchorElement) { (window as any).HTMLAnchorElement.prototype.click = vi.fn() }
   global.fetch = vi.fn(async (url: any, opts: any) => {
     const u = String(url)
     if (u.endsWith('/api/admin/analytics-settings') && (!opts || opts.method === 'GET')) {
