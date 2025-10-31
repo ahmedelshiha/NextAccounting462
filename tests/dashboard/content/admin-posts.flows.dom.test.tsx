@@ -6,6 +6,7 @@ vi.mock('@/lib/api', () => ({
 }))
 
 import { apiFetch } from '@/lib/api'
+vi.mock('@/components/PermissionGate', () => ({ __esModule: true, default: ({ children }: any) => <>{children}</>, PermissionGate: ({ children }: any) => <>{children}</> }))
 import AdminPostsPage from '@/app/admin/posts/page'
 
 function mockJson(data: any) { return { ok: true, json: async () => data } }
