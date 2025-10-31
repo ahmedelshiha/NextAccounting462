@@ -100,13 +100,75 @@ function hashUserId(userId: string): number {
 /**
  * Get feature flag configuration for menu customization
  *
- * Returns metadata about the feature flag status
+ * Returns metadata about the feature flag status with configurable rollout
  */
 export const getMenuCustomizationFeatureFlagConfig = () => {
+  // Get rollout percentage from environment, default to 100%
+  const rolloutPercentage = getEnvironmentVariable('NEXT_PUBLIC_MENU_CUSTOMIZATION_ROLLOUT_PERCENTAGE', '100')
+  const targetUsersEnv = getEnvironmentVariable('NEXT_PUBLIC_MENU_CUSTOMIZATION_TARGET_USERS', 'all')
+  const betaTesters = getBetaTesterList()
+
   return {
     enabled: isMenuCustomizationEnabled(),
-    rolloutPercentage: 100, // TODO: Make configurable
-    targetUsers: 'all', // TODO: Support 'beta', 'admins', etc.
+    rolloutPercentage: parseInt(rolloutPercentage, 10),
+    targetUsers: parseTargetUsers(targetUsersEnv),
+    betaTesters,
     description: 'User menu customization feature for admin dashboard',
   }
+}
+
+/**
+ * Get environment variable with fallback
+ */
+function getEnvironmentVariable(key: string, defaultValue: string): string {
+  if (typeof process !== 'undefined' && process.env?.[key]) {
+    return process.env[key] as string
+  }
+
+  if (typeof window !== 'undefined') {
+    const envValue = (window as any).__ENV__?.[key]
+    if (envValue !== undefined) {
+      return envValue
+    }
+  }
+
+  return defaultValue
+}
+
+/**
+ * Parse target users configuration
+ * Supports: 'all', 'admins', 'beta', or comma-separated role list
+ */
+function parseTargetUsers(targetUsersStr: string): string | string[] {
+  if (targetUsersStr === 'all' || targetUsersStr === 'beta') {
+    return targetUsersStr
+  }
+
+  if (targetUsersStr === 'admins') {
+    return ['ADMIN']
+  }
+
+  // Support comma-separated list of roles
+  if (targetUsersStr.includes(',')) {
+    return targetUsersStr.split(',').map(role => role.trim().toUpperCase())
+  }
+
+  // Single role
+  if (targetUsersStr && targetUsersStr !== 'all') {
+    return [targetUsersStr.toUpperCase()]
+  }
+
+  return 'all'
+}
+
+/**
+ * Get list of beta tester user IDs from environment
+ */
+function getBetaTesterList(): string[] {
+  const betaListEnv = getEnvironmentVariable('NEXT_PUBLIC_MENU_CUSTOMIZATION_BETA_TESTERS', '')
+  if (!betaListEnv) {
+    return []
+  }
+
+  return betaListEnv.split(',').map(id => id.trim()).filter(Boolean)
 }
