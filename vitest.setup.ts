@@ -388,6 +388,86 @@ vi.mock('@/lib/permissions', async () => {
   }
 })
 
+// Polyfill Web APIs (Blob, File, URL) for jsdom/Node test environments
+if (typeof (globalThis as any).Blob === 'undefined') {
+  class NodeBlob {
+    parts: any[]
+    mimeType: string
+    constructor(parts: any[] = [], options: any = {}) {
+      this.parts = parts
+      this.mimeType = options.type || 'application/octet-stream'
+    }
+    get type() { return this.mimeType }
+    async text() { return this.parts.map(p => String(p)).join('') }
+    async arrayBuffer() { return Buffer.from(await this.text()) }
+    slice(start?: number, end?: number, contentType?: string) {
+      const sliced = this.parts.slice(start, end)
+      return new NodeBlob(sliced, { type: contentType || this.mimeType })
+    }
+  }
+  ;(globalThis as any).Blob = NodeBlob as any
+}
+
+// Ensure URL is properly polyfilled with createObjectURL and revokeObjectURL
+if (typeof (globalThis as any).URL === 'undefined' || !((globalThis as any).URL && typeof (globalThis as any).URL.createObjectURL === 'function')) {
+  const blobStore = new Map<string, any>()
+  const counter = { id: 0 }
+
+  if (typeof (globalThis as any).URL === 'undefined') {
+    class NodeURL {
+      href: string
+      protocol: string
+      hostname: string
+      pathname: string
+      search: string
+      hash: string
+
+      constructor(url: string, base?: string) {
+        this.href = url
+        this.protocol = url.split(':')[0] + ':'
+        const path = url.replace(/^[^:]+:\/\/[^\/]+/, '')
+        const [pathname, search] = path.split('?')
+        const [cleanPath, hash] = (search || '').split('#')
+        this.pathname = pathname
+        this.search = search ? '?' + cleanPath : ''
+        this.hash = hash ? '#' + hash : ''
+
+        try {
+          const u = new URL(url, base)
+          this.hostname = u.hostname
+        } catch {
+          this.hostname = ''
+        }
+      }
+
+      toString() { return this.href }
+      static createObjectURL(blob: any) {
+        const id = `blob:${++counter.id}`
+        blobStore.set(id, blob)
+        return id
+      }
+      static revokeObjectURL(url: string) {
+        blobStore.delete(url)
+      }
+    }
+    ;(globalThis as any).URL = NodeURL as any
+  } else {
+    // Extend existing URL with createObjectURL if it doesn't exist
+    if (typeof (globalThis as any).URL.createObjectURL !== 'function') {
+      (globalThis as any).URL.createObjectURL = (blob: any) => {
+        const id = `blob:${++counter.id}`
+        blobStore.set(id, blob)
+        return id
+      }
+    }
+    if (typeof (globalThis as any).URL.revokeObjectURL !== 'function') {
+      (globalThis as any).URL.revokeObjectURL = (url: string) => {
+        blobStore.delete(url)
+      }
+    }
+  }
+}
+
 // Polyfill Web File in Node test env
 
 // Mock Stripe package for tests that import 'stripe' to avoid network calls
