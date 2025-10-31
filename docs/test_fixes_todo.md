@@ -54,9 +54,10 @@ This document tracks all failing tests that need to be fixed. Each test is categ
 - **Issue**: Export/Import UI elements not found
 - **Investigation (2025-10-31)**:
   - Page (`src/app/admin/settings/communication/page.tsx`) wraps actions in PermissionGate (export/import/edit). Tests render page without mocking session/permissions. The Export/Import buttons are inside PermissionGate.
-- **Fix Required**:
-  - Mock session/permissions in tests or adjust PermissionGate mocking
-- **Status**: ⚠️ In Progress — permission gating is likely root cause
+- **Fix Implemented (2025-10-31)**:
+  - Mocked PermissionGate to bypass RBAC; switched to portal-safe queries; stubbed URL.createObjectURL and anchor.click to avoid jsdom navigation errors
+  - Tests updated: `tests/components/communication-settings.export-import.ui.test.tsx`
+- **Status**: ⚠️ In Progress — needs one more stabilization to avoid anchor side-effects entirely
 
 ### 5. Analytics Settings - Duplicate Import Buttons
 - **File**: `tests/components/analytics-settings.export-import.ui.test.tsx`
