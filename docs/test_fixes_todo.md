@@ -182,11 +182,11 @@ This document tracks all failing tests that need to be fixed. Each test is categ
 
 - [x] Investigation: Reviewed failing test list and reproduction files
 - [x] Root-cause analysis for several tests (Admin Posts, EditableField, useSystemHealth, Export/Import pages)
-- [ ] Implement fixes starting from High Priority
+- [x] Implement fixes starting from High Priority (EditableField, useSystemHealth)
 - [ ] Run test suite and iterate on remaining failures
 
 **Last Updated**: 2025-10-31
-**Total Progress**: 0/28 items completed (investigation stage)
+**Total Progress**: 2/28 items completed
 
 ---
 
