@@ -64,9 +64,10 @@ This document tracks all failing tests that need to be fixed. Each test is categ
 - **Issue**: Found multiple elements with text "Import"
 - **Investigation**:
   - UI renders "Import" text both on the page action and inside the import modal. The test uses getByText('Import') which returns the first match and can be ambiguous.
-- **Fix Required**:
-  - Update test to select modal button specifically (use getByRole with accessible name, or find input file element then the modal's confirm Import button), or add aria-label/test-id to disambiguate
-- **Status**: ⚠️ In Progress — test should use more specific selectors
+- **Fix Implemented (2025-10-31)**:
+  - Disambiguated by using `getAllByText('Import')` and clicking toolbar first, then modal confirm last; stubbed URL APIs for jsdom
+  - Tests updated: `tests/components/analytics-settings.export-import.ui.test.tsx`
+- **Status**: ✅ Completed (test passes locally)
 
 ### 6. Data Table - Selection Count Display
 - **File**: `tests/dashboard/tables/dom/advanced-data-table.interactions.dom.test.tsx`
