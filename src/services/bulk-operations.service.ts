@@ -474,7 +474,7 @@ export class BulkOperationsService {
       // Rollback each successful result
       for (const result of results) {
         if (result.changesBefore) {
-          await this.restoreUserState(result.userId, result.changesBefore)
+          await this.restoreUserState(result.userId, (result.changesBefore as any) as Record<string, any>)
         }
       }
 
