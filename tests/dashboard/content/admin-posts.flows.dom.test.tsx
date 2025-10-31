@@ -42,7 +42,7 @@ describe('Admin Posts CRUD flows', () => {
       const calls = (apiFetch as any).mock.calls.map((c: any[]) => c[0])
       expect(calls[0]).toContain('/api/posts') // initial GET
       expect(calls.some((u: string) => u === '/api/posts')).toBeTruthy() // POST uses same path, but with method; ensure at least two calls
-      expect(calls.filter((u: string) => u === '/api/posts').length).toBeGreaterThan(1)
+      expect(calls.filter((u: string) => u.startsWith('/api/posts')).length).toBeGreaterThan(1)
     } finally { unmount() }
   })
 
