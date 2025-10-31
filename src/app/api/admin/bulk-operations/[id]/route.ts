@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { withTenantContext } from '@/lib/api-wrapper'
+import { requireTenantContext } from '@/lib/tenant-utils'
 import { bulkOperationsService } from '@/services/bulk-operations.service'
-import prisma from '@/lib/prisma'
 
 /**
  * GET /api/admin/bulk-operations/[id]
  * Get a specific bulk operation
  */
-export async function GET(
+export const GET = withTenantContext(async (
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
-    const session = await getServerSession()
-    if (!session?.user) {
+    const ctx = requireTenantContext()
+    if (!ctx.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -23,18 +23,7 @@ export async function GET(
     }
 
     // Verify access
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    })
-
-    const membership = await prisma.tenantMembership.findFirst({
-      where: {
-        tenantId: operation.tenantId,
-        userId: session.user.id
-      }
-    })
-
-    if (!membership) {
+    if (operation.tenantId !== ctx.tenantId) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
@@ -46,7 +35,7 @@ export async function GET(
       { status: 500 }
     )
   }
-}
+})
 
 /**
  * PATCH /api/admin/bulk-operations/[id]
