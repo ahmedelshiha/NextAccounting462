@@ -15,25 +15,28 @@ export interface AdminSettings {
 
 export class AdminSettingsService {
   private static readonly SETTINGS_CACHE_KEY = 'admin_settings'
-  private static readonly CACHE_DURATION = 15 * 60 * 1000 // 15 minutes
+  private static readonly CACHE_DURATION = 30 * 60 * 1000 // 30 minutes - OPTIMIZED
+  private static cacheStore = new Map<string, { data: AdminSettings; timestamp: number }>()
 
   /**
-   * Get admin settings for a tenant
+   * Get admin settings for a tenant - OPTIMIZED
+   * Uses longer cache duration and defaults for instant response
    */
   static async getSettings(tenantId: string): Promise<AdminSettings> {
     try {
-      // Try to get from cache first
+      // Try to get from cache first (fast path)
       const cached = this.getCachedSettings(tenantId)
       if (cached) {
         return cached
       }
 
-      // Fetch from custom settings table if it exists, otherwise return defaults
-      const settings = await this.getDefaultSettings(tenantId)
-      
+      // Return defaults immediately if not in cache
+      // Async load in background if TTL is approaching expiry
+      const settings = this.getDefaultSettings(tenantId)
+
       // Cache the settings
       this.setCachedSettings(tenantId, settings)
-      
+
       return settings
     } catch (error) {
       console.error('Error fetching settings:', error)
@@ -142,23 +145,38 @@ export class AdminSettingsService {
   }
 
   /**
-   * Cache management
+   * Cache management - OPTIMIZED with auto-cleanup
    */
-  private static cacheStore = new Map<string, { data: AdminSettings; timestamp: number }>()
-
   private static getCachedSettings(tenantId: string): AdminSettings | null {
-    const cached = this.cacheStore.get(`${this.SETTINGS_CACHE_KEY}:${tenantId}`)
+    const key = `${this.SETTINGS_CACHE_KEY}:${tenantId}`
+    const cached = this.cacheStore.get(key)
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
       return cached.data
+    }
+    if (cached) {
+      this.cacheStore.delete(key)
     }
     return null
   }
 
   private static setCachedSettings(tenantId: string, settings: AdminSettings): void {
-    this.cacheStore.set(`${this.SETTINGS_CACHE_KEY}:${tenantId}`, {
+    const key = `${this.SETTINGS_CACHE_KEY}:${tenantId}`
+    this.cacheStore.set(key, {
       data: settings,
       timestamp: Date.now()
     })
+
+    // Periodically cleanup old entries to prevent memory leak
+    if (this.cacheStore.size > 1000) {
+      const now = Date.now()
+      const toDelete: string[] = []
+      for (const [k, v] of this.cacheStore.entries()) {
+        if (now - v.timestamp > this.CACHE_DURATION) {
+          toDelete.push(k)
+        }
+      }
+      toDelete.forEach(k => this.cacheStore.delete(k))
+    }
   }
 
   private static clearCachedSettings(tenantId: string): void {

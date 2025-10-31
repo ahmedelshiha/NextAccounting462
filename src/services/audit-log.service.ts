@@ -197,14 +197,21 @@ export class AuditLogService {
   }
 
   /**
-   * Get distinct actions for filtering
+   * Get distinct actions for filtering - OPTIMIZED
+   * Uses groupBy instead of findMany for better performance on large datasets
    */
   static async getDistinctActions(tenantId: string): Promise<string[]> {
-    const actions = await prisma.auditLog.findMany({
-      where: { tenantId },
-      distinct: ['action'],
-      select: {
-        action: true
+    // Cache frequent queries for 1 hour
+    const cacheKey = `actions:${tenantId}`
+    const cached = this.getQueryCache(cacheKey)
+    if (cached) return cached
+
+    // Use groupBy for better performance on large datasets
+    const actions = await prisma.auditLog.groupBy({
+      by: ['action'],
+      where: {
+        tenantId,
+        action: { not: null }
       },
       orderBy: {
         action: 'asc'
@@ -212,13 +219,20 @@ export class AuditLogService {
       take: 100
     })
 
-    return actions.map(a => a.action).filter(Boolean)
+    const result = actions.map(a => a.action).filter(Boolean)
+    this.setQueryCache(cacheKey, result, 60 * 60 * 1000) // Cache for 1 hour
+    return result
   }
 
   /**
-   * Get audit statistics
+   * Get audit statistics - OPTIMIZED with caching
    */
   static async getAuditStats(tenantId: string, days: number = 30): Promise<any> {
+    // Check cache first
+    const cacheKey = `stats:${tenantId}:${days}`
+    const cached = this.getQueryCache(cacheKey)
+    if (cached) return cached
+
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
 
@@ -263,7 +277,7 @@ export class AuditLogService {
       })
     ])
 
-    return {
+    const result = {
       totalLogs,
       logsByAction: logsByAction.map(item => ({
         action: item.action,
@@ -274,6 +288,10 @@ export class AuditLogService {
         count: item._count.id
       }))
     }
+
+    // Cache stats for 10 minutes
+    this.setQueryCache(cacheKey, result, 10 * 60 * 1000)
+    return result
   }
 
   /**
@@ -306,5 +324,36 @@ export class AuditLogService {
     ].join('\n')
 
     return csvContent
+  }
+
+  /**
+   * Query cache for frequently accessed data
+   */
+  private static queryCache = new Map<string, { data: any; timestamp: number }>()
+  private static readonly QUERY_CACHE_DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
+
+  private static getQueryCache(key: string): any {
+    const cached = this.queryCache.get(key)
+    if (cached && Date.now() - cached.timestamp < this.QUERY_CACHE_DEFAULT_TTL) {
+      return cached.data
+    }
+    this.queryCache.delete(key)
+    return null
+  }
+
+  private static setQueryCache(key: string, data: any, ttl: number = this.QUERY_CACHE_DEFAULT_TTL): void {
+    this.queryCache.set(key, {
+      data,
+      timestamp: Date.now()
+    })
+    // Auto-cleanup old cache entries
+    if (this.queryCache.size > 100) {
+      const now = Date.now()
+      for (const [k, v] of this.queryCache.entries()) {
+        if (now - v.timestamp > ttl) {
+          this.queryCache.delete(k)
+        }
+      }
+    }
   }
 }

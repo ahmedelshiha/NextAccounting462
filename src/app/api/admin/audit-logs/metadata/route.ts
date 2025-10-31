@@ -22,15 +22,24 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'actions'
     const days = parseInt(searchParams.get('days') || '30')
 
+    let result: any
     if (type === 'actions') {
       const actions = await AuditLogService.getDistinctActions(tenantId)
-      return NextResponse.json({ actions })
+      result = { actions }
     } else if (type === 'stats') {
       const stats = await AuditLogService.getAuditStats(tenantId, days)
-      return NextResponse.json(stats)
+      result = stats
+    } else {
+      return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
 
-    return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
+    const response = NextResponse.json(result)
+
+    // Aggressive caching for metadata (30 minutes) - doesn't change frequently
+    response.headers.set('Cache-Control', 'private, max-age=1800, stale-while-revalidate=3600')
+    response.headers.set('CDN-Cache-Control', 'max-age=1800, stale-while-revalidate=3600')
+
+    return response
   } catch (error) {
     console.error('Error fetching audit metadata:', error)
     return NextResponse.json(
