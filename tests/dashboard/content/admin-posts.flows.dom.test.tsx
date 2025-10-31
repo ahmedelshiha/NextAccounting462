@@ -27,17 +27,16 @@ describe('Admin Posts CRUD flows', () => {
       fireEvent.click(createBtn)
 
       // fill form
-      const title = container.querySelector('input[placeholder="Enter post title..."]') as HTMLInputElement
-      const slug = container.querySelector('input[placeholder="post-url-slug"]') as HTMLInputElement
-      const content = Array.from(container.querySelectorAll('textarea')).find(t => (t as HTMLTextAreaElement).placeholder?.includes('Write your professional blog content')) as HTMLTextAreaElement
-      expect(title && slug && content).toBeTruthy()
+      const title = screen.getByPlaceholderText('Enter post title...') as HTMLInputElement
+      const slug = screen.getByPlaceholderText('post-url-slug') as HTMLInputElement
+      const content = screen.getByPlaceholderText(/Write your professional blog content/i) as HTMLTextAreaElement
 
       fireEvent.change(title, { target: { value: 'My Post' } })
       fireEvent.change(slug, { target: { value: 'my-post' } })
       fireEvent.change(content, { target: { value: 'hello world content with enough length to pass validation '.repeat(5) } })
 
-      const confirmCreate = Array.from(container.querySelectorAll('button')).find(b => (b.textContent || '').includes('Create Post')) as HTMLButtonElement
-      fireEvent.click(confirmCreate)
+      const createButtons = screen.getAllByText('Create Post')
+      fireEvent.click(createButtons[createButtons.length - 1])
 
       // assertions
       const calls = (apiFetch as any).mock.calls.map((c: any[]) => c[0])
@@ -59,8 +58,7 @@ describe('Admin Posts CRUD flows', () => {
       const editBtn = screen.getByText('Edit')
       fireEvent.click(editBtn)
 
-      const title = Array.from(container.querySelectorAll('input')).find(i => (i as HTMLInputElement).value === 'Original') as HTMLInputElement
-      expect(title).toBeTruthy()
+      const title = screen.getByDisplayValue('Original') as HTMLInputElement
       fireEvent.change(title, { target: { value: 'Updated' } })
 
       const update = Array.from(container.querySelectorAll('button')).find(b => (b.textContent || '').includes('Update Post')) as HTMLButtonElement
@@ -81,16 +79,10 @@ describe('Admin Posts CRUD flows', () => {
 
     const { container, unmount } = render(<AdminPostsPage />)
     try {
-      // find Delete icon button next to Edit
-      const editBtnEl = screen.getByText('Edit')
-      const btn = editBtnEl.closest('button') as HTMLButtonElement
-      const group = btn?.parentElement as HTMLElement
-      const deleteBtn = group?.querySelectorAll('button')[1] as HTMLButtonElement
-      expect(deleteBtn).toBeTruthy()
-
+      const deleteBtn = screen.getByLabelText('Delete post')
       fireEvent.click(deleteBtn)
 
-      const confirmDelete = Array.from(container.querySelectorAll('button')).find(b => (b.textContent || '').includes('Delete Post')) as HTMLButtonElement
+      const confirmDelete = screen.getByText('Delete Post')
       fireEvent.click(confirmDelete)
 
       const calls = (apiFetch as any).mock.calls
