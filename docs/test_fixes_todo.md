@@ -31,10 +31,10 @@ This document tracks all failing tests that need to be fixed. Each test is categ
 - **Investigation (2025-10-31)**:
   - Component (`src/components/admin/profile/EditableField.tsx`) currently renders a fixed mask string of 8 bullets when `masked` is true: display = masked ? "••••••••" : value
   - Test uses value "secret" (6 characters); test expects mask length to match value length.
-- **Fix Required**:
-  - Prefer changing component to show bullets matching value length (safer UX) — e.g., display = masked ? '•'.repeat(value.length) : value
-  - Or update tests to expect 8 bullets (less ideal)
-- **Status**: ⚠️ In Progress — recommended component change noted
+- **Fix Implemented (2025-10-31)**:
+  - Updated component to mask with value length: `display = masked ? '•'.repeat(value.length) : value`
+  - File: `src/components/admin/profile/EditableField.tsx`
+- **Status**: ✅ Completed
 
 ### 3. System Health Hook - Polling Interval
 - **File**: `src/hooks/admin/__tests__/useSystemHealth.test.tsx`
@@ -161,7 +161,7 @@ This document tracks all failing tests that need to be fixed. Each test is categ
 - **File**: `tests/admin/settings/SettingsOverview.test.tsx`
 - **Issue**: State updates not wrapped in act()
 - **Fix Required**: Wrap state-triggering actions in act() or use waitFor() for async updates
-- **Status**: ⚠️ In Progress
+- **Status**: ���️ In Progress
 
 ---
 
