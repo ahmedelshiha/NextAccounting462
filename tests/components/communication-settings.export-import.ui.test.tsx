@@ -9,8 +9,9 @@ vi.mock('@/lib/auth', () => ({ authOptions: {} }))
 const originalFetch = global.fetch as any
 
 beforeEach(() => {
-  // Stub URL.createObjectURL for jsdom environment
-  (global as any).URL = { ...(global as any).URL, createObjectURL: vi.fn(() => 'blob:mock') }
+  // Stub URL.createObjectURL for jsdom environment without clobbering URL constructor
+  ;(window as any).URL = (window as any).URL || (global as any).URL
+  ;(window as any).URL.createObjectURL = vi.fn(() => 'blob:mock')
   global.fetch = vi.fn(async (url: any, opts: any) => {
     const u = String(url)
     if (u.endsWith('/api/admin/communication-settings') && (!opts || opts.method === 'GET')) {
