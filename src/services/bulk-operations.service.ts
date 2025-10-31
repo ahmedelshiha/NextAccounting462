@@ -200,7 +200,7 @@ export class BulkOperationsService {
       const preview = affectedUsers.slice(0, 5).map((user: any) => ({
         userId: user.id,
         userName: user.name || user.email,
-        changes: this.getChangePreview(operation.operationConfig, user)
+        changes: this.getChangePreview((operation.operationConfig as any) as OperationConfig, user)
       }))
 
       // Estimate duration (50ms per user, minimum 1 second)
