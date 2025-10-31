@@ -33,7 +33,12 @@
   - src/app/admin/team/page.tsx (server redirect to /admin/users?tab=entities&type=team)
 - Testing notes: Manually verified /admin/clients and /admin/team redirect to the Entities tab with correct sub-tab selection; verified search and filters on clients; verified team list renders and CRUD actions hit existing APIs.
 - Issues: None observed. Backward-compatible.
-- Next tasks: E2E and a11y tests; service unification per plan (optional, non-blocking).
+- Next tasks: Service unification per plan (optional, non-blocking).
+
+### Validation Update (2025-10-31)
+- Added E2E tests: e2e/tests/admin-unified-redirects.spec.ts
+- Covers: redirects for /admin/{permissions,roles,clients,team} and presence of Entities/RBAC tabs
+- Status: ✅ Basic validation added; extend a11y tests later if needed
 
 ---
 
@@ -113,7 +118,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 │   └── User selection
 ├── Entities Tab (NEW)
 │   ├── Clients List
-│   ���   ├── Search, filter, sort
+│   ����   ├── Search, filter, sort
 │   │   ├── Create/Edit/Delete client modals
 │   │   ├── Client detail panel
 │   │   ├── Bulk actions for clients
@@ -1102,7 +1107,7 @@ Migration Steps:
 Post-Migration:
 ├─ Run validation queries
 ├─ Check for orphaned records
-├─ Verify permissions still work
+���─ Verify permissions still work
 └─ Performance testing
 ```
 
