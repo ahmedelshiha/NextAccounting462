@@ -247,7 +247,7 @@ export function DashboardTab({
                   <label htmlFor="bulk-value-role" className="text-sm font-medium text-gray-700">
                     Select new role
                   </label>
-                  <Select value={bulkActionValue || ''} onValueChange={setBulkActionValue}>
+                  <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
                     <SelectTrigger id="bulk-value-role" className="w-full sm:w-40" aria-label="Role selection">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
@@ -267,7 +267,7 @@ export function DashboardTab({
                   <label htmlFor="bulk-value-status" className="text-sm font-medium text-gray-700">
                     Select new status
                   </label>
-                  <Select value={bulkActionValue || ''} onValueChange={setBulkActionValue}>
+                  <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
                     <SelectTrigger id="bulk-value-status" className="w-full sm:w-40" aria-label="Status selection">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -285,7 +285,7 @@ export function DashboardTab({
                   <label htmlFor="bulk-value-department" className="text-sm font-medium text-gray-700">
                     Select new department
                   </label>
-                  <Select value={bulkActionValue || ''} onValueChange={setBulkActionValue}>
+                  <Select value={bulkActionValue} onValueChange={setBulkActionValue}>
                     <SelectTrigger id="bulk-value-department" className="w-full sm:w-40" aria-label="Department selection">
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
