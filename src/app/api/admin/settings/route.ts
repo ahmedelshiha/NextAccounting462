@@ -58,7 +58,7 @@ export const POST = withTenantContext(async (request: NextRequest) => {
     }
 
     const body = await request.json()
-    const settings = await AdminSettingsService.saveSettings(tenantId, body)
+    const settings = await AdminSettingsService.updateSettings(tenantId, body)
 
     return NextResponse.json(settings)
   } catch (error) {
