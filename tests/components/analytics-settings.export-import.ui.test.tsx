@@ -39,17 +39,17 @@ describe('Analytics Settings Export/Import UI', () => {
     fireEvent.click(exportBtn as any)
     await waitFor(() => expect((global.fetch as any).mock.calls.some((c: any[]) => String(c[0]).endsWith('/api/admin/analytics-settings/export'))).toBe(true))
 
-    const importBtn = getByText('Import')
-    fireEvent.click(importBtn as any)
-    await waitFor(() => getByText('Import Analytics & Reporting Settings'))
+    const importButtons = Array.from(screen.getAllByText('Import'))
+    fireEvent.click(importButtons[0] as any)
+    await waitFor(() => screen.getByText('Import Analytics & Reporting Settings'))
 
-    const input = container.querySelector('input[type="file"]') as HTMLInputElement
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
     const file = new File([JSON.stringify({ settings: { dashboards: [] } })], 'analytics.json', { type: 'application/json' })
     const dt = { files: [file] } as any
     fireEvent.change(input, dt)
 
-    const confirm = getByText('Import')
-    fireEvent.click(confirm as any)
+    const confirmButtons = Array.from(screen.getAllByText('Import'))
+    fireEvent.click(confirmButtons[confirmButtons.length - 1] as any)
 
     await waitFor(() => expect((global.fetch as any).mock.calls.some((c: any[]) => String(c[0]).endsWith('/api/admin/analytics-settings/import'))).toBe(true))
   })
