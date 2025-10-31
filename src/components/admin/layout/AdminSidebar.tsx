@@ -70,14 +70,10 @@ function AdminSidebar(props: AdminSidebarProps) {
   const COLLAPSED_WIDTH = 64
 
   // Integrate with centralized Zustand store for state management
-  // Use selectors to read/write collapsed state
+  // Use selectors to read/write sidebar state
   const storeCollapsed = useSidebarCollapsed()
-  const { setCollapsed: storeSetCollapsed } = useSidebarActions()
-
-  // Get expanded sections from Zustand store
-  const { useAdminLayoutStore } = require('@/stores/admin/layout.store')
-  const expandedSections = useAdminLayoutStore(state => state.sidebar.expandedGroups)
-  const setExpandedGroups = useAdminLayoutStore(state => state.setExpandedGroups)
+  const { setCollapsed: storeSetCollapsed, setExpandedGroups } = useSidebarActions()
+  const expandedSections = useExpandedGroups()
 
   // Fetch notification counts for badges
   const { data: counts } = useUnifiedData({
