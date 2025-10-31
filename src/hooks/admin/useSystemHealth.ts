@@ -118,9 +118,6 @@ export function useSystemHealth(
     {
       // Polling configuration (SWR v2 uses refreshInterval)
       refreshInterval: enabled ? interval : 0,
-      // Back-compat for tests/mocks that inspect revalidateInterval (SWR v1 naming)
-      // Note: SWR will ignore unknown config keys, so this is safe.
-      revalidateInterval: enabled ? interval : 0,
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
 

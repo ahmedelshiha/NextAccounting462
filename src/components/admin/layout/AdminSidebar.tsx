@@ -140,6 +140,22 @@ function AdminSidebar(props: AdminSidebarProps) {
         { name: 'Chat', href: '/admin/chat', icon: Mail },
         { name: 'Reminders', href: '/admin/reminders', icon: Bell },
       ]
+    },
+    {
+      section: 'system',
+      items: [
+        { name: 'User Management', href: '/admin/users', icon: Users, permission: PERMISSIONS.USERS_MANAGE },
+        { name: 'Permissions', href: '/admin/permissions', icon: Shield, permission: PERMISSIONS.SYSTEM_ADMIN_SETTINGS_VIEW },
+        { name: 'Roles', href: '/admin/roles', icon: Briefcase, permission: PERMISSIONS.SYSTEM_ADMIN_SETTINGS_VIEW },
+        { name: 'Audits', href: '/admin/audits', icon: FileText, permission: PERMISSIONS.ANALYTICS_VIEW },
+        { name: 'Compliance', href: '/admin/compliance', icon: CheckSquare, permission: PERMISSIONS.SECURITY_COMPLIANCE_SETTINGS_VIEW },
+        { name: 'Integrations', href: '/admin/integrations', icon: Briefcase, permission: PERMISSIONS.INTEGRATION_HUB_VIEW },
+        { name: 'Security', href: '/admin/security', icon: Shield, permission: PERMISSIONS.SECURITY_COMPLIANCE_SETTINGS_VIEW },
+        { name: 'Posts', href: '/admin/posts', icon: FileText, permission: PERMISSIONS.ANALYTICS_VIEW },
+        { name: 'Newsletter', href: '/admin/newsletter', icon: Mail, permission: PERMISSIONS.COMMUNICATION_SETTINGS_VIEW },
+        { name: 'Notifications', href: '/admin/notifications', icon: Bell, permission: PERMISSIONS.COMMUNICATION_SETTINGS_VIEW },
+        { name: 'Performance Metrics', href: '/admin/perf-metrics', icon: BarChart3, permission: PERMISSIONS.ANALYTICS_VIEW },
+      ]
     }
   ]
 
