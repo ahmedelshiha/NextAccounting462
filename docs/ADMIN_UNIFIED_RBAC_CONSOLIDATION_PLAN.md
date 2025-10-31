@@ -7,6 +7,20 @@
 **Revision Type:** MAJOR SCOPE CHANGE  
 **Vision:** Single Hub for User Management, RBAC, Clients, and Team
 
+### Progress Update (2025-10-31)
+- Status: ✅ Completed initial RBAC consolidation
+- Summary: Added “Roles & Permissions” tab to unified /admin/users and redirected legacy RBAC pages.
+- Files modified/added:
+  - src/app/admin/permissions/page.tsx (server redirect to /admin/users?tab=rbac)
+  - src/app/admin/roles/page.tsx (server redirect to /admin/users?tab=rbac)
+  - src/app/admin/users/components/tabs/RbacTab.tsx (new)
+  - src/app/admin/users/components/tabs/index.ts (export RbacTab)
+  - src/app/admin/users/components/TabNavigation.tsx (added rbac tab)
+  - src/app/admin/users/EnterpriseUsersPage.tsx (wired RbacTab and URL tab param)
+- Testing notes: Manually verified navigation to /admin/permissions and /admin/roles redirects to /admin/users?tab=rbac; verified tab activation from URL (?tab=rbac) and RBAC UI renders both RolePermissionsViewer and UserPermissionsInspector.
+- Issues: None observed. Backward-compatible; old pages now forward to unified hub.
+- Next tasks: Add Entities tab (clients/team), unify services per plan; E2E coverage for redirects and RBAC tab.
+
 ---
 
 ## Executive Summary
@@ -83,7 +97,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 │   ├── Pending operations
 │   ├��─ Quick actions
 │   └── User selection
-├── Entities Tab (NEW)
+��── Entities Tab (NEW)
 │   ├── Clients List
 │   ���   ├── Search, filter, sort
 │   │   ├── Create/Edit/Delete client modals
@@ -551,7 +565,7 @@ TabContext: {
 □ Tab integration                 (12 hours)
 □ E2E & A11y testing             (20 hours)
 □ Performance testing            (8 hours)
-───────────────��─────────────────────────
+───────────────��───────────��─────────────
   Subtotal: 74 hours
 ```
 
