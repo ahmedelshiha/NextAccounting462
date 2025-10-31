@@ -602,7 +602,7 @@ export class BulkOperationsService {
             changesBefore.role = user.role
             await prisma.user.update({
               where: { id: user.id },
-              data: { role: config.toRole }
+              data: { role: config.toRole as any }
             })
             changesAfter.role = config.toRole
           }
