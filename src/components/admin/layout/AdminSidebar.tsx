@@ -140,6 +140,12 @@ function AdminSidebar(props: AdminSidebarProps) {
         { name: 'Chat', href: '/admin/chat', icon: Mail },
         { name: 'Reminders', href: '/admin/reminders', icon: Bell },
       ]
+    },
+    {
+      section: 'system',
+      items: [
+        { name: 'User Management', href: '/admin/users', icon: Users, permission: PERMISSIONS.USERS_MANAGE },
+      ]
     }
   ]
 
