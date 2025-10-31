@@ -125,6 +125,7 @@ interface UsersContextType {
   // Helpers
   openUserProfile: (user: UserItem) => void
   closeUserProfile: () => void
+  refreshUsers: () => Promise<void>
 }
 
 // Create Context
@@ -205,6 +206,34 @@ export function UsersContextProvider({ children, initialUsers = [], initialStats
     setActiveTab('overview')
   }, [])
 
+  const refreshUsers = useCallback(async () => {
+    setRefreshing(true)
+    setErrorMsg(null)
+    try {
+      const response = await fetch('/api/admin/users?page=1&limit=50', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      if (data.users) {
+        setUsers(data.users)
+      }
+      if (data.stats) {
+        setStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Failed to refresh users:', error)
+      setErrorMsg(error instanceof Error ? error.message : 'Failed to refresh data')
+    } finally {
+      setRefreshing(false)
+    }
+  }, [])
+
   const value: UsersContextType = {
     // Data
     users,
@@ -277,7 +306,8 @@ export function UsersContextProvider({ children, initialUsers = [], initialStats
 
     // Helpers
     openUserProfile,
-    closeUserProfile
+    closeUserProfile,
+    refreshUsers
   }
 
   return <UsersContext.Provider value={value}>{children}</UsersContext.Provider>

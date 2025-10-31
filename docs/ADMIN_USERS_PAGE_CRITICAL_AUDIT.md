@@ -1,8 +1,10 @@
 # Admin Users Page - Critical Audit Report
 
-**Date:** January 2025  
-**Status:** 🔴 **CRITICAL ISSUE IDENTIFIED**  
-**Priority:** P0 - Data Not Loading  
+> **📌 Part of:** [ADMIN_USERS_PROJECT_MASTER.md](./ADMIN_USERS_PROJECT_MASTER.md) - Reference for historical context and root cause analysis
+
+**Date:** January 2025
+**Status:** 🔴 **CRITICAL ISSUE IDENTIFIED**
+**Priority:** P0 - Data Not Loading
 **Root Cause:** Tenant Context Not Available in Server Components  
 
 ---
