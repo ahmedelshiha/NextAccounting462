@@ -77,6 +77,12 @@ model User {
   manager                   User?                   @relation("ManagerEmployee", fields: [managerId], references: [id])
   employees                 User[]                  @relation("ManagerEmployee")
   tenant                    Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workflowsAsUser           UserWorkflow[]          @relation("WorkflowUser")
+  workflowsTriggered        UserWorkflow[]          @relation("WorkflowTriggeredBy")
+  workflowsApproved         UserWorkflow[]          @relation("WorkflowApprovedBy")
+  workflowStepsApproved     WorkflowStep[]          @relation("WorkflowStepApprovedBy")
+  workflowTemplatesCreated  WorkflowTemplate[]      @relation("WorkflowTemplateCreatedBy")
+  workflowHistoryChanges    WorkflowHistory[]       @relation("WorkflowHistoryChangedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
@@ -214,6 +220,8 @@ model Tenant {
   translationKeys       TranslationKey[]
   translationMetrics    TranslationMetrics[]
   users                 User[]
+  userWorkflows         UserWorkflow[]
+  workflowTemplates     WorkflowTemplate[]
 
   @@index([status])
 }
@@ -1547,7 +1555,7 @@ model UserWorkflow {
 
   // Relations
   tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User            @relation("WorkflowUser", fields: [userId], references: [id], onDelete: Cascade)
   triggeredByUser User            @relation("WorkflowTriggeredBy", fields: [triggeredBy], references: [id])
   approvedByUser  User?           @relation("WorkflowApprovedBy", fields: [approvedBy], references: [id])
   steps           WorkflowStep[]
@@ -1579,7 +1587,7 @@ model WorkflowStep {
   updatedAt       DateTime       @updatedAt
 
   workflow        UserWorkflow   @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  approvedByUser  User?          @relation(fields: [approvedBy], references: [id])
+  approvedByUser  User?          @relation("WorkflowStepApprovedBy", fields: [approvedBy], references: [id])
 
   @@index([workflowId, stepNumber])
   @@index([status])
@@ -1601,7 +1609,7 @@ model WorkflowTemplate {
   updatedAt        DateTime      @updatedAt
 
   tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  createdByUser    User          @relation(fields: [createdBy], references: [id])
+  createdByUser    User          @relation("WorkflowTemplateCreatedBy", fields: [createdBy], references: [id])
 
   @@index([tenantId, isActive])
   @@unique([tenantId, name])
@@ -1636,7 +1644,7 @@ model WorkflowHistory {
   createdAt        DateTime      @default(now())
 
   workflow         UserWorkflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  changedByUser    User          @relation(fields: [changedBy], references: [id])
+  changedByUser    User          @relation("WorkflowHistoryChangedBy", fields: [changedBy], references: [id])
 
   @@index([workflowId, createdAt])
   @@map("workflow_history")

@@ -60,7 +60,7 @@ export async function fetchPendingOperations(
     }
 
     const data = await response.json()
-    return (data.operations || []).map(op => ({
+    return (data.operations || []).map((op: any) => ({
       id: op.id,
       title: op.title,
       description: op.description,
