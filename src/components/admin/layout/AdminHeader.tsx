@@ -11,7 +11,7 @@
 
 'use client'
 
-import { useRef, useState, lazy, Suspense } from 'react'
+import { useRef, useState, lazy, Suspense, useCallback, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import {
@@ -28,6 +28,15 @@ import Link from 'next/link'
 import QuickLinks from './Footer/QuickLinks'
 import ResponsiveUserMenu from './Header/ResponsiveUserMenu'
 import dynamic from 'next/dynamic'
+
+// Debounce function for search queries
+function debounce<T extends (...args: any[]) => any>(func: T, delay: number): (...args: Parameters<T>) => void {
+  let timeoutId: NodeJS.Timeout
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func(...args), delay)
+  }
+}
 
 const ProfileManagementPanel = dynamic(
   () => import('../profile/ProfileManagementPanel'),
