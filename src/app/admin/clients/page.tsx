@@ -1,34 +1,10 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
-import Link from 'next/link'
-import { apiFetch } from '@/lib/api'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { 
-  Users,
-  Search,
-  Download,
-  RefreshCw,
-  Plus,
-  Eye,
-  Loader2,
-  Edit3,
-  UserCheck,
-  Clock,
-  Mail,
-  Phone,
-  Building,
-  Calendar,
-  TrendingUp,
-  TrendingDown,
-  DollarSign
-} from 'lucide-react'
-import { usePermissions } from '@/lib/use-permissions'
-import ListPage from '@/components/dashboard/templates/ListPage'
-import type { Column } from '@/types/dashboard'
+import { redirect } from 'next/navigation'
+
+export default function ClientsPage() {
+  redirect('/admin/users?tab=entities&type=clients')
+}
 
 interface Client {
   id: string
