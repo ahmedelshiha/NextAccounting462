@@ -36,7 +36,7 @@ import SETTINGS_REGISTRY from '@/lib/settings/registry'
 import useRovingTabIndex from '@/hooks/useRovingTabIndex'
 import SidebarHeader from './SidebarHeader'
 import SidebarFooter from './SidebarFooter'
-import { useSidebarCollapsed, useSidebarActions } from '@/stores/admin/layout.store.selectors'
+import { useSidebarCollapsed, useSidebarActions, useExpandedGroups } from '@/stores/admin/layout.store.selectors'
 import { useMenuCustomizationStore } from '@/stores/admin/menuCustomization.store'
 import { applyCustomizationToNavigation } from '@/lib/menu/menuUtils'
 
