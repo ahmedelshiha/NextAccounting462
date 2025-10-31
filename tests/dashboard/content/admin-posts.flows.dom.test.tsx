@@ -62,7 +62,7 @@ describe('Admin Posts CRUD flows', () => {
       const title = screen.getByDisplayValue('Original') as HTMLInputElement
       fireEvent.change(title, { target: { value: 'Updated' } })
 
-      const update = Array.from(container.querySelectorAll('button')).find(b => (b.textContent || '').includes('Update Post')) as HTMLButtonElement
+      const update = screen.getByText('Update Post') as HTMLButtonElement
       fireEvent.click(update)
 
       const calls = (apiFetch as any).mock.calls
@@ -84,7 +84,7 @@ describe('Admin Posts CRUD flows', () => {
       const deleteBtn = screen.getByLabelText('Delete post')
       fireEvent.click(deleteBtn)
 
-      const confirmDelete = screen.getByText('Delete Post')
+      const confirmDelete = screen.getByRole('button', { name: 'Delete Post' })
       fireEvent.click(confirmDelete)
 
       const calls = (apiFetch as any).mock.calls
