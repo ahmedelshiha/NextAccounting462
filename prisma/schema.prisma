@@ -1698,3 +1698,105 @@ enum UserRole {
   ADMIN
   SUPER_ADMIN
 }
+
+// Phase 4c Bulk Operations Enums
+enum BulkOperationType {
+  ROLE_CHANGE
+  STATUS_UPDATE
+  PERMISSION_GRANT
+  PERMISSION_REVOKE
+  SEND_EMAIL
+  IMPORT_CSV
+  CUSTOM
+}
+
+enum BulkOperationStatus {
+  DRAFT
+  READY
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+  PAUSED
+}
+
+// Phase 4c Bulk Operations Models
+model BulkOperation {
+  id                String                  @id @default(cuid())
+  tenantId          String
+  name              String                  @db.VarChar(255)
+  description       String?
+  type              BulkOperationType
+  userFilter        Json?                   // Filters for user selection (role, status, etc)
+  operationConfig   Json                    // Operation-specific configuration
+  status            BulkOperationStatus     @default(DRAFT)
+  createdBy         String
+  approvalRequired  Boolean                 @default(false)
+  approvalStatus    String?                 // PENDING, APPROVED, REJECTED
+  approvedBy        String?
+  approvedAt        DateTime?
+  scheduledFor      DateTime?
+  notifyUsers       Boolean                 @default(true)
+  dryRunResults     Json?                   // Results of dry-run preview
+  totalUsersAffected Int                    @default(0)
+  successCount      Int                     @default(0)
+  failureCount      Int                     @default(0)
+  startedAt         DateTime?
+  completedAt       DateTime?
+  errorMessage      String?
+  rollbackAvailable Boolean                 @default(true)
+  rollbackUntilDate DateTime?               // 30 days from completion
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  // Relations
+  tenant            Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  creator           User                    @relation("BulkOperationCreatedBy", fields: [createdBy], references: [id])
+  approver          User?                   @relation("BulkOperationApprovedBy", fields: [approvedBy], references: [id])
+  results           BulkOperationResult[]
+  history           BulkOperationHistory[]
+
+  @@index([tenantId, status, createdAt])
+  @@index([createdBy, createdAt])
+  @@index([status])
+  @@map("bulk_operations")
+}
+
+model BulkOperationResult {
+  id                String              @id @default(cuid())
+  bulkOperationId   String
+  userId            String
+  status            String              // SUCCESS, FAILED, SKIPPED, PENDING
+  errorMessage      String?
+  changesBefore     Json?               // State before operation
+  changesAfter      Json?               // State after operation
+  executionTimeMs   Int?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  // Relations
+  bulkOperation     BulkOperation       @relation(fields: [bulkOperationId], references: [id], onDelete: Cascade)
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([bulkOperationId, status])
+  @@index([userId, createdAt])
+  @@map("bulk_operation_results")
+}
+
+model BulkOperationHistory {
+  id                String              @id @default(cuid())
+  bulkOperationId   String
+  eventType         String              // CREATED, STATUS_CHANGED, DRY_RUN, EXECUTED, ROLLBACK, etc
+  eventDescription  String?
+  changedBy         String?
+  oldValue          Json?
+  newValue          Json?
+  createdAt         DateTime            @default(now())
+
+  // Relations
+  bulkOperation     BulkOperation       @relation(fields: [bulkOperationId], references: [id], onDelete: Cascade)
+  changedByUser     User?               @relation("BulkOperationHistoryChangedBy", fields: [changedBy], references: [id])
+
+  @@index([bulkOperationId, createdAt])
+  @@map("bulk_operation_history")
+}
