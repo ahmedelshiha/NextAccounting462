@@ -55,7 +55,7 @@ describe('Admin Posts CRUD flows', () => {
 
     const { container, unmount } = render(<AdminPostsPage />)
     try {
-      const editBtn = screen.getByText('Edit')
+      const editBtn = await screen.findByText('Edit')
       fireEvent.click(editBtn)
 
       const title = screen.getByDisplayValue('Original') as HTMLInputElement
