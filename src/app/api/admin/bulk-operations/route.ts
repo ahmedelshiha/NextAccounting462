@@ -1,40 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { withTenantContext } from '@/lib/api-wrapper'
+import { requireTenantContext } from '@/lib/tenant-utils'
 import { bulkOperationsService } from '@/services/bulk-operations.service'
-import prisma from '@/lib/prisma'
 
 /**
  * GET /api/admin/bulk-operations
  * List bulk operations with pagination
  */
-export async function GET(request: NextRequest) {
+export const GET = withTenantContext(async (request: NextRequest) => {
   try {
-    const session = await getServerSession()
-    if (!session?.user) {
+    const ctx = requireTenantContext()
+    if (!ctx.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const searchParams = request.nextUrl.searchParams
-    const tenantId = searchParams.get('tenantId')
+    const tenantId = ctx.tenantId
     const limit = parseInt(searchParams.get('limit') || '10')
     const offset = parseInt(searchParams.get('offset') || '0')
     const status = searchParams.get('status') as any
-
-    if (!tenantId) {
-      return NextResponse.json({ error: 'tenantId is required' }, { status: 400 })
-    }
-
-    // Verify user has access to this tenant
-    const membership = await prisma.tenantMembership.findFirst({
-      where: {
-        tenantId,
-        userId: session.user.id
-      }
-    })
-
-    if (!membership) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
 
     const result = await bulkOperationsService.listBulkOperations(tenantId, {
       limit,
@@ -50,44 +34,32 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})
 
 /**
  * POST /api/admin/bulk-operations
  * Create a new bulk operation
  */
-export async function POST(request: NextRequest) {
+export const POST = withTenantContext(async (request: NextRequest) => {
   try {
-    const session = await getServerSession()
-    if (!session?.user) {
+    const ctx = requireTenantContext()
+    if (!ctx.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
-    const { tenantId, name, description, type, userFilter, operationConfig, approvalRequired, scheduledFor, notifyUsers } = body
+    const { name, description, type, userFilter, operationConfig, approvalRequired, scheduledFor, notifyUsers } = body
 
-    if (!tenantId || !name || !type || !operationConfig) {
+    if (!name || !type || !operationConfig) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
 
-    // Verify user has access to this tenant
-    const membership = await prisma.tenantMembership.findFirst({
-      where: {
-        tenantId,
-        userId: session.user.id
-      }
-    })
-
-    if (!membership) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
     const operation = await bulkOperationsService.createBulkOperation(
-      tenantId,
-      session.user.id,
+      ctx.tenantId,
+      ctx.userId,
       {
         name,
         description,
@@ -108,4 +80,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})
