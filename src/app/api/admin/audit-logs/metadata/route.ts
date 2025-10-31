@@ -1,18 +1,17 @@
-import { getServerSession } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
+import { withTenantContext } from '@/lib/api-wrapper'
+import { requireTenantContext } from '@/lib/tenant-utils'
 import { AuditLogService } from '@/services/audit-log.service'
-import { authOptions } from '@/lib/auth'
 
-export async function GET(request: NextRequest) {
+export const GET = withTenantContext(async (request: NextRequest) => {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user) {
+    const ctx = requireTenantContext()
+    
+    if (!ctx.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const user = session.user as any
-    const tenantId = user.tenantId
+    const tenantId = ctx.tenantId
 
     if (!tenantId) {
       return NextResponse.json({ error: 'Tenant ID not found' }, { status: 400 })
@@ -47,4 +46,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})
