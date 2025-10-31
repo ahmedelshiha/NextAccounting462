@@ -19,7 +19,21 @@
   - src/app/admin/users/EnterpriseUsersPage.tsx (wired RbacTab and URL tab param)
 - Testing notes: Manually verified navigation to /admin/permissions and /admin/roles redirects to /admin/users?tab=rbac; verified tab activation from URL (?tab=rbac) and RBAC UI renders both RolePermissionsViewer and UserPermissionsInspector.
 - Issues: None observed. Backward-compatible; old pages now forward to unified hub.
-- Next tasks: Add Entities tab (clients/team), unify services per plan; E2E coverage for redirects and RBAC tab.
+- Next tasks: E2E coverage for redirects and RBAC tab.
+
+### Progress Update (2025-10-31 - Part 2)
+- Status: ✅ Added Entities tab with Clients and Team sub-tabs
+- Summary: Embedded Clients list (via /api/admin/users?role=CLIENT) and Team management (existing component) inside unified /admin/users.
+- Files modified/added:
+  - src/app/admin/users/components/tabs/EntitiesTab.tsx (new)
+  - src/app/admin/users/components/tabs/index.ts (export EntitiesTab)
+  - src/app/admin/users/components/TabNavigation.tsx (added entities tab)
+  - src/app/admin/users/EnterpriseUsersPage.tsx (wired EntitiesTab, URL param parsing)
+  - src/app/admin/clients/page.tsx (server redirect to /admin/users?tab=entities&type=clients)
+  - src/app/admin/team/page.tsx (server redirect to /admin/users?tab=entities&type=team)
+- Testing notes: Manually verified /admin/clients and /admin/team redirect to the Entities tab with correct sub-tab selection; verified search and filters on clients; verified team list renders and CRUD actions hit existing APIs.
+- Issues: None observed. Backward-compatible.
+- Next tasks: E2E and a11y tests; service unification per plan (optional, non-blocking).
 
 ---
 
@@ -97,7 +111,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 │   ├── Pending operations
 │   ├��─ Quick actions
 │   └── User selection
-��── Entities Tab (NEW)
+├── Entities Tab (NEW)
 │   ├── Clients List
 │   ���   ├── Search, filter, sort
 │   │   ├── Create/Edit/Delete client modals
@@ -565,7 +579,7 @@ TabContext: {
 □ Tab integration                 (12 hours)
 □ E2E & A11y testing             (20 hours)
 □ Performance testing            (8 hours)
-───────────────��───────────��─────────────
+───────────────��─────────────────────────
   Subtotal: 74 hours
 ```
 
