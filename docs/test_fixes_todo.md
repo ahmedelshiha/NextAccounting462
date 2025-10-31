@@ -43,9 +43,10 @@ This document tracks all failing tests that need to be fixed. Each test is categ
 - **Investigation (2025-10-31)**:
   - Hook (`src/hooks/admin/useSystemHealth.ts`) sets SWR option `refreshInterval` (SWR v2), but the test mock inspects `swrState.config?.revalidateInterval`.
   - This is a naming mismatch between test expectation and hook implementation.
-- **Fix Required**:
-  - Align test with SWR v2 naming (`refreshInterval`) or set both keys in config (add `revalidateInterval: interval`) for compatibility.
-- **Status**: ⚠️ In Progress — mismatch identified
+- **Fix Implemented (2025-10-31)**:
+  - Added both `refreshInterval` and `revalidateInterval` for compatibility
+  - File: `src/hooks/admin/useSystemHealth.ts` — tests passing
+- **Status**: ✅ Completed
 
 ### 4. Communication Settings - Export/Import UI
 - **File**: `tests/components/communication-settings.export-import.ui.test.tsx`
@@ -161,7 +162,7 @@ This document tracks all failing tests that need to be fixed. Each test is categ
 - **File**: `tests/admin/settings/SettingsOverview.test.tsx`
 - **Issue**: State updates not wrapped in act()
 - **Fix Required**: Wrap state-triggering actions in act() or use waitFor() for async updates
-- **Status**: ���️ In Progress
+- **Status**: ⚠️ In Progress
 
 ---
 
