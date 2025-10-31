@@ -197,14 +197,21 @@ export class AuditLogService {
   }
 
   /**
-   * Get distinct actions for filtering
+   * Get distinct actions for filtering - OPTIMIZED
+   * Uses groupBy instead of findMany for better performance on large datasets
    */
   static async getDistinctActions(tenantId: string): Promise<string[]> {
-    const actions = await prisma.auditLog.findMany({
-      where: { tenantId },
-      distinct: ['action'],
-      select: {
-        action: true
+    // Cache frequent queries for 1 hour
+    const cacheKey = `actions:${tenantId}`
+    const cached = this.getQueryCache(cacheKey)
+    if (cached) return cached
+
+    // Use groupBy for better performance on large datasets
+    const actions = await prisma.auditLog.groupBy({
+      by: ['action'],
+      where: {
+        tenantId,
+        action: { not: null }
       },
       orderBy: {
         action: 'asc'
@@ -212,7 +219,9 @@ export class AuditLogService {
       take: 100
     })
 
-    return actions.map(a => a.action).filter(Boolean)
+    const result = actions.map(a => a.action).filter(Boolean)
+    this.setQueryCache(cacheKey, result, 60 * 60 * 1000) // Cache for 1 hour
+    return result
   }
 
   /**
