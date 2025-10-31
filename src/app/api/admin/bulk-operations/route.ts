@@ -43,7 +43,7 @@ export const GET = withTenantContext(async (request: NextRequest) => {
 export const POST = withTenantContext(async (request: NextRequest) => {
   try {
     const ctx = requireTenantContext()
-    if (!ctx.userId) {
+    if (!ctx.userId || !ctx.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -58,7 +58,7 @@ export const POST = withTenantContext(async (request: NextRequest) => {
     }
 
     const operation = await bulkOperationsService.createBulkOperation(
-      ctx.tenantId,
+      ctx.tenantId as string,
       ctx.userId,
       {
         name,
