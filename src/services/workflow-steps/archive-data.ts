@@ -31,7 +31,7 @@ export class ArchiveDataStepHandler extends BaseStepHandler {
         archivedItems.tasks = tasks
 
         const bookings = await prisma.booking.count({
-          where: { userId: workflow.user.id }
+          where: { clientId: workflow.user.id }
         })
         archivedItems.bookings = bookings
       } catch {
