@@ -71,6 +71,15 @@ export function DashboardTab({
   const [bulkActionValue, setBulkActionValue] = useState<string>('')
   const [isApplyingBulkAction, setIsApplyingBulkAction] = useState(false)
 
+  // Handle Select value change - Convert empty to undefined for Radix Select compatibility
+  const handleBulkActionTypeChange = (value: string) => {
+    setBulkActionType(value || '')
+  }
+
+  const handleBulkActionValueChange = (value: string) => {
+    setBulkActionValue(value || '')
+  }
+
   // Fetch pending operations
   const { operations: pendingOperations, metrics, isLoading: operationsLoading } = usePendingOperations({
     userCount: users.length,
