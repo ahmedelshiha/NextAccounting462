@@ -12,6 +12,7 @@ export const runtime = 'nodejs'
 export const GET = withTenantContext(async (_request: Request, { params }: { params: { id: string } }) => {
   const ctx = requireTenantContext()
   if (!ctx.userId) return respond.unauthorized()
+  if (!ctx.tenantId) return respond.unauthorized()
   if (!hasPermission(ctx.role ?? '', PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
   const id = params.id
 
