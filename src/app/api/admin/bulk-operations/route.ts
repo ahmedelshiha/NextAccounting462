@@ -10,12 +10,12 @@ import { bulkOperationsService } from '@/services/bulk-operations.service'
 export const GET = withTenantContext(async (request: NextRequest) => {
   try {
     const ctx = requireTenantContext()
-    if (!ctx.userId) {
+    if (!ctx.userId || !ctx.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const searchParams = request.nextUrl.searchParams
-    const tenantId = ctx.tenantId
+    const tenantId = ctx.tenantId as string
     const limit = parseInt(searchParams.get('limit') || '10')
     const offset = parseInt(searchParams.get('offset') || '0')
     const status = searchParams.get('status') as any
