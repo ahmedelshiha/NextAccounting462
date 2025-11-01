@@ -1805,3 +1805,41 @@ model BulkOperationHistory {
   @@index([bulkOperationId, createdAt])
   @@map("bulk_operation_history")
 }
+
+// Phase 3 Workflow Designer Models
+model Workflow {
+  id              String                @id @default(cuid())
+  name            String                @db.VarChar(255)
+  description     String?
+  version         Int                   @default(1)
+  status          String                @default("DRAFT") // DRAFT, ACTIVE, ARCHIVED
+  nodes           Json                  @default("[]") // WorkflowNode[]
+  edges           Json                  @default("[]") // WorkflowEdge[]
+  createdBy       String                @default("system")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  // Relations
+  simulations     WorkflowSimulation[]
+
+  @@index([status, createdAt])
+  @@index([createdBy, createdAt])
+  @@map("workflows")
+}
+
+model WorkflowSimulation {
+  id              String                @id @default(cuid())
+  workflowId      String
+  testData        Json?
+  executionPath   Json                  @default("[]") // ExecutionStep[]
+  totalDuration   Int                   @default(0)
+  success         Boolean               @default(false)
+  errors          String[]              @default([])
+  createdAt       DateTime              @default(now())
+
+  // Relations
+  workflow        Workflow              @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId, createdAt])
+  @@map("workflow_simulations")
+}
