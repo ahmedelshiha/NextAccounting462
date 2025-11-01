@@ -61,7 +61,7 @@ export function ImportWizard({ onImportComplete }: ImportWizardProps) {
   const [fileContent, setFileContent] = useState<string>('')
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>(DEFAULT_FIELD_MAPPINGS)
   const [previewData, setPreviewData] = useState<any[]>([])
-  const [validation Errors, setValidationErrors] = useState<ImportError[]>([])
+  const [validationErrors, setValidationErrors] = useState<ImportError[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [results, setResults] = useState<ImportResults | null>(null)
   const [dryRunMode, setDryRunMode] = useState(true)
