@@ -62,7 +62,7 @@ export function EnterpriseUsersPage() {
     toast.success('User created successfully')
     setIsCreateUserModalOpen(false)
     // Trigger refresh of users list
-    context.refetchUsers?.()
+    context.refreshUsers?.()
   }
 
   // Handler for Import action

@@ -8,11 +8,11 @@ export const GET = withTenantContext(async () => {
   try {
     const ctx = requireTenantContext()
     const role = ctx.role ?? undefined
-    if (!hasPermission(role, PERMISSIONS.ROLES_VIEW)) {
+    if (!hasPermission(role, PERMISSIONS.USERS_VIEW)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const roles = await prisma.role.findMany({
+    const roles = await prisma.customRole.findMany({
       where: {
         tenantId: ctx.tenantId,
       },
@@ -38,7 +38,7 @@ export const POST = withTenantContext(async (req: Request) => {
   try {
     const ctx = requireTenantContext()
     const role = ctx.role ?? undefined
-    if (!hasPermission(role, PERMISSIONS.ROLES_MANAGE)) {
+    if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -54,7 +54,7 @@ export const POST = withTenantContext(async (req: Request) => {
     }
 
     // Check if role name already exists for this tenant
-    const existing = await prisma.role.findFirst({
+    const existing = await prisma.customRole.findFirst({
       where: {
         name,
         tenantId: ctx.tenantId,
@@ -65,7 +65,7 @@ export const POST = withTenantContext(async (req: Request) => {
       return NextResponse.json({ error: 'Role name already exists' }, { status: 409 })
     }
 
-    const newRole = await prisma.role.create({
+    const newRole = await prisma.customRole.create({
       data: {
         name,
         description,

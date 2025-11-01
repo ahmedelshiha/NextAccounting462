@@ -13,7 +13,7 @@ export const GET = withTenantContext(async () => {
     }
 
     const clients = await prisma.user.findMany({
-      where: { 
+      where: {
         role: 'CLIENT',
         tenantId: ctx.tenantId,
       },
@@ -21,9 +21,6 @@ export const GET = withTenantContext(async () => {
         id: true,
         name: true,
         email: true,
-        phone: true,
-        company: true,
-        status: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -46,7 +43,7 @@ export const POST = withTenantContext(async (req: Request) => {
     }
 
     const body = await req.json().catch(() => ({}))
-    const { name, email, phone, company, tier, status } = body || {}
+    const { name, email, tier, status } = body || {}
 
     if (!name || !email) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
@@ -54,7 +51,7 @@ export const POST = withTenantContext(async (req: Request) => {
 
     // Check if email already exists
     const existing = await prisma.user.findUnique({
-      where: { email },
+      where: { tenantId_email: { tenantId: ctx.tenantId, email } },
     })
 
     if (existing) {
@@ -65,10 +62,7 @@ export const POST = withTenantContext(async (req: Request) => {
       data: {
         name,
         email,
-        phone: phone || null,
-        company: company || null,
         role: 'CLIENT',
-        status: status || 'ACTIVE',
         tenantId: ctx.tenantId,
         emailVerified: new Date(),
       },
@@ -76,9 +70,6 @@ export const POST = withTenantContext(async (req: Request) => {
         id: true,
         name: true,
         email: true,
-        phone: true,
-        company: true,
-        status: true,
         createdAt: true,
       },
     })
