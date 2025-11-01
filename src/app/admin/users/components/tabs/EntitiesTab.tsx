@@ -345,7 +345,7 @@ function TeamManagementEmbedded({ onEdit, onAddClick }: { onEdit: (member: any) 
           Add Member
         </Button>
       </div>
-      <TeamManagement hideHeader onEdit={onEdit} onAddClick={onAddClick} />
+      <TeamManagement hideHeader />
     </div>
   )
 }
