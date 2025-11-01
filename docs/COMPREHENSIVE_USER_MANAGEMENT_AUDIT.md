@@ -79,11 +79,11 @@ The admin user management system consists of **three interconnected subsystems**
 │  │    Status: ⚠️ 80% Complete                    │  │
 │  └──────────────────────────────────────────────┘  │
 │                                                     │
-│  ┌──────���───────────────────────────────────────┐  │
+│  ┌──────────────────────────────────────────────┐  │
 │  │ 3. USER MANAGEMENT SETTINGS                  │  │
 │  │    (9 Tabs + useUserManagementSettings)      │  │
 │  │    Status: 🔴 70% Complete (Critical Gaps)   │  │
-│  └──────────────────────────────────────────────┘  │
+│  └──────────────────────────────────────��───────┘  │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
@@ -1431,12 +1431,23 @@ Priority 3 - Nice-to-have:
 
 ---
 
-## 🔄 CODE DUPLICATION ANALYSIS & CONSOLIDATION OPPORTUNITIES
+## 🔄 COMPLETE CODE DUPLICATION ANALYSIS: Admin/Users Directory
+
+### Executive Summary
+**Total Files Analyzed:** 71
+**Duplications Found:** 8 Major + 5 Minor = 13 total
+**Estimated Code Savings:** ~4,500+ lines
+**Consolidation Effort:** 55-75 developer hours
+
+---
+
+## 📊 DETAILED ADMIN/USERS DUPLICATION INVENTORY
 
 ### Overview
-**Duplication Found:** 4 Major, 6 Minor
-**Estimated Code Savings:** ~3,000 lines
-**Consolidation Effort:** 30-40 developer hours
+**Duplication Found:** 8 Major, 5 Minor (In Addition to Previous 4 Major)
+**Total Duplicates in System:** 12 Major + 5 Minor
+**Estimated Code Savings:** ~4,500 lines
+**Consolidation Effort:** 55-75 developer hours
 
 ---
 
