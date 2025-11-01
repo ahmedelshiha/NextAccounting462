@@ -339,15 +339,15 @@ function PreviewStep({
             <h4 className="font-semibold mb-2">Dry-Run Results</h4>
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-green-50 p-3 rounded">
-                <div className="text-2xl font-bold text-green-600">{dryRunResult.succeeded}</div>
+                <div className="text-2xl font-bold text-green-600">{dryRunResult.succeeded ?? 0}</div>
                 <div className="text-xs text-gray-600">Would Succeed</div>
               </div>
               <div className="bg-red-50 p-3 rounded">
-                <div className="text-2xl font-bold text-red-600">{dryRunResult.failed}</div>
+                <div className="text-2xl font-bold text-red-600">{dryRunResult.failed ?? 0}</div>
                 <div className="text-xs text-gray-600">Would Fail</div>
               </div>
               <div className="bg-yellow-50 p-3 rounded">
-                <div className="text-2xl font-bold text-yellow-600">{dryRunResult.warnings}</div>
+                <div className="text-2xl font-bold text-yellow-600">{dryRunResult.warnings ?? 0}</div>
                 <div className="text-xs text-gray-600">Warnings</div>
               </div>
             </div>
