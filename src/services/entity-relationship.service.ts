@@ -177,7 +177,7 @@ export class EntityRelationshipService {
     }
 
     // Simplified - assume user has permissions based on role
-    const hasPermissions = user.role ? [user.role] : []
+    const hasPermissions = user.role ? [String(user.role)] : []
     const missingPermissions = requiredPermissions.filter((p) => !hasPermissions.includes(p))
 
     return {
