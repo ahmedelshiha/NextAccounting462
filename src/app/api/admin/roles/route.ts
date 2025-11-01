@@ -79,7 +79,7 @@ export const POST = withTenantContext(async (req: Request) => {
         description,
         permissions,
         tenantId: ctx.tenantId,
-        createdBy: ctx.userId,
+        createdBy: ctx.userId ?? undefined,
       },
       select: {
         id: true,
