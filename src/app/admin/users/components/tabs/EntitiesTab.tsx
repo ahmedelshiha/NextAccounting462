@@ -327,7 +327,6 @@ function ClientsListEmbedded({ onEdit, onAddClick }: { onEdit: (client: ClientIt
         columns={columns}
         rows={filtered}
         loading={loading}
-        error={error || undefined}
       />
     </div>
   )
