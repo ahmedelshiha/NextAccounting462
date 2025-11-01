@@ -50,6 +50,10 @@ export const PATCH = withTenantContext(async (req: Request, { params }: { params
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
+    }
+
     const body = await req.json().catch(() => ({}))
     const { name, email } = body || {}
 
