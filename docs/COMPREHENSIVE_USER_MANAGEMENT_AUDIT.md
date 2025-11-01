@@ -63,7 +63,7 @@ The admin user management system consists of **three interconnected subsystems**
 ### Three-Tier User Management Architecture
 
 ```
-┌───────────────────────────────────────────────────���─┐
+┌─────────────────────────────────────────────────────┐
 │        USER MANAGEMENT SYSTEM (3 Subsystems)        │
 ├─────────────────────────────────────────────────────┤
 │                                                     │
@@ -2276,36 +2276,50 @@ export function useEntitySettings<T extends Record<string, any>>(
 
 ---
 
-### 🚀 CONSOLIDATION ROADMAP
+### 🚀 COMPREHENSIVE CONSOLIDATION ROADMAP
 
-**Phase 0: Foundation (Week 1) - 12-15 hours**
-1. [ ] Create generic `useEntitySettings()` hook (4-6h)
-2. [ ] Create generic `EntitySettingsPanel` component (8-10h)
+**Phase 0: Admin/Users Quick Wins (Week 1) - 10-16 hours**
+1. [ ] Delete obsolete page files (page-refactored.tsx, page-phase4.tsx) (1-2h)
+2. [ ] Delete unused WorkflowBuilder.tsx (1h)
+3. [ ] Consolidate BulkOperationsWizard + BulkOperationsAdvanced (6-8h)
+4. [ ] Rename search/filter components for clarity (2-3h)
+5. [ ] Testing and integration (2-3h)
 
-**Phase 1: Merge Modals (Week 2) - 16-20 hours**
+**Phase 1: Foundation - Settings (Week 1-2) - 15-18 hours**
+1. [ ] Create generic `useEntitySettings<T>()` hook (4-6h)
+2. [ ] Create generic `EntitySettingsPanel<T>` component (8-10h)
+3. [ ] Testing (2-3h)
+
+**Phase 2: Merge Permission Modals (Week 2) - 16-20 hours**
 1. [ ] Enhance `UnifiedPermissionModal` for role mode (4-6h)
 2. [ ] Replace RoleFormModal usage in RbacTab (4-6h)
 3. [ ] Delete RoleFormModal.tsx (1h)
-4. [ ] Consolidate role/permission logic (8-10h)
+4. [ ] Consolidate role/permission logic (5-7h)
+5. [ ] Testing (2-3h)
 
-**Phase 2: Consolidate Dashboard (Week 2) - 6-8 hours**
-1. [ ] Merge DashboardTab logic into EnhancedDashboardTab (6-8h)
+**Phase 3: Consolidate Dashboards (Week 2) - 8-10 hours**
+1. [ ] Merge DashboardTab logic into ExecutiveDashboardTab (6-8h)
 2. [ ] Remove DashboardTab.tsx (1h)
+3. [ ] Testing (1-2h)
 
-**Phase 3: Unify Entity Settings (Week 3) - 10-15 hours**
+**Phase 4: Unify Entity Settings (Week 3) - 12-16 hours**
 1. [ ] Refactor ClientEntitySettings using generic component (5-7h)
 2. [ ] Refactor TeamEntitySettings using generic component (5-7h)
-3. [ ] Add Department/Division entity settings with same pattern (2-3h)
+3. [ ] Add Department/Division entity settings (2-3h)
+4. [ ] Testing (1-2h)
 
-**Phase 4: Clean Up & Testing (Week 3-4) - 8-12 hours**
+**Phase 5: Polish & Testing (Week 4) - 10-14 hours**
 1. [ ] Integration testing (4-6h)
-2. [ ] Performance testing (2-3h)
-3. [ ] Delete redundant files (1h)
-4. [ ] Update documentation (1-2h)
+2. [ ] Performance profiling (2-3h)
+3. [ ] Update documentation (2-3h)
+4. [ ] Delete all redundant files (1h)
+5. [ ] Final QA (1-2h)
 
-**Total Consolidation Effort:** 52-70 hours (~1.5 weeks)
-**Code Savings:** 1,400+ lines
-**Maintenance Improvement:** 40% reduction in similar code
+**Total Consolidation Effort:** 71-94 hours (~2.5 weeks)
+**Code Savings:** 2,380+ lines
+**Files Deleted:** 8+ redundant files
+**Maintenance Improvement:** 45% reduction in duplicate patterns
+**Bundle Size Reduction:** 10-15% (less duplicate code shipped)
 
 ---
 
@@ -2318,7 +2332,7 @@ export function useEntitySettings<T extends Record<string, any>>(
 2. ✅ **Consolidate modals** (improves UX + removes duplication) - 8-10h
 3. ✅ **Generic entity settings** (foundation for consolidation) - 10-12h
 4. ✅ Context refactoring (improves performance) - 10-12h
-5. ��� Complete DryRun + audit logging (features) - 10-12h
+5. ✅ Complete DryRun + audit logging (features) - 10-12h
 6. ✅ Tests (ensures quality) - 20-30h
 7. ✅ Mobile optimization (improves accessibility) - 8-10h
 8. ✅ Additional consolidation (clean up code) - 12-15h
