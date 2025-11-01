@@ -64,7 +64,7 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
     )
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const schema = mode === 'create' ? UserCreateSchema : UserEditSchema
+    const schema = (mode === 'create' ? UserCreateSchema : UserEditSchema) as any
     const {
       register,
       handleSubmit,
