@@ -3,11 +3,9 @@
 import React, { useState, useCallback } from 'react'
 import { QuickActionsBar } from '../QuickActionsBar'
 import { OperationsOverviewCards, OperationsMetrics } from '../OperationsOverviewCards'
-import { PendingOperationsPanel, PendingOperation } from '../PendingOperationsPanel'
 import { AdvancedUserFilters, UserFilters } from '../AdvancedUserFilters'
 import { UsersTable } from '../UsersTable'
 import { UserItem } from '../../contexts/UsersContextProvider'
-import { usePendingOperations } from '../../hooks/usePendingOperations'
 import {
   Select,
   SelectContent,
@@ -31,21 +29,21 @@ interface DashboardTabProps {
 
 /**
  * Dashboard Tab Component
- * 
+ *
  * Main operations dashboard for Phase 4a:
  * - Quick actions bar (Add, Import, Bulk Ops, Export, Refresh)
  * - Operations overview metrics cards
- * - Pending operations panel (active workflows)
  * - Advanced user filters
  * - User directory table with bulk selection
- * 
+ *
  * Features:
  * - Real-time data updates
  * - Comprehensive filtering
  * - Bulk user selection
  * - Action tracking
  * - Responsive layout
- * 
+ *
+ * Note: Pending operations are available in the Workflows tab
  * This is the default tab when users navigate to /admin/users
  */
 export function DashboardTab({
@@ -71,11 +69,6 @@ export function DashboardTab({
   const [bulkActionValue, setBulkActionValue] = useState<string>('')
   const [isApplyingBulkAction, setIsApplyingBulkAction] = useState(false)
 
-  // Fetch pending operations
-  const { operations: pendingOperations, metrics, isLoading: operationsLoading } = usePendingOperations({
-    userCount: users.length,
-    enabled: true
-  })
 
   // Filter users based on active filters
   const filteredUsers = users.filter((user) => {
@@ -103,8 +96,8 @@ export function DashboardTab({
     return true
   })
 
-  // Use fetched metrics or provide defaults
-  const displayMetrics: OperationsMetrics = metrics || {
+  // Use provided stats or provide defaults
+  const displayMetrics: OperationsMetrics = stats || {
     totalUsers: users.length,
     pendingApprovals: 0,
     inProgressWorkflows: 0,
@@ -180,16 +173,7 @@ export function DashboardTab({
 
       {/* Operations Overview Metrics */}
       <section role="region" aria-label="Operations metrics" className="max-w-7xl mx-auto w-full">
-        <OperationsOverviewCards metrics={displayMetrics} isLoading={isLoading || operationsLoading} />
-      </section>
-
-      {/* Pending Operations */}
-      <section role="region" aria-label="Pending operations" className="max-w-7xl mx-auto w-full">
-        <PendingOperationsPanel
-          operations={pendingOperations}
-          isLoading={operationsLoading}
-          onViewAll={() => {}}
-        />
+        <OperationsOverviewCards metrics={displayMetrics} isLoading={isLoading} />
       </section>
 
       {/* Filters Section */}
@@ -210,9 +194,9 @@ export function DashboardTab({
         />
       </section>
 
-      {/* Users Table with Bulk Actions */}
-      <section role="region" aria-label="User table and bulk actions" className="max-w-7xl mx-auto w-full">
-        <div className="mb-4 flex flex-col gap-4">
+      {/* Users Table with Bulk Actions - Takes available space */}
+      <section role="region" aria-label="User table and bulk actions" className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
+        <div className="mb-4 flex flex-col gap-4 flex-1">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="text-sm text-gray-600">
               Showing {filteredUsers.length} of {users.length} users
@@ -312,14 +296,16 @@ export function DashboardTab({
           )}
         </div>
 
-        <UsersTable
-          users={filteredUsers}
-          isLoading={isLoading}
-          selectedUserIds={selectedUserIds}
-          onSelectUser={handleSelectUser}
-          onSelectAll={handleSelectAll}
-          onViewProfile={() => {}}
-        />
+        <div className="flex-1 overflow-auto">
+          <UsersTable
+            users={filteredUsers}
+            isLoading={isLoading}
+            selectedUserIds={selectedUserIds}
+            onSelectUser={handleSelectUser}
+            onSelectAll={handleSelectAll}
+            onViewProfile={() => {}}
+          />
+        </div>
       </section>
     </div>
   )
