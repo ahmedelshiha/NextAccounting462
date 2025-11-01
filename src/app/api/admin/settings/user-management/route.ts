@@ -67,6 +67,8 @@ async function handleGET(request: AuthenticatedRequest) {
   }
 }
 
+export const GET = withAdminAuth(handleGET)
+
 /**
  * PUT /api/admin/settings/user-management
  * Update user management settings for the current tenant
