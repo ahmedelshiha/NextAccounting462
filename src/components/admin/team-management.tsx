@@ -505,10 +505,10 @@ export default function TeamManagement({ hideHeader = false }: { hideHeader?: bo
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        // Load core team members
-        const res = await fetch('/api/admin/team-members', { cache: 'no-store' })
-        const data = await res.json().catch(() => ({}))
-        const members = Array.isArray(data.teamMembers) ? data.teamMembers : []
+        // Load core team members via service
+        const { TeamMemberService } = await import('@/services/team-member.service')
+        const svc = new TeamMemberService()
+        const members = await svc.list()
 
         // Load availability metrics (availabilityPercentage per member)
         const availabilityById: Record<string, number> = {}
