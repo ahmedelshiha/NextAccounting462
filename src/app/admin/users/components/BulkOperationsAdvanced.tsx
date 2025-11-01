@@ -532,7 +532,10 @@ function CompletionStep({
   onRollback: () => Promise<void>
   onNewOperation: () => void
 }) {
-  const successRate = (result.succeeded / (result.succeeded + result.failed)) * 100
+  const succeeded = result.succeeded ?? 0
+  const failed = result.failed ?? 0
+  const total = succeeded + failed || 1
+  const successRate = (succeeded / total) * 100
 
   return (
     <Card>
@@ -545,17 +548,17 @@ function CompletionStep({
           <CheckCircle className="h-4 w-4" />
           <AlertTitle>Operation Completed</AlertTitle>
           <AlertDescription>
-            {result.succeeded} users updated successfully, {result.failed} failed
+            {succeeded} users updated successfully, {failed} failed
           </AlertDescription>
         </Alert>
 
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-green-50 p-3 rounded">
-            <div className="text-2xl font-bold text-green-600">{result.succeeded}</div>
+            <div className="text-2xl font-bold text-green-600">{succeeded}</div>
             <div className="text-xs text-gray-600">Succeeded</div>
           </div>
           <div className="bg-red-50 p-3 rounded">
-            <div className="text-2xl font-bold text-red-600">{result.failed}</div>
+            <div className="text-2xl font-bold text-red-600">{failed}</div>
             <div className="text-xs text-gray-600">Failed</div>
           </div>
           <div className="bg-blue-50 p-3 rounded">
