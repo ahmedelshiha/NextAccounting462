@@ -11,6 +11,7 @@ import {
   AdminTab,
   RbacTab
 } from './components/tabs'
+import { CreateUserModal } from '@/components/admin/shared/CreateUserModal'
 import { useUsersContext } from './contexts/UsersContextProvider'
 import { toast } from 'sonner'
 
