@@ -16,15 +16,15 @@ import { useListFilters } from '@/hooks/admin/useListFilters'
 
 interface ClientItem {
   id: string
-  name: string | null
+  name: string
   email: string
-  phone?: string | null
-  company?: string | null
-  tier?: 'INDIVIDUAL' | 'SMB' | 'ENTERPRISE' | null
-  status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | null
+  phone?: string
+  company?: string
+  tier?: 'INDIVIDUAL' | 'SMB' | 'ENTERPRISE'
+  status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
   totalBookings?: number
   totalRevenue?: number
-  lastBooking?: string | null
+  lastBooking?: string
   createdAt: string
 }
 
