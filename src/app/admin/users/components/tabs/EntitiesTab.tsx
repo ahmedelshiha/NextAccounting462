@@ -81,11 +81,10 @@ function ClientsListEmbedded() {
     try {
       setLoading(true)
       setError(null)
-      const params = new URLSearchParams({ limit: '50', offset: '0' })
-      const res = await apiFetch(`/api/admin/users?${params.toString()}&role=CLIENT`)
-      if (!res.ok) throw new Error(`API ${res.status}`)
-      const data = await res.json()
-      setRows(Array.isArray(data?.users) ? data.users : [])
+      const { ClientService } = await import('@/services/client.service')
+      const svc = new ClientService()
+      const items = await svc.list({ limit: 50, offset: 0 })
+      setRows(items)
     } catch (e) {
       setError('Failed to load clients')
       // eslint-disable-next-line no-console
