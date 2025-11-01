@@ -12,6 +12,10 @@ export const GET = withTenantContext(async (req: Request, { params }: { params: 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
+    }
+
     const client = await prisma.user.findFirst({
       where: {
         id: params.id,
@@ -44,6 +48,10 @@ export const PATCH = withTenantContext(async (req: Request, { params }: { params
     const role = ctx.role ?? undefined
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
     }
 
     const body = await req.json().catch(() => ({}))
@@ -99,6 +107,10 @@ export const DELETE = withTenantContext(async (req: Request, { params }: { param
     const role = ctx.role ?? undefined
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
     }
 
     const client = await prisma.user.findFirst({

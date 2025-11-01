@@ -18,7 +18,7 @@ const updateTeamMember = async (request: Request, context: any) => {
     const allowed = ['name', 'email', 'role', 'department', 'title', 'status', 'isAvailable', 'userId', 'workingHours', 'specialties', 'phone', 'certifications', 'availability', 'notes']
     for (const k of allowed) if (k in body) updates[k] = (body as any)[k]
     const updated = await prisma.teamMember.update({ where: { id }, data: updates as any })
-    return NextResponse.json({ id: updated.id, ...updated })
+    return NextResponse.json(updated)
   } catch (err) {
     console.error('Update /api/admin/team-members/[id] error', err)
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 })

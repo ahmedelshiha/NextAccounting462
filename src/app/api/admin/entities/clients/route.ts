@@ -12,6 +12,10 @@ export const GET = withTenantContext(async () => {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
+    }
+
     const clients = await prisma.user.findMany({
       where: {
         role: 'CLIENT',
@@ -40,6 +44,10 @@ export const POST = withTenantContext(async (req: Request) => {
     const role = ctx.role ?? undefined
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
     }
 
     const body = await req.json().catch(() => ({}))
@@ -74,7 +82,7 @@ export const POST = withTenantContext(async (req: Request) => {
       },
     })
 
-    return NextResponse.json({ id: client.id, ...client }, { status: 201 })
+    return NextResponse.json(client, { status: 201 })
   } catch (err) {
     console.error('POST /api/admin/entities/clients error', err)
     return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })

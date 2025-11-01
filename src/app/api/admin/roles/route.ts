@@ -12,6 +12,10 @@ export const GET = withTenantContext(async () => {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
+    }
+
     const roles = await prisma.customRole.findMany({
       where: {
         tenantId: ctx.tenantId,
@@ -40,6 +44,14 @@ export const POST = withTenantContext(async (req: Request) => {
     const role = ctx.role ?? undefined
     if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
+    }
+
+    if (!ctx.userId) {
+      return NextResponse.json({ error: 'User context missing' }, { status: 400 })
     }
 
     const body = await req.json().catch(() => ({}))
