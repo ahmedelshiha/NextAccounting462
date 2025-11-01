@@ -73,39 +73,14 @@ export const GET = withAdminAuth(handleGET)
  * PUT /api/admin/settings/user-management
  * Update user management settings for the current tenant
  */
-export async function PUT(request: NextRequest) {
+async function handlePUT(request: AuthenticatedRequest) {
   try {
-    const session = await getServerSession(authConfig)
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get tenant ID from session or headers
-    const tenantId = session.user.tenantId || request.headers.get('x-tenant-id')
+    const { tenantId, userId } = request
 
     if (!tenantId) {
       return NextResponse.json(
         { error: 'Tenant ID not found' },
         { status: 400 }
-      )
-    }
-
-    // Check admin authorization
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true, role: true, tenantId: true },
-    })
-
-    if (!user || user.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(user.role)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
       )
     }
 
