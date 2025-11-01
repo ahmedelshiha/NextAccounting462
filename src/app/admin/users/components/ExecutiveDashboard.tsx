@@ -34,12 +34,12 @@ export function ExecutiveDashboard({
 
       if (metricsRes.ok) {
         const data = await metricsRes.json()
-        setMetrics(data)
+        setMetrics(data.metrics || data)
       }
 
       if (recsRes.ok) {
         const data = await recsRes.json()
-        setRecommendations(data)
+        setRecommendations(data.recommendations || data)
       }
 
       setLastUpdate(new Date())
