@@ -28,8 +28,8 @@ export function EntityRelationshipMapComponent({
   const [viewMode, setViewMode] = useState<'graph' | 'matrix' | 'tree'>('graph')
 
   const { analysis } = relationshipMap
-  const criticalIssues = analysis.hierarchyIssues.filter(i => i.severity === 'critical')
-  const warnings = analysis.hierarchyIssues.filter(i => i.severity === 'warning')
+  const criticalIssues = analysis?.hierarchyIssues?.filter(i => i.severity === 'high') || []
+  const warnings = analysis?.hierarchyIssues?.filter(i => i.severity === 'medium') || []
 
   return (
     <div className="space-y-6">
