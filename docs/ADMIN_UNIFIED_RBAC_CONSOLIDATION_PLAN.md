@@ -23,7 +23,7 @@
 
 ### Progress Update (2025-10-31 - Part 2)
 - Status: ✅ Added Entities tab with Clients and Team sub-tabs
-- Summary: Embedded Clients list (via /api/admin/users?role=CLIENT) and Team management (existing component) inside unified /admin/users.
+- Summary: Embedded Clients list (via /api/admin/users?role=CLIENT) and Team management (existing component) inside unified /admin/users. Extracted shared hooks (useListState, useListFilters) for Clients list to reduce duplication and prepare reuse.
 - Files modified/added:
   - src/app/admin/users/components/tabs/EntitiesTab.tsx (new)
   - src/app/admin/users/components/tabs/index.ts (export EntitiesTab)
@@ -118,7 +118,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 │   └── User selection
 ├── Entities Tab (NEW)
 │   ├── Clients List
-│   ����   ├── Search, filter, sort
+│   ���   ├── Search, filter, sort
 │   │   ├── Create/Edit/Delete client modals
 │   │   ├── Client detail panel
 │   │   ├── Bulk actions for clients
@@ -143,7 +143,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 ├── Workflows Tab (Existing Phase 4b) ✅
 │   ├── Workflow management
 │   ├── Step handlers
-│   └── Approval routing
+��   └── Approval routing
 ├── Bulk Operations Tab (Existing Phase 4c) ✅
 │   ├── 5-step wizard (now with client/team operations)
 │   ├── Dry-run preview
@@ -624,7 +624,7 @@ Week 1-2:   Phase 0 - Planning & Architecture
 
 Week 2-3:   Phase 1 - Foundation & Services
 ├─ Day 1-3: Shared interfaces
-├─ Day 4-7: Service layer
+├�� Day 4-7: Service layer
 ├─ Day 8-10: API routes
 
 Week 4-6:   Phase 2 - Tab Implementation
@@ -722,7 +722,7 @@ Total Project Cost:                       $41,055-$50,830
 Files to Retire:
 ├─ src/app/admin/clients/page.tsx        (~400 lines)
 ├─ src/components/admin/team-management.tsx (~600 lines)
-├─ src/app/admin/permissions/page.tsx    (~30 lines)
+├��� src/app/admin/permissions/page.tsx    (~30 lines)
 ├─ src/app/admin/roles/page.tsx         (~25 lines)
 ├─ src/app/admin/clients/new/page.tsx    (~300 lines)
 ├─ src/app/admin/clients/[id]/page.tsx   (~200 lines)
@@ -1107,7 +1107,7 @@ Migration Steps:
 Post-Migration:
 ├─ Run validation queries
 ├─ Check for orphaned records
-���─ Verify permissions still work
+├─ Verify permissions still work
 └─ Performance testing
 ```
 
