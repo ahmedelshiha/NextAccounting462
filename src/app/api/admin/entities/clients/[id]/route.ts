@@ -22,9 +22,6 @@ export const GET = withTenantContext(async (req: Request, { params }: { params: 
         id: true,
         name: true,
         email: true,
-        phone: true,
-        company: true,
-        status: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -50,7 +47,7 @@ export const PATCH = withTenantContext(async (req: Request, { params }: { params
     }
 
     const body = await req.json().catch(() => ({}))
-    const { name, email, phone, company, status } = body || {}
+    const { name, email } = body || {}
 
     const client = await prisma.user.findFirst({
       where: {
@@ -67,7 +64,7 @@ export const PATCH = withTenantContext(async (req: Request, { params }: { params
     // Check if new email is available (if changed)
     if (email && email !== client.email) {
       const existing = await prisma.user.findUnique({
-        where: { email },
+        where: { tenantId_email: { tenantId: ctx.tenantId, email } },
       })
       if (existing) {
         return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
@@ -79,17 +76,11 @@ export const PATCH = withTenantContext(async (req: Request, { params }: { params
       data: {
         ...(name && { name }),
         ...(email && { email }),
-        ...(phone !== undefined && { phone: phone || null }),
-        ...(company !== undefined && { company: company || null }),
-        ...(status && { status }),
       },
       select: {
         id: true,
         name: true,
         email: true,
-        phone: true,
-        company: true,
-        status: true,
         createdAt: true,
         updatedAt: true,
       },

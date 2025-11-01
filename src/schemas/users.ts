@@ -19,19 +19,19 @@ export const UserCreateSchema = z.object({
       'Invalid phone number'
     ),
   company: z.string()
-    .optional()
-    .max(255, 'Company name must be less than 255 characters'),
+    .max(255, 'Company name must be less than 255 characters')
+    .optional(),
   location: z.string()
-    .optional()
-    .max(255, 'Location must be less than 255 characters'),
+    .max(255, 'Location must be less than 255 characters')
+    .optional(),
   role: z.enum(['USER', 'TEAM_MEMBER', 'TEAM_LEAD', 'ADMIN'], {
     message: 'Select a valid role'
   }).default('USER'),
   isActive: z.boolean().default(true),
   requiresOnboarding: z.boolean().default(true),
   notes: z.string()
-    .optional()
-    .max(1000, 'Notes must be less than 1000 characters'),
+    .max(1000, 'Notes must be less than 1000 characters')
+    .optional(),
   temporaryPassword: z.string()
     .optional()
     .describe('Generated temporary password for new user'),

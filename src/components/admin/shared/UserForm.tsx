@@ -64,7 +64,7 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
     )
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const schema = mode === 'create' ? UserCreateSchema : UserEditSchema
+    const schema = (mode === 'create' ? UserCreateSchema : UserEditSchema) as any
     const {
       register,
       handleSubmit,
@@ -126,8 +126,8 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
               {...register('name')}
               aria-invalid={!!errors.name}
             />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name.message}</p>
+            {errors.name && errors.name.message && (
+              <p className="text-sm text-red-500">{String(errors.name.message)}</p>
             )}
           </div>
 
@@ -143,8 +143,8 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
               aria-invalid={!!errors.email}
               className={mode === 'edit' ? 'bg-gray-50 cursor-not-allowed' : ''}
             />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
+            {errors.email && errors.email.message && (
+              <p className="text-sm text-red-500">{String(errors.email.message)}</p>
             )}
             {mode === 'edit' && (
               <p className="text-xs text-gray-500">Email cannot be changed</p>
@@ -161,8 +161,8 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
               {...register('phone')}
               aria-invalid={!!errors.phone}
             />
-            {errors.phone && (
-              <p className="text-sm text-red-500">{errors.phone.message}</p>
+            {errors.phone && errors.phone.message && (
+              <p className="text-sm text-red-500">{String(errors.phone.message)}</p>
             )}
           </div>
 
@@ -176,8 +176,8 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
               {...register('company')}
               aria-invalid={!!errors.company}
             />
-            {errors.company && (
-              <p className="text-sm text-red-500">{errors.company.message}</p>
+            {errors.company && errors.company.message && (
+              <p className="text-sm text-red-500">{String(errors.company.message)}</p>
             )}
           </div>
 
@@ -191,8 +191,8 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
               {...register('location')}
               aria-invalid={!!errors.location}
             />
-            {errors.location && (
-              <p className="text-sm text-red-500">{errors.location.message}</p>
+            {errors.location && errors.location.message && (
+              <p className="text-sm text-red-500">{String(errors.location.message)}</p>
             )}
           </div>
         </div>
@@ -219,8 +219,8 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
                 <SelectItem value="ADMIN">Administrator</SelectItem>
               </SelectContent>
             </Select>
-            {errors.role && (
-              <p className="text-sm text-red-500">{errors.role.message}</p>
+            {errors.role && errors.role.message && (
+              <p className="text-sm text-red-500">{String(errors.role.message)}</p>
             )}
           </div>
 
@@ -323,8 +323,8 @@ export const UserForm = React.forwardRef<HTMLDivElement, UserFormProps>(
               aria-invalid={!!errors.notes}
               className="min-h-24"
             />
-            {errors.notes && (
-              <p className="text-sm text-red-500">{errors.notes.message}</p>
+            {errors.notes && errors.notes.message && (
+              <p className="text-sm text-red-500">{String(errors.notes.message)}</p>
             )}
           </div>
         </div>
