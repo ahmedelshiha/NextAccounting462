@@ -76,13 +76,13 @@ export function EntityRelationshipMapComponent({
         />
         <StatCard
           label="Density Score"
-          value={analysis.densityScore}
+          value={relationshipMap.nodes.length > 0 ? Math.round((relationshipMap.edges.length / (relationshipMap.nodes.length * (relationshipMap.nodes.length - 1))) * 100) || 0 : 0}
           suffix="%"
           icon="📊"
         />
         <StatCard
           label="Complexity"
-          value={analysis.complexityScore}
+          value={relationshipMap.nodes.length > 0 ? Math.min(99, Math.round((relationshipMap.edges.length / relationshipMap.nodes.length) * 10)) : 0}
           suffix="%"
           icon="⚠️"
         />
