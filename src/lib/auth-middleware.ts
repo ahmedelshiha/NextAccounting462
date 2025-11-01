@@ -48,3 +48,28 @@ export async function requireAuth(roles: string[] = []) {
 export function isResponse(x: unknown): x is Response {
   return typeof x === 'object' && x !== null && 'body' in (x as any) && 'headers' in (x as any) && 'ok' in (x as any)
 }
+
+/**
+ * Higher-order function to wrap API route handlers with admin authentication
+ */
+export function withAdminAuth(
+  handler: (req: any, ...args: any[]) => Promise<Response> | Response
+) {
+  return async (req: any, ...args: any[]): Promise<Response> => {
+    const auth = await requireAuth(['ADMIN', 'SUPER_ADMIN'])
+
+    if (isResponse(auth)) {
+      return auth
+    }
+
+    try {
+      return await handler(req, ...args)
+    } catch (error) {
+      console.error('API handler error:', error)
+      return new Response(
+        JSON.stringify({ error: 'Internal server error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+  }
+}

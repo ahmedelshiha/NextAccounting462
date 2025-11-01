@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react'
 import { TabNavigation, TabType } from './components/TabNavigation'
 import {
   DashboardTab,
+  ExecutiveDashboardTab,
   EntitiesTab,
   WorkflowsTab,
   BulkOperationsTab,
@@ -154,7 +155,7 @@ export function EnterpriseUsersPage() {
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
           <Suspense fallback={<div className="p-8">Loading dashboard...</div>}>
-            <DashboardTab
+            <ExecutiveDashboardTab
               users={context.users}
               stats={context.stats}
               isLoading={context.usersLoading || context.isLoading}
