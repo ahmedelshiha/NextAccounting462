@@ -117,11 +117,15 @@ export class EntityRelationshipService {
   }
 
   /**
-   * Find orphaned users (without roles or teams)
+   * Find orphaned users (without team assignments)
    */
   async findOrphanedUsers(): Promise<string[]> {
     const users = await prisma.user.findMany({
-      where: { role: null },
+      where: {
+        teamMembers: {
+          none: {}
+        }
+      },
       select: { id: true }
     })
 
