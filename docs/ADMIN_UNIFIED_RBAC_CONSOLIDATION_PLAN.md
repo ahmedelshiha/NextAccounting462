@@ -7,6 +7,47 @@
 **Revision Type:** MAJOR SCOPE CHANGE  
 **Vision:** Single Hub for User Management, RBAC, Clients, and Team
 
+### Progress Update (2025-10-31)
+- Status: ✅ Completed initial RBAC consolidation
+- Summary: Added “Roles & Permissions” tab to unified /admin/users and redirected legacy RBAC pages.
+- Files modified/added:
+  - src/app/admin/permissions/page.tsx (server redirect to /admin/users?tab=rbac)
+  - src/app/admin/roles/page.tsx (server redirect to /admin/users?tab=rbac)
+  - src/app/admin/users/components/tabs/RbacTab.tsx (new)
+  - src/app/admin/users/components/tabs/index.ts (export RbacTab)
+  - src/app/admin/users/components/TabNavigation.tsx (added rbac tab)
+  - src/app/admin/users/EnterpriseUsersPage.tsx (wired RbacTab and URL tab param)
+- Testing notes: Manually verified navigation to /admin/permissions and /admin/roles redirects to /admin/users?tab=rbac; verified tab activation from URL (?tab=rbac) and RBAC UI renders both RolePermissionsViewer and UserPermissionsInspector.
+- Issues: None observed. Backward-compatible; old pages now forward to unified hub.
+- Next tasks: E2E coverage for redirects and RBAC tab.
+
+### Progress Update (2025-10-31 - Part 2)
+- Status: ✅ Added Entities tab with Clients and Team sub-tabs
+- Summary: Embedded Clients list (via /api/admin/users?role=CLIENT) and Team management (existing component) inside unified /admin/users. Extracted shared hooks (useListState, useListFilters) for Clients list to reduce duplication and prepare reuse.
+- Files modified/added:
+  - src/app/admin/users/components/tabs/EntitiesTab.tsx (new)
+  - src/app/admin/users/components/tabs/index.ts (export EntitiesTab)
+  - src/app/admin/users/components/TabNavigation.tsx (added entities tab)
+  - src/app/admin/users/EnterpriseUsersPage.tsx (wired EntitiesTab, URL param parsing)
+  - src/app/admin/clients/page.tsx (server redirect to /admin/users?tab=entities&type=clients)
+  - src/app/admin/team/page.tsx (server redirect to /admin/users?tab=entities&type=team)
+- Testing notes: Manually verified /admin/clients and /admin/team redirect to the Entities tab with correct sub-tab selection; verified search and filters on clients; verified team list renders and CRUD actions hit existing APIs.
+- Issues: None observed. Backward-compatible.
+- Next tasks: Optional further refactors.
+
+### Service Unification (2025-10-31)
+- Added shared hooks: src/hooks/admin/useListState.ts, src/hooks/admin/useListFilters.ts
+- Added services: src/services/client.service.ts, src/services/team-member.service.ts
+- Refactored EntitiesTab to use ClientService for list load
+- Refactored TeamManagement mutations (create/update/delete/toggle) to use TeamMemberService
+- Backward compatible; APIs unchanged
+- Added E2E tests: e2e/tests/admin-entities-tab.spec.ts for Entities sub-tabs
+
+### Validation Update (2025-10-31)
+- Added E2E tests: e2e/tests/admin-unified-redirects.spec.ts
+- Covers: redirects for /admin/{permissions,roles,clients,team} and presence of Entities/RBAC tabs
+- Status: ✅ Basic validation added; extend a11y tests later if needed
+
 ---
 
 ## Executive Summary
@@ -107,7 +148,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 │       ├── Inspect permission dependencies
 │       ├── Bulk permission assignment
 │       └── Permission audit trail
-├── Workflows Tab (Existing Phase 4b) ✅
+├─��� Workflows Tab (Existing Phase 4b) ✅
 │   ├── Workflow management
 │   ├── Step handlers
 │   └── Approval routing
@@ -863,7 +904,7 @@ src/app/admin/users/
 │   │   ├── AuditTab.tsx             (Phase 4d) ✅
 │   │   ├── SettingsTab.tsx          (Phase 4e) ✅
 │   │   └── index.ts
-│   ├── shared/                       (shared components)
+│   ���── shared/                       (shared components)
 │   │   ├── EntityListView.tsx
 │   │   ├── EntityForm.tsx
 │   │   ├── EntityActionMenu.tsx
@@ -963,7 +1004,7 @@ Recommendations to avoid duplication:
 2. Replace inline form code in /admin/clients/new with the new UserForm to preserve existing create flow while enabling reuse.
 3. Implement a lightweight CreateUserModal that simply wraps UserForm and handles modal presentation; use the same modal component for dashboard quick-action and Entities tab create button.
 4. Reuse existing UserProfileDialog for editing users (it should consume the same UserForm component in edit mode or delegate to a dedicated EditUserForm wrapper).
-5. Keep UnifiedPermissionModal as the single source of truth for permission changes — do not create additional permission modal variants.
+5. Keep UnifiedPermissionModal as the single source of truth for permission changes �� do not create additional permission modal variants.
 6. Centralize permission and role saving logic in src/app/admin/users/hooks/useUserPermissions.ts and reuse it across UnifiedPermissionModal and any role/permission UI.
 7. Lazy-load heavy modal wrappers (CreateUserModal, UserProfileDialog, UnifiedPermissionModal) with dynamic imports and Suspense to avoid bundle inflation.
 8. Add migration and refactor tasks to Phase 2/3 to ensure changes are incremental and verified:
@@ -1125,7 +1166,7 @@ Integration Tests (30% of total):
 └─ Modal workflows
 
 E2E Tests (30% of total):
-├─ Tab navigation
+├�� Tab navigation
 ├─ Entity CRUD operations
 ├─ Bulk operations
 ├─ RBAC workflows
