@@ -82,7 +82,7 @@ export const POST = withTenantContext(async (req: Request) => {
       },
     })
 
-    return NextResponse.json({ id: client.id, ...client }, { status: 201 })
+    return NextResponse.json(client, { status: 201 })
   } catch (err) {
     console.error('POST /api/admin/entities/clients error', err)
     return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })
