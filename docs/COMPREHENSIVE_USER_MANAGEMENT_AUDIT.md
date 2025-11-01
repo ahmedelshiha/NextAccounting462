@@ -71,7 +71,7 @@ The admin user management system consists of **three interconnected subsystems**
 │  │ 1. RBAC/PERMISSIONS MODAL SYSTEM              │  │
 │  │    (UnifiedPermissionModal + PermissionEngine)│  │
 │  │    Status: ✅ 90% Complete                     │  │
-│  └──────────────────────────────────────────────┘  │
+│  └───────────────────────��──────────────────────┘  │
 │                                                     │
 │  ┌──────────────────────────────────────────────┐  │
 │  │ 2. ADMIN USERS PAGE SYSTEM                   │  │
@@ -83,7 +83,7 @@ The admin user management system consists of **three interconnected subsystems**
 │  │ 3. USER MANAGEMENT SETTINGS                  │  │
 │  │    (9 Tabs + useUserManagementSettings)      │  │
 │  │    Status: 🔴 70% Complete (Critical Gaps)   │  │
-│  └──────────────────────────────────────��───────┘  │
+│  └──────────────────────────────────────────────┘  │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
@@ -1680,7 +1680,435 @@ export function EntitySettingsPanel<T extends Record<string, any>>({
 
 ---
 
-#### #4: Permission & Role Management Fragmentation - 🟡 HIGH
+#### #4: Admin/Users Page Files - 🔴 CRITICAL (NEW FINDING)
+
+**Problem:** Three redundant page files serving nearly identical purposes
+
+**Files:**
+- `src/app/admin/users/page.tsx` (Router/switcher - 50 lines)
+- `src/app/admin/users/page-refactored.tsx` (Legacy implementation - 250+ lines)
+- `src/app/admin/users/page-phase4.tsx` (Phase 4 wrapper - 50 lines)
+- `src/app/admin/users/EnterpriseUsersPage.tsx` (Main component - 200+ lines)
+
+**Analysis:**
+
+```typescript
+// page.tsx - Feature flag router
+export default function AdminUsersPage() {
+  const isPhase4Enabled = isFeatureEnabled('enablePhase4Enterprise', true)
+  return isPhase4Enabled ? <AdminUsersPagePhase4 /> : <AdminUsersPageRefactored />
+}
+
+// page-phase4.tsx - Wrapper
+export default function AdminUsersPagePhase4() {
+  return <Suspense><EnterpriseUsersPage /></Suspense>
+}
+
+// page-refactored.tsx - Alternative implementation (200+ lines of duplicate UI)
+export default function AdminUsersPageRefactored() {
+  // Uses hooks: useUsersList, useUserStats, useUserActions
+  // Returns: DashboardHeader, StatsSection, UsersTable
+}
+
+// EnterpriseUsersPage.tsx - Tab interface (200+ lines)
+export function EnterpriseUsersPage() {
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard')
+  // Returns 7-tab interface
+}
+```
+
+**Duplication Issues:**
+- ❌ Two completely separate implementations (page-refactored vs EnterpriseUsersPage)
+- ❌ Redundant wrapper (page-phase4.tsx just re-exports)
+- ❌ Confusing file structure (3 layers of indirection)
+- ❌ Code split between two implementations
+- ⚠️ Feature flag logic pollutes routing layer
+
+**Impact:**
+- Developers unsure which to modify
+- Testing burden (2 implementations to test)
+- Double maintenance overhead
+- Confusing git history
+- Bundle size bloat with 2 implementations
+
+**Consolidation Strategy:**
+
+```
+REMOVE:
+├��� page-refactored.tsx (obsolete)
+├─ page-phase4.tsx (unnecessary wrapper)
+
+KEEP & ENHANCE:
+├─ page.tsx (becomes simple entry point)
+└─ EnterpriseUsersPage.tsx (single source of truth)
+
+NEW STRUCTURE:
+page.tsx
+└─��� exports default function AdminUsersPage()
+    └── imports <EnterpriseUsersPage />
+        └── Contains all tab logic
+            ├─ DashboardTab / ExecutiveDashboardTab
+            ├─ WorkflowsTab
+            ├─ BulkOperationsTab
+            ├─ AuditTab
+            ├─ RbacTab
+            └─ AdminTab
+```
+
+**Effort:** 3-4 hours
+
+---
+
+#### #5: Bulk Operations Duplication - 🟡 HIGH (NEW FINDING)
+
+**Problem:** Two separate implementations of bulk operations with 80% overlap
+
+**Files:**
+- `src/app/admin/users/components/BulkOperationsAdvanced.tsx` (250+ lines)
+- `src/app/admin/users/components/bulk-operations/BulkOperationsWizard.tsx` (200+ lines)
+
+**Comparison:**
+
+| Feature | BulkOperationsAdvanced | BulkOperationsWizard |
+|---------|---|---|
+| Step-based flow | ✅ (5 steps) | ✅ (5 steps) |
+| User selection | ✅ | ✅ |
+| Operation type selection | ✅ | ✅ |
+| Configuration | ✅ | ✅ |
+| Dry-run preview | ✅ Yes | ✅ Yes |
+| Execution | ✅ | ✅ |
+| Progress tracking | ✅ | ✅ |
+| Rollback support | ✅ onRollback prop | ❌ |
+| Risk assessment | ✅ Detailed | ⚠️ Basic |
+
+**Current Usage:**
+```typescript
+// BulkOperationsAdvanced
+<BulkOperationsAdvanced
+  initialRequest={request}
+  onExecute={execute}
+  onRollback={rollback}  // Advanced feature
+/>
+
+// BulkOperationsWizard
+<BulkOperationsWizard
+  tenantId={tenantId}
+  onClose={onClose}
+/>
+```
+
+**Duplication Issues:**
+- ❌ Nearly identical step flow
+- ❌ Same UI patterns repeated
+- ❌ Duplicate state management
+- ❌ Different APIs (one takes props, one takes tenantId)
+- ⚠️ BulkOperationsAdvanced has rollback (advanced), BulkOperationsWizard doesn't
+
+**Solution:** Consolidate to single component with advanced features
+
+```typescript
+// CONSOLIDATED: BulkOperationsWizard (enhanced)
+interface BulkOperationsWizardProps {
+  tenantId: string
+  onClose: () => void
+  onExecute?: (request: BulkOperationRequest) => Promise<void>
+  onRollback?: (operationId: string) => Promise<void>
+  showAdvancedFeatures?: boolean  // Toggle risk assessment, rollback
+}
+
+// Then REMOVE: BulkOperationsAdvanced.tsx
+```
+
+**Effort:** 6-8 hours
+
+---
+
+#### #6: Workflow Builder Components - 🟡 HIGH (NEW FINDING)
+
+**Problem:** Three workflow builder components with overlapping functionality
+
+**Files:**
+- `src/app/admin/users/components/WorkflowBuilder.tsx` (180+ lines)
+- `src/app/admin/users/components/WorkflowDesigner.tsx` (280+ lines)
+- `src/app/admin/users/components/WorkflowCanvas.tsx` (250+ lines)
+
+**Analysis:**
+
+```typescript
+// WorkflowBuilder - Simple dialog with 6-step wizard
+export function WorkflowBuilder({ isOpen, onClose, onConfirm }) {
+  const [step, setStep] = useState(1)  // Steps 1-6
+  const [workflowType, setWorkflowType] = useState('ONBOARDING')
+  return <Dialog><Step1 /> ... <Step6 /></Dialog>
+}
+
+// WorkflowDesigner - Full visual designer with canvas
+export function WorkflowDesigner({ initialWorkflow, onSave }) {
+  const [workflow, setWorkflow] = useState(initialWorkflow)
+  return (
+    <Tabs>
+      <TabsContent value="designer">
+        <NodeLibrary />
+        <WorkflowCanvas workflow={workflow} />  // Uses canvas
+      </TabsContent>
+      <TabsContent value="preview">
+        <WorkflowSimulator />
+      </TabsContent>
+    </Tabs>
+  )
+}
+
+// WorkflowCanvas - SVG canvas for dragging nodes
+export function WorkflowCanvas({ workflow, onNodeSelect, onNodeDelete }) {
+  const svgRef = useRef<SVGSVGElement>(null)
+  // Node dragging, connection creation, zoom/pan
+}
+```
+
+**Current Usage:**
+- `WorkflowBuilder` - Simple dialog for creating workflows
+- `WorkflowDesigner` - Advanced designer with visual editor
+- `WorkflowCanvas` - Underlying canvas (used by WorkflowDesigner)
+
+**Analysis:**
+- ✅ Actually different purposes (simple vs advanced)
+- ⚠️ But no clear separation - could be single component with modes
+- ⚠️ `WorkflowBuilder` is never used (redundant with `WorkflowDesigner`)
+
+**Solution:**
+
+```typescript
+// Option 1: Keep both (simpler approach)
+// - Keep WorkflowBuilder for simple workflows
+// - Keep WorkflowDesigner for advanced workflows
+// - Consolidate WorkflowCanvas internal implementation
+
+// Option 2: Merge into single component
+export function WorkflowBuilder({
+  mode: 'simple' | 'advanced' = 'advanced',
+  // ...
+}) {
+  if (mode === 'simple') return <SimpleWizard />
+  return <AdvancedDesigner />
+}
+```
+
+**Recommendation:** If `WorkflowBuilder` is unused, delete it (3-4 hours)
+
+**Effort:** 3-6 hours (depending on approach)
+
+---
+
+#### #7: Search & Filter Components - 🟡 MEDIUM (NEW FINDING)
+
+**Problem:** Two separate search/filter components with different concerns
+
+**Files:**
+- `src/app/admin/users/components/AdvancedSearch.tsx` (300+ lines)
+- `src/app/admin/users/components/AdvancedUserFilters.tsx` (180+ lines)
+
+**Analysis:**
+
+```typescript
+// AdvancedSearch - Full-text search with suggestions
+export function AdvancedSearch({ onResultSelect }) {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
+  // Fetches from /api/admin/search/suggestions
+  // Returns: search box + suggestions dropdown + results
+}
+
+// AdvancedUserFilters - Faceted filters
+export interface UserFilters {
+  search: string           // ← OVERLAPS with AdvancedSearch
+  role?: string
+  status?: string
+  department?: string
+  dateRange?: 'all' | 'today' | 'week' | 'month'
+}
+
+export function AdvancedUserFilters({
+  filters,
+  onFiltersChange,
+  roleOptions, statusOptions, departmentOptions
+}) {
+  // Returns: search input + role dropdown + status dropdown + date range
+}
+```
+
+**Duplication Issues:**
+- ❌ Both have search field (`search` property)
+- ❌ AdvancedSearch does full-text, AdvancedUserFilters does filter search
+- ❌ Unclear which to use for what
+- ✅ Actually serve different purposes (search vs filter)
+- ⚠️ But could be unified into single `UserSearchAndFilter` component
+
+**Current Usage:**
+```typescript
+// In DashboardTab
+<AdvancedUserFilters filters={filters} onFiltersChange={onFiltersChange} />
+<UsersTable users={filteredUsers} />
+
+// In QuickActionsBar
+<AdvancedSearch onResultSelect={selectUser} />
+```
+
+**Solution:** Keep separate but clarify usage
+
+```typescript
+// RENAME for clarity
+- AdvancedSearch → UserGlobalSearch (for quick user lookup)
+- AdvancedUserFilters → UserFilterPanel (for list filtering)
+
+// OR consolidate
+export function UserSearchAndFilter({
+  searchQuery: string
+  filters: UserFilters
+  onSearchChange: (query: string) => void
+  onFiltersChange: (filters: UserFilters) => void
+  // ...
+}) {
+  // Single unified search/filter component
+}
+```
+
+**Effort:** 4-5 hours to consolidate
+
+---
+
+#### #8: Permission Components - 🟡 MEDIUM (NEW FINDING)
+
+**Problem:** Two permission-related components with different purposes but similar names
+
+**Files:**
+- `src/app/admin/users/components/PermissionSimulator.tsx` (200+ lines)
+- `src/app/admin/users/components/PermissionHierarchy.tsx` (200+ lines)
+
+**Analysis:**
+
+```typescript
+// PermissionSimulator - Test permissions (RBAC testing)
+export function PermissionSimulator({ onTest }) {
+  const [testCases, setTestCases] = useState<TestCase[]>([...])
+  const [results, setResults] = useState<Map<string, TestResult>>()
+  // Run test → ALLOW/DENY results
+  // Purpose: Validate permission logic
+}
+
+// PermissionHierarchy - View permission hierarchy
+export function PermissionHierarchy({ roles, permissions, conflicts }) {
+  const [expandedRoles, setExpandedRoles] = useState(new Set([...]))
+  const [selectedRole, setSelectedRole] = useState<string | null>()
+  // Display: Role → Permissions tree
+  // Purpose: Visualize hierarchy
+}
+```
+
+**Analysis:**
+- ✅ Different purposes (test vs visualize)
+- ��️ Both are debugging/admin tools
+- ⚠️ Could be combined into single "PermissionDebugger"
+- ✅ Actually complementary (one tests, one visualizes)
+
+**Recommendation:** Keep separate (clear separation of concerns)
+
+**Effort:** 0 hours (no consolidation needed)
+
+---
+
+#### #9: Analytics Components - 🟡 MEDIUM (NEW FINDING)
+
+**Problem:** Two analytics components with different scope
+
+**Files:**
+- `src/app/admin/users/components/AnalyticsCharts.tsx` (150+ lines)
+- `src/app/admin/users/components/WorkflowAnalytics.tsx` (200+ lines)
+
+**Analysis:**
+
+```typescript
+// AnalyticsCharts - User analytics
+export function AnalyticsCharts({
+  userGrowthTrend,
+  departmentDistribution,
+  roleDistribution,
+  workflowEfficiency,
+  complianceScore
+}) {
+  // Charts: Growth trend, department pie, role pie
+  // Purpose: User management analytics
+}
+
+// WorkflowAnalytics - Workflow-specific analytics
+export function WorkflowAnalytics({ workflow }) {
+  // Metrics: Duration, parallel paths, bottlenecks, efficiency
+  // Purpose: Workflow designer analytics
+}
+```
+
+**Analysis:**
+- ✅ Different purposes (user vs workflow)
+- ✅ Different data sources
+- ✅ Different consumers
+
+**Recommendation:** Keep separate
+
+**Effort:** 0 hours (no consolidation needed)
+
+---
+
+### 🔴 MAJOR FINDINGS: Admin/Users Specific Duplications
+
+#### CRITICAL: #1 Page File Duplication
+
+| File | Status | Action |
+|------|--------|--------|
+| `page.tsx` | ✅ Keep | Entry point |
+| `page-refactored.tsx` | 🗑️ DELETE | Obsolete |
+| `page-phase4.tsx` | 🗑️ DELETE | Unnecessary wrapper |
+| `EnterpriseUsersPage.tsx` | ✅ Keep | Main implementation |
+
+**Why:** page-refactored is outdated legacy code; page-phase4 just wraps EnterpriseUsersPage
+
+---
+
+#### HIGH: #2 Bulk Operations Duplication
+
+| Component | Status | Action |
+|-----------|--------|--------|
+| `BulkOperationsWizard` | ✅ Keep | Main implementation |
+| `BulkOperationsAdvanced` | 🗑️ DELETE | Merge into Wizard |
+
+**Why:** BulkOperationsAdvanced is advanced version of same thing; consolidate features
+
+---
+
+#### MEDIUM: #3 Workflow Builders
+
+| Component | Status | Action |
+|-----------|--------|--------|
+| `WorkflowBuilder` | 🗑️ DELETE | Unused simple version |
+| `WorkflowDesigner` | ✅ Keep | Main implementation |
+| `WorkflowCanvas` | ✅ Keep | Internal component |
+
+**Why:** WorkflowBuilder never used; WorkflowDesigner is superior
+
+---
+
+### 📊 NEW ADMIN/USERS DUPLICATION SUMMARY
+
+| # | Type | Severity | Files | Lines | Effort | Savings |
+|---|------|----------|-------|-------|--------|---------|
+| 1 | Page files | 🔴 CRITICAL | 3 | 300+ | 3-4h | 300 lines |
+| 2 | Bulk ops | 🟡 HIGH | 2 | 450+ | 6-8h | 250 lines |
+| 3 | Workflow builders | 🟡 HIGH | 2 | 350+ | 3-6h | 180 lines |
+| 4 | Search/filter | 🟡 MEDIUM | 2 | 480+ | 4-5h | 250 lines |
+| 5 | Permission components | ✅ OK | 2 | 400+ | 0h | 0 lines |
+| 6 | Analytics | ✅ OK | 2 | 350+ | 0h | 0 lines |
+| **SUBTOTAL** | | | **13 files** | **2,330+ lines** | **16-23 hours** | **980 lines** |
+
+#### #5: Permission & Role Management Fragmentation - 🟡 HIGH
 
 **Problem:** Permissions and roles managed in multiple places with different approaches
 
