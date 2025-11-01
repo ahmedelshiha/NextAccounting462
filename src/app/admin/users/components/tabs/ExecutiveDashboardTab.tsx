@@ -8,7 +8,7 @@ import { AnalyticsCharts } from '../AnalyticsCharts'
 import { DashboardTab } from './DashboardTab'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useDashboardMetrics, useDashboardRecommendations, useDashboardAnalytics } from '../hooks/useDashboardMetrics'
+import { useDashboardMetrics, useDashboardRecommendations, useDashboardAnalytics } from '../../hooks/useDashboardMetrics'
 import { UserItem } from '../../contexts/UsersContextProvider'
 
 interface ExecutiveDashboardTabProps {
