@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react'
 import { TabNavigation, TabType } from './components/TabNavigation'
 import {
   DashboardTab,
+  ExecutiveDashboardTab,
   EntitiesTab,
   WorkflowsTab,
   BulkOperationsTab,
