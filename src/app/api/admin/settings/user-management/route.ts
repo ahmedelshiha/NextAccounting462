@@ -113,7 +113,7 @@ async function handlePUT(request: AuthenticatedRequest) {
           invitations: body.invitations || getDefaultInvitations(),
           clientSettings: body.entities?.clients || null,
           teamSettings: body.entities?.teams || null,
-          lastUpdatedBy: user.id,
+          lastUpdatedBy: userId,
         },
       })
     } else {
@@ -130,7 +130,7 @@ async function handlePUT(request: AuthenticatedRequest) {
           invitations: body.invitations !== undefined ? body.invitations : settings.invitations,
           clientSettings: body.entities?.clients !== undefined ? body.entities.clients : settings.clientSettings,
           teamSettings: body.entities?.teams !== undefined ? body.entities.teams : settings.teamSettings,
-          lastUpdatedBy: user.id,
+          lastUpdatedBy: userId,
         },
       })
     }
@@ -139,7 +139,7 @@ async function handlePUT(request: AuthenticatedRequest) {
     await prisma.settingChangeDiff.create({
       data: {
         tenantId,
-        userId: user.id,
+        userId,
         category: 'USER_MANAGEMENT',
         resource: 'user-management-settings',
         before: {},
