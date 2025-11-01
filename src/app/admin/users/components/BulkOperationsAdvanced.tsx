@@ -79,7 +79,7 @@ export function BulkOperationsAdvanced({
       const failed = 1
       const result: BulkOperationResult = {
         id: request.id,
-        status: failed === 0 ? 'SUCCESS' : 'PARTIAL',
+        status: (failed as number) > 0 ? 'PARTIAL' : 'SUCCESS',
         processedCount: request.userIds.length,
         failedCount: failed,
         succeeded,
