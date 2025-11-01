@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { cache } from 'react'
 
 export interface EntityNode {
@@ -220,7 +220,7 @@ export const entityRelationshipService = {
         const perms1 = new Set(role1.permissions.map(p => p.id))
         const perms2 = new Set(role2.permissions.map(p => p.id))
 
-        const overlap = Array.from(perms1).filter(p => perms2.has(p))
+        const overlap: string[] = Array.from(perms1).filter((p: string) => perms2.has(p))
         const overlapPercent = Math.round(
           (overlap.length / Math.max(perms1.size, perms2.size)) * 100
         )
