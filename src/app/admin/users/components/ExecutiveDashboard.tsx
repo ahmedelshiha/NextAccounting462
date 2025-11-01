@@ -9,7 +9,7 @@ import { DashboardMetrics } from '@/services/dashboard-metrics.service'
 import { Recommendation } from '@/services/recommendation-engine.service'
 
 interface ExecutiveDashboardProps {
-  initialMetrics: DashboardMetrics['metrics']
+  initialMetrics?: Partial<DashboardMetrics>
   initialRecommendations: Recommendation[]
   onRefresh?: () => void
 }
@@ -19,7 +19,15 @@ export function ExecutiveDashboard({
   initialRecommendations,
   onRefresh
 }: ExecutiveDashboardProps) {
-  const [metrics, setMetrics] = useState(initialMetrics)
+  const defaultMetrics: DashboardMetrics = {
+    totalUsers: { id: 'total-users', label: 'Total Users', value: 0, trend: 0, trendDirection: 'stable', icon: '👥', change: '↑ 0%' },
+    activeUsers: { id: 'active-users', label: 'Active Users', value: 0, trend: 0, trendDirection: 'stable', icon: '✅', change: '↑ 0%' },
+    pendingApprovals: { id: 'pending-approvals', label: 'Pending Approvals', value: 0, trend: 0, trendDirection: 'stable', icon: '⏳', change: '↑ 0%' },
+    workflowVelocity: { id: 'workflow-velocity', label: 'Workflow Velocity', value: 0, trend: 0, trendDirection: 'stable', icon: '⚡', change: '↑ 0%' },
+    systemHealth: { id: 'system-health', label: 'System Health', value: 0, trend: 0, trendDirection: 'stable', icon: '🟢', change: '↑ 0%' },
+    costPerUser: { id: 'cost-per-user', label: 'Cost Per User', value: 0, trend: 0, trendDirection: 'stable', icon: '💰', change: '↑ 0%' }
+  }
+  const [metrics, setMetrics] = useState<DashboardMetrics>(Object.assign({}, defaultMetrics, initialMetrics) as DashboardMetrics)
   const [recommendations, setRecommendations] = useState(initialRecommendations)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
@@ -34,7 +42,7 @@ export function ExecutiveDashboard({
 
       if (metricsRes.ok) {
         const data = await metricsRes.json()
-        setMetrics(data.metrics || data)
+        setMetrics((data.metrics as DashboardMetrics) || data)
       }
 
       if (recsRes.ok) {
