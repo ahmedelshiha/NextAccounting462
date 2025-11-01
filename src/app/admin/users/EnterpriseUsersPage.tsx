@@ -37,6 +37,7 @@ import { toast } from 'sonner'
  */
 export function EnterpriseUsersPage() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard')
+  const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false)
 
   // Initialize tab from URL query (?tab=...)
   useEffect(() => {
@@ -53,8 +54,15 @@ export function EnterpriseUsersPage() {
 
   // Handler for Add User action
   const handleAddUser = () => {
-    toast.info('Add User feature coming in Phase 4b (Workflows)')
-    setActiveTab('workflows')
+    setIsCreateUserModalOpen(true)
+  }
+
+  // Handler for successful user creation
+  const handleUserCreated = (userId: string) => {
+    toast.success('User created successfully')
+    setIsCreateUserModalOpen(false)
+    // Trigger refresh of users list
+    context.refetchUsers?.()
   }
 
   // Handler for Import action
