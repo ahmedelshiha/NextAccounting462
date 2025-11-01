@@ -46,6 +46,10 @@ export const POST = withTenantContext(async (req: Request) => {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
+    }
+
     const body = await req.json().catch(() => ({}))
     const { name, email, tier, status } = body || {}
 
