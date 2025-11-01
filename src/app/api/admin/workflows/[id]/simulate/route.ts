@@ -20,8 +20,8 @@ export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
       )
     }
 
-    // Convert stored workflow data to service format
-    const workflowData = {
+    // Validate workflow first
+    const baseWorkflow = {
       id: workflow.id,
       name: workflow.name,
       description: workflow.description || '',
@@ -47,9 +47,11 @@ export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
       createdBy: workflow.createdBy || 'system'
     }
 
-    // Validate workflow
-    const validation = workflowDesignerService.validateWorkflow(workflowData)
-    workflowData.validation = validation
+    const validation = workflowDesignerService.validateWorkflow(baseWorkflow)
+    const workflowData = {
+      ...baseWorkflow,
+      validation
+    }
 
     // Analyze performance
     const performance = workflowDesignerService.analyzePerformance(workflowData)
