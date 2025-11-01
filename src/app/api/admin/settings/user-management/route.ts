@@ -174,6 +174,8 @@ async function handlePUT(request: AuthenticatedRequest) {
   }
 }
 
+export const PUT = withAdminAuth(handlePUT)
+
 // Default configuration generators
 function getDefaultRoles() {
   return {
