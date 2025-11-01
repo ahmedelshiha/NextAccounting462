@@ -1,22 +1,30 @@
-import { NextResponse } from 'next/server'
 import { withTenantContext } from '@/lib/api-wrapper'
 import { requireTenantContext } from '@/lib/tenant-utils'
-import { PERMISSIONS, hasPermission } from '@/lib/permissions'
-import { toggleLanguageStatus } from '@/lib/language-registry'
+import { hasPermission, PERMISSIONS } from '@/lib/permissions'
+import prisma from '@/lib/prisma'
 
-function json(payload: any, status = 200) { return NextResponse.json(payload, { status }) }
+export const dynamic = 'force-dynamic'
 
-export const PATCH = withTenantContext(async (_req: Request, { params }: { params: { code: string } }) => {
-  const ctx = requireTenantContext()
-  if (!ctx || !ctx.role || !hasPermission(ctx.role, PERMISSIONS.LANGUAGES_MANAGE)) {
-    return json({ ok: false, error: 'Forbidden' }, 403)
-  }
-  const code = String(params?.code || '').toLowerCase()
-  if (!code || !/^[a-z]{2}(-[a-z0-9-]+)?$/.test(code)) return json({ ok:false, error:'Invalid language code' }, 400)
+export const PATCH = withTenantContext(async (req: Request, { params }: { params: { code: string } }) => {
   try {
-    const updated = await toggleLanguageStatus(code)
-    return json({ ok:true, data: updated })
-  } catch (err:any) {
-    return json({ ok:false, error: String(err?.message || 'Failed to toggle language status') }, 400)
+    const ctx = requireTenantContext()
+    if (!ctx.userId || !hasPermission(ctx.role, PERMISSIONS.LANGUAGES_MANAGE)) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const code = params.code.toLowerCase()
+
+    const language = await prisma.language.findUnique({ where: { code } })
+
+    if (!language) {
+      return Response.json({ error: 'Language not found' }, { status: 404 })
+    }
+
+    const updated = await prisma.language.update({ where: { code }, data: { enabled: !language.enabled } })
+
+    return Response.json({ success: true, data: updated })
+  } catch (error: any) {
+    console.error('Failed to toggle language:', error)
+    return Response.json({ error: error.message || 'Failed to toggle language' }, { status: 500 })
   }
 })
