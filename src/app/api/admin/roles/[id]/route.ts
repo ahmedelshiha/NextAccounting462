@@ -8,11 +8,11 @@ export const GET = withTenantContext(async (req: Request, { params }: { params: 
   try {
     const ctx = requireTenantContext()
     const role = ctx.role ?? undefined
-    if (!hasPermission(role, PERMISSIONS.ROLES_VIEW)) {
+    if (!hasPermission(role, PERMISSIONS.USERS_VIEW)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const targetRole = await prisma.role.findFirst({
+    const targetRole = await prisma.customRole.findFirst({
       where: {
         id: params.id,
         tenantId: ctx.tenantId,
@@ -42,14 +42,14 @@ export const PATCH = withTenantContext(async (req: Request, { params }: { params
   try {
     const ctx = requireTenantContext()
     const role = ctx.role ?? undefined
-    if (!hasPermission(role, PERMISSIONS.ROLES_MANAGE)) {
+    if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await req.json().catch(() => ({}))
     const { name, description, permissions } = body || {}
 
-    const targetRole = await prisma.role.findFirst({
+    const targetRole = await prisma.customRole.findFirst({
       where: {
         id: params.id,
         tenantId: ctx.tenantId,
@@ -62,7 +62,7 @@ export const PATCH = withTenantContext(async (req: Request, { params }: { params
 
     // Check if new name is available (if changed)
     if (name && name !== targetRole.name) {
-      const existing = await prisma.role.findFirst({
+      const existing = await prisma.customRole.findFirst({
         where: {
           name,
           tenantId: ctx.tenantId,
@@ -78,7 +78,7 @@ export const PATCH = withTenantContext(async (req: Request, { params }: { params
       return NextResponse.json({ error: 'At least one permission must be assigned' }, { status: 400 })
     }
 
-    const updated = await prisma.role.update({
+    const updated = await prisma.customRole.update({
       where: { id: params.id },
       data: {
         ...(name && { name }),
@@ -106,11 +106,11 @@ export const DELETE = withTenantContext(async (req: Request, { params }: { param
   try {
     const ctx = requireTenantContext()
     const role = ctx.role ?? undefined
-    if (!hasPermission(role, PERMISSIONS.ROLES_MANAGE)) {
+    if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const targetRole = await prisma.role.findFirst({
+    const targetRole = await prisma.customRole.findFirst({
       where: {
         id: params.id,
         tenantId: ctx.tenantId,
@@ -121,21 +121,7 @@ export const DELETE = withTenantContext(async (req: Request, { params }: { param
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
     }
 
-    // Check if role is assigned to any users
-    const usersWithRole = await prisma.user.findFirst({
-      where: {
-        role: targetRole.name,
-        tenantId: ctx.tenantId,
-      },
-    })
-
-    if (usersWithRole) {
-      return NextResponse.json({ 
-        error: 'Cannot delete role that is assigned to users. Please reassign users first.' 
-      }, { status: 409 })
-    }
-
-    await prisma.role.delete({
+    await prisma.customRole.delete({
       where: { id: params.id },
     })
 
