@@ -33,7 +33,14 @@
   - src/app/admin/team/page.tsx (server redirect to /admin/users?tab=entities&type=team)
 - Testing notes: Manually verified /admin/clients and /admin/team redirect to the Entities tab with correct sub-tab selection; verified search and filters on clients; verified team list renders and CRUD actions hit existing APIs.
 - Issues: None observed. Backward-compatible.
-- Next tasks: Service unification per plan (optional, non-blocking).
+- Next tasks: Optional further refactors.
+
+### Service Unification (2025-10-31)
+- Added shared hooks: src/hooks/admin/useListState.ts, src/hooks/admin/useListFilters.ts
+- Added services: src/services/client.service.ts, src/services/team-member.service.ts
+- Refactored EntitiesTab to use ClientService for list load
+- Refactored TeamManagement mutations (create/update/delete/toggle) to use TeamMemberService
+- Backward compatible; APIs unchanged
 
 ### Validation Update (2025-10-31)
 - Added E2E tests: e2e/tests/admin-unified-redirects.spec.ts
@@ -133,7 +140,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 │   ├── Role Management
 │   │   ├── Create/Edit/Delete roles
 │   │   ├── Assign permissions to roles
-│   │   ├── Role templates
+│   ��   ├── Role templates
 │   │   └── Preview role impact
 │   └── User Permissions
 │       ├── View user effective permissions
@@ -143,7 +150,7 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 ├── Workflows Tab (Existing Phase 4b) ✅
 │   ├── Workflow management
 │   ├── Step handlers
-��   └── Approval routing
+│   └── Approval routing
 ├── Bulk Operations Tab (Existing Phase 4c) ✅
 │   ├── 5-step wizard (now with client/team operations)
 │   ├── Dry-run preview
@@ -606,7 +613,7 @@ TabContext: {
 □ Documentation                  (12 hours)
 □ Training & handoff             (6 hours)
 □ Final testing                  (6 hours)
-─────────────────────────────────────────
+─────────────���───────────────────────────
   Subtotal: 38 hours
 ```
 
@@ -624,7 +631,7 @@ Week 1-2:   Phase 0 - Planning & Architecture
 
 Week 2-3:   Phase 1 - Foundation & Services
 ├─ Day 1-3: Shared interfaces
-├�� Day 4-7: Service layer
+├─ Day 4-7: Service layer
 ├─ Day 8-10: API routes
 
 Week 4-6:   Phase 2 - Tab Implementation
@@ -722,7 +729,7 @@ Total Project Cost:                       $41,055-$50,830
 Files to Retire:
 ├─ src/app/admin/clients/page.tsx        (~400 lines)
 ├─ src/components/admin/team-management.tsx (~600 lines)
-├��� src/app/admin/permissions/page.tsx    (~30 lines)
+├─ src/app/admin/permissions/page.tsx    (~30 lines)
 ├─ src/app/admin/roles/page.tsx         (~25 lines)
 ├─ src/app/admin/clients/new/page.tsx    (~300 lines)
 ├─ src/app/admin/clients/[id]/page.tsx   (~200 lines)
@@ -1033,7 +1040,7 @@ Workflows Tab (Phase 4b)
 Bulk Operations Tab (Phase 4c)
 ├── 5-step wizard ✅ ENHANCED
 │   ├─ User bulk ops
-│   ├─ Client bulk ops (NEW)
+│   ���─ Client bulk ops (NEW)
 │   └─ Team bulk ops (NEW)
 ├── Dry-run ✅ EXTENDED
 └── Rollback ✅ EXTENDED
