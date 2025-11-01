@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { recommendationEngine } from '@/services/recommendation-engine.service'
 import { withAdminAuth } from '@/lib/auth-middleware'
-import { getServerSession } from 'next-auth'
+import { withTenantContext, requireTenantContext } from '@/lib/auth-middleware'
 
 export const revalidate = 600 // Cache for 10 minutes
 
 export const GET = withAdminAuth(async (req: NextRequest) => {
   try {
-    const session = await getServerSession()
-    
-    if (!session?.user?.id) {
+    // Use tenant context instead of getServerSession
+    const tenantId = await requireTenantContext(req)
+
+    if (!tenantId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
-
-    // Get tenant from headers or session
-    const tenantId = (req.headers.get('x-tenant-id') as string) || 'default'
 
     const recommendations = await recommendationEngine.generateRecommendations({
       tenantId,
