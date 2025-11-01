@@ -4,14 +4,18 @@ import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertTriangle, CheckCircle, Play } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Play, Tabs } from 'lucide-react'
 import { Workflow, WorkflowNode, WorkflowSimulation } from '@/services/workflow-designer.service'
+import { NodeLibrary } from './NodeLibrary'
+import { WorkflowCanvas } from './WorkflowCanvas'
+import { WorkflowSimulator } from './WorkflowSimulator'
+import { WorkflowAnalytics } from './WorkflowAnalytics'
 
 interface WorkflowDesignerProps {
   initialWorkflow?: Workflow
   onSave?: (workflow: Workflow) => Promise<void>
   onPublish?: (workflow: Workflow) => Promise<void>
-  onTest?: (workflow: Workflow) => Promise<WorkflowSimulation>
+  onTest?: (workflow: Workflow, testData?: Record<string, any>) => Promise<WorkflowSimulation>
 }
 
 export function WorkflowDesigner({
@@ -23,8 +27,8 @@ export function WorkflowDesigner({
   const [workflow, setWorkflow] = useState<Workflow>(initialWorkflow || createBlankWorkflow())
   const [selectedNode, setSelectedNode] = useState<string | null>(null)
   const [isTestRunning, setIsTestRunning] = useState(false)
-  const [testResult, setTestResult] = useState<WorkflowSimulation | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState('designer')
 
   const handleAddNode = (type: any) => {
     const nodeCount = workflow.nodes.length
