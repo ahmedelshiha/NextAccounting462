@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,11 +31,22 @@ import {
  * - API rate limiting
  * - Session management
  * - Invitation and signup settings
+ * - Client entity settings
+ * - Team entity settings
  */
 
 export default function UserManagementSettingsPage() {
+  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('roles')
   const { settings, isLoading, isSaving, error, fetchSettings, updateSettings } = useUserManagementSettings()
+
+  // Initialize tab from URL query parameter
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam) {
+      setActiveTab(tabParam)
+    }
+  }, [searchParams])
 
   if (error && !settings) {
     return (
