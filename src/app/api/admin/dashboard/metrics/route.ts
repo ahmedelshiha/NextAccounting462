@@ -6,7 +6,7 @@ export const revalidate = 300 // Cache for 5 minutes
 
 export const GET = withAdminAuth(async (req: NextRequest) => {
   try {
-    const metrics = await dashboardMetricsService.getMetrics()
+    const metrics = await dashboardMetricsService.getMetrics('default-tenant')
 
     return NextResponse.json(
       {

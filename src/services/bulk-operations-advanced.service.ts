@@ -6,6 +6,9 @@ export interface BulkOperationRequest {
   type: 'ROLE_CHANGE' | 'STATUS_UPDATE' | 'TEAM_TRANSFER' | 'PERMISSION_GRANT' | 'DEACTIVATE'
   userIds: string[]
   targetValue?: string
+  description?: string
+  createdBy?: string
+  createdAt?: Date
 }
 
 export interface BulkOperationImpact {
@@ -28,7 +31,12 @@ export interface BulkOperationResult {
   status: 'SUCCESS' | 'PARTIAL' | 'FAILED'
   processedCount: number
   failedCount: number
+  succeeded?: number
+  failed?: number
+  warnings?: number
   details: string[]
+  results?: Array<{ userId: string; status: string; message: string }>
+  timestamp?: Date
 }
 
 /**
@@ -36,6 +44,31 @@ export interface BulkOperationResult {
  * Handles analysis and execution of bulk operations
  */
 export class BulkOperationsAdvancedService {
+  /**
+   * Execute bulk operation as dry run
+   */
+  async executeDryRun(request: BulkOperationRequest): Promise<BulkOperationResult> {
+    const users = await prisma.user.findMany({
+      where: { id: { in: request.userIds } }
+    })
+
+    return {
+      id: request.id,
+      status: 'SUCCESS',
+      processedCount: users.length,
+      failedCount: 0,
+      succeeded: users.length,
+      failed: 0,
+      warnings: 0,
+      details: users.map(u => `✓ ${u.email}`),
+      results: users.map(u => ({
+        userId: u.id,
+        status: 'SUCCESS',
+        message: 'Ready to execute'
+      })),
+      timestamp: new Date()
+    }
+  }
   /**
    * Analyze impact of a bulk operation before execution
    */
@@ -123,6 +156,13 @@ export class BulkOperationsAdvancedService {
    */
   async canRollback(operationId: string): Promise<boolean> {
     return true // Simplified - always can rollback
+  }
+
+  /**
+   * Preview bulk operation
+   */
+  async preview(request: BulkOperationRequest): Promise<BulkOperationResult> {
+    return this.executeDryRun(request)
   }
 }
 

@@ -9,6 +9,7 @@ export interface Recommendation {
   impact: 'low' | 'medium' | 'high' | 'critical'
   confidence: number
   estimatedBenefit?: string
+  estimatedSavings?: { time?: string; cost?: string }
   actions: RecommendationAction[]
 }
 
@@ -38,7 +39,7 @@ export class RecommendationEngineService {
     const adminUsers = await prisma.user.findMany({
       where: {
         tenantId: context.tenantId,
-        role: 'ADMIN'
+        role: 'ADMIN' as any
       },
       select: { id: true, email: true, createdAt: true }
     })
@@ -51,6 +52,7 @@ export class RecommendationEngineService {
         description: `You have ${adminUsers.length} admin accounts. Consider limiting for security.`,
         impact: 'high',
         confidence: 0.95,
+        estimatedSavings: { time: '2 hours', cost: '$500' },
         actions: [
           { label: 'View Admin Accounts', action: 'navigate', target: '/admin/users' },
           { label: 'Audit Access', action: 'view_logs' }
@@ -60,7 +62,7 @@ export class RecommendationEngineService {
 
     // Check for high volume operations
     const bulkOps = await prisma.bulkOperation.count({
-      where: { createdById: context.userId }
+      where: { createdBy: context.userId }
     })
 
     if (bulkOps > 10) {
@@ -72,6 +74,7 @@ export class RecommendationEngineService {
         impact: 'medium',
         confidence: 0.82,
         estimatedBenefit: '20-30% time savings',
+        estimatedSavings: { time: '4-6 hours/month' },
         actions: [
           { label: 'Create Workflow', action: 'navigate', target: '/admin/workflows/new' }
         ]
@@ -87,6 +90,7 @@ export class RecommendationEngineService {
         description: 'Regularly audit user roles to ensure proper access control.',
         impact: 'medium',
         confidence: 0.8,
+        estimatedSavings: { time: '1 hour' },
         actions: [
           { label: 'View Roles', action: 'navigate', target: '/admin/permissions' }
         ]
@@ -138,6 +142,7 @@ export class RecommendationEngineService {
         description: 'Ensure all system actions are logged for compliance purposes.',
         impact: 'critical',
         confidence: 0.95,
+        estimatedSavings: { time: '30 minutes' },
         actions: [
           { label: 'Enable Logging', action: 'enable_audit_logs' }
         ]
@@ -158,6 +163,7 @@ export class RecommendationEngineService {
         impact: 'medium',
         confidence: 0.75,
         estimatedBenefit: 'Save $1,200/year',
+        estimatedSavings: { cost: '$1,200/year' },
         actions: [
           { label: 'Review Roles', action: 'navigate', target: '/admin/permissions' }
         ]

@@ -19,6 +19,7 @@ export interface EntityRelationshipMap {
   nodes: EntityNode[]
   edges: EntityRelationship[]
   metrics: Record<string, number>
+  analysis?: EntityAnalysis
 }
 
 export interface PermissionGap {
@@ -32,6 +33,20 @@ export interface RoleConflict {
   role2: string
   conflictingPermissions: string[]
   overlapPercentage: number
+}
+
+export interface HierarchyIssue {
+  id: string
+  type: string
+  description: string
+  severity: 'low' | 'medium' | 'high'
+}
+
+export interface EntityAnalysis {
+  orphanedUsers: string[]
+  permissionGaps: PermissionGap[]
+  roleConflicts: RoleConflict[]
+  hierarchyIssues: HierarchyIssue[]
 }
 
 /**
@@ -80,11 +95,13 @@ export class EntityRelationshipService {
     // Add edges (user -> role relationships)
     users.forEach((user) => {
       if (user.role) {
-        edges.push({
-          source: `user-${user.id}`,
-          target: `role-${user.role}`,
-          type: 'HAS_ROLE'
-        })
+        if (user.role) {
+          edges.push({
+            source: `user-${user.id}`,
+            target: `role-${user.role}`,
+            type: 'HAS_ROLE'
+          })
+        }
       }
     })
 
