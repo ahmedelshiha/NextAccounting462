@@ -311,7 +311,7 @@ export function ImportWizard({ onImportComplete }: ImportWizardProps) {
               <Alert className="bg-green-50 border-green-200">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
-                  File "{file.name}" selected ({(file.size / 1024).toFixed(1)} KB)
+                  File &quot;{file.name}&quot; selected ({(file.size / 1024).toFixed(1)} KB)
                 </AlertDescription>
               </Alert>
             )}

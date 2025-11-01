@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { cache } from 'react'
 
 export type NodeType = 'trigger' | 'action' | 'decision' | 'approval' | 'integration' | 'notification' | 'delay' | 'parallel'

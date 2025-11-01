@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { cache } from 'react'
 
 export interface SearchResult {
@@ -40,21 +40,20 @@ export class AdvancedSearchService {
       where: {
         OR: [
           { email: { contains: queryLower, mode: 'insensitive' } },
-          { firstName: { contains: query, mode: 'insensitive' } },
-          { lastName: { contains: query, mode: 'insensitive' } }
+          { name: { contains: query, mode: 'insensitive' } }
         ]
       },
       take: 5,
-      select: { id: true, email: true, firstName: true, lastName: true }
+      select: { id: true, email: true, name: true }
     })
 
     users.forEach((user) => {
       results.push({
         id: user.id,
         type: 'user',
-        title: `${user.firstName} ${user.lastName}`.trim() || user.email,
+        title: user.name || user.email,
         subtitle: user.email,
-        relevanceScore: this.calculateRelevance(query, user.email + ' ' + user.firstName + ' ' + user.lastName)
+        relevanceScore: this.calculateRelevance(query, user.email + ' ' + (user.name || ''))
       })
     })
 
@@ -117,16 +116,16 @@ export class AdvancedSearchService {
       where: {
         OR: [
           { email: { startsWith: query, mode: 'insensitive' } },
-          { firstName: { startsWith: query, mode: 'insensitive' } }
+          { name: { startsWith: query, mode: 'insensitive' } }
         ]
       },
       take: 3,
-      select: { email: true, firstName: true, id: true }
+      select: { email: true, name: true, id: true }
     })
 
     users.forEach((user) => {
       suggestions.push({
-        text: user.firstName || user.email,
+        text: user.name || user.email,
         type: 'entity',
         icon: '👤'
       })
@@ -153,13 +152,14 @@ export class AdvancedSearchService {
    * Get popular searches
    */
   async getPopularSearches(limit = 5): Promise<SearchSuggestion[]> {
-    return [
+    const suggestions: SearchSuggestion[] = [
       { text: 'Active users', type: 'query' },
       { text: 'ADMIN role', type: 'query' },
       { text: 'Pending approvals', type: 'query' },
       { text: 'Team members', type: 'query' },
       { text: 'Client list', type: 'query' }
-    ].slice(0, limit)
+    ]
+    return suggestions.slice(0, limit)
   }
 
   /**

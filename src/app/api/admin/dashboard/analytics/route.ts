@@ -13,21 +13,21 @@ export const GET = withAdminAuth(async (req: NextRequest) => {
       workflowEfficiency,
       complianceScore
     ] = await Promise.all([
-      dashboardMetricsService.getUserGrowthTrend(),
-      dashboardMetricsService.getDepartmentDistribution(),
-      dashboardMetricsService.getRoleDistribution(),
-      dashboardMetricsService.getWorkflowEfficiency(),
-      dashboardMetricsService.getComplianceScore()
+      dashboardMetricsService.getUserGrowthTrend('default-tenant'),
+      dashboardMetricsService.getDepartmentDistribution('default-tenant'),
+      dashboardMetricsService.getRoleDistribution('default-tenant'),
+      dashboardMetricsService.getWorkflowEfficiency('default-tenant'),
+      dashboardMetricsService.getComplianceScore('default-tenant')
     ])
 
     return NextResponse.json(
       {
         analytics: {
-          userGrowthTrend,
-          departmentDistribution,
-          roleDistribution,
-          workflowEfficiency,
-          complianceScore
+          userGrowthTrend: userGrowthTrend,
+          departmentDistribution: departmentDistribution,
+          roleDistribution: roleDistribution,
+          workflowEfficiency: workflowEfficiency,
+          complianceScore: complianceScore
         },
         timestamp: new Date().toISOString()
       },

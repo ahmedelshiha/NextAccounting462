@@ -221,7 +221,7 @@ export function AdvancedSearch({ onResultSelect }: AdvancedSearchProps) {
           <CardContent className="py-8">
             <div className="text-center">
               <Search className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
-              <p className="text-muted-foreground">No results found for "{query}"</p>
+              <p className="text-muted-foreground">No results found for &quot;{query}&quot;</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Try different keywords or use filters
               </p>
