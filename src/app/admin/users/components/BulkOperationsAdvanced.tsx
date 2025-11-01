@@ -399,7 +399,10 @@ function ReviewStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const successRate = (dryRunResult.succeeded / (dryRunResult.succeeded + dryRunResult.failed)) * 100
+  const succeeded = dryRunResult.succeeded ?? 0
+  const failed = dryRunResult.failed ?? 0
+  const total = succeeded + failed || 1
+  const successRate = (succeeded / total) * 100
 
   return (
     <Card>
