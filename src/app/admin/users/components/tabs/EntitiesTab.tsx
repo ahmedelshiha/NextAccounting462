@@ -1,12 +1,15 @@
-"use client"
-import React, { useEffect, useMemo, useState } from 'react'
+'use client'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import TeamManagement from '@/components/admin/team-management'
 import ListPage from '@/components/dashboard/templates/ListPage'
+import { ClientFormModal } from '@/components/admin/shared/ClientFormModal'
+import { TeamMemberFormModal } from '@/components/admin/shared/TeamMemberFormModal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar, DollarSign, Edit3, Eye, Building, Users } from 'lucide-react'
+import { Calendar, DollarSign, Edit3, Eye, Building, Users, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { apiFetch } from '@/lib/api'
+import { toast } from 'sonner'
 import type { Column } from '@/types/dashboard'
 import { useListState } from '@/hooks/admin/useListState'
 import { useListFilters } from '@/hooks/admin/useListFilters'
@@ -29,6 +32,8 @@ type EntitiesSubTab = 'clients' | 'team'
 
 export function EntitiesTab() {
   const [activeSubTab, setActiveSubTab] = useState<EntitiesSubTab>('clients')
+  const [clientFormModal, setClientFormModal] = useState({ isOpen: false, mode: 'create' as 'create' | 'edit', data: undefined as Partial<ClientItem> | undefined })
+  const [teamFormModal, setTeamFormModal] = useState({ isOpen: false, mode: 'create' as 'create' | 'edit', data: undefined as any })
 
   // Initialize sub-tab from URL (?type=clients|team)
   useEffect(() => {
@@ -37,6 +42,22 @@ export function EntitiesTab() {
       const t = params.get('type') as EntitiesSubTab | null
       if (t === 'clients' || t === 'team') setActiveSubTab(t)
     }
+  }, [])
+
+  const openClientForm = useCallback((data?: ClientItem) => {
+    setClientFormModal({ isOpen: true, mode: data ? 'edit' : 'create', data })
+  }, [])
+
+  const closeClientForm = useCallback(() => {
+    setClientFormModal({ isOpen: false, mode: 'create', data: undefined })
+  }, [])
+
+  const openTeamForm = useCallback((data?: any) => {
+    setTeamFormModal({ isOpen: true, mode: data ? 'edit' : 'create', data })
+  }, [])
+
+  const closeTeamForm = useCallback(() => {
+    setTeamFormModal({ isOpen: false, mode: 'create', data: undefined })
   }, [])
 
   return (
@@ -65,19 +86,49 @@ export function EntitiesTab() {
       </div>
 
       <div id="entities-panel" className="p-0">
-        {activeSubTab === 'clients' ? <ClientsListEmbedded /> : <TeamManagement hideHeader />}
+        {activeSubTab === 'clients' ? (
+          <>
+            <ClientsListEmbedded onEdit={openClientForm} onAddClick={() => openClientForm()} />
+            <ClientFormModal
+              isOpen={clientFormModal.isOpen}
+              onClose={closeClientForm}
+              mode={clientFormModal.mode}
+              initialData={clientFormModal.data}
+              onSuccess={() => {
+                closeClientForm()
+                // Trigger refresh of clients list
+                window.dispatchEvent(new Event('refresh-clients'))
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <TeamManagementEmbedded onEdit={openTeamForm} onAddClick={() => openTeamForm()} />
+            <TeamMemberFormModal
+              isOpen={teamFormModal.isOpen}
+              onClose={closeTeamForm}
+              mode={teamFormModal.mode}
+              initialData={teamFormModal.data}
+              onSuccess={() => {
+                closeTeamForm()
+                // Trigger refresh of team list
+                window.dispatchEvent(new Event('refresh-team'))
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   )
 }
 
-function ClientsListEmbedded() {
+function ClientsListEmbedded({ onEdit, onAddClick }: { onEdit: (client: ClientItem) => void; onAddClick: () => void }) {
   const { rows, loading, error, setRows, setLoading, setError } = useListState<ClientItem>([])
   const { search, setSearch, values, setFilter } = useListFilters({ tier: 'all', status: 'all' })
   const tier = values.tier
   const status = values.status
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -87,16 +138,18 @@ function ClientsListEmbedded() {
       setRows(items)
     } catch (e) {
       setError('Failed to load clients')
-      // eslint-disable-next-line no-console
       console.error(e)
     } finally {
       setLoading(false)
     }
-  }
+  }, [setLoading, setError, setRows])
 
   useEffect(() => {
     load()
-  }, [])
+    const handleRefresh = () => load()
+    window.addEventListener('refresh-clients', handleRefresh)
+    return () => window.removeEventListener('refresh-clients', handleRefresh)
+  }, [load])
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -105,6 +158,18 @@ function ClientsListEmbedded() {
       .filter((c) => (tier === 'all' ? true : (c.tier || '').toLowerCase() === tier))
       .filter((c) => (status === 'all' ? true : (c.status || '').toLowerCase() === status))
   }, [rows, search, tier, status])
+
+  const handleDeleteClient = useCallback(async (clientId: string) => {
+    if (!confirm('Are you sure you want to delete this client?')) return
+    try {
+      const response = await fetch(`/api/admin/entities/clients/${clientId}`, { method: 'DELETE' })
+      if (!response.ok) throw new Error('Failed to delete client')
+      toast.success('Client deleted successfully')
+      load()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete client')
+    }
+  }, [load])
 
   const columns: Column<ClientItem>[] = [
     {
@@ -208,15 +273,11 @@ function ClientsListEmbedded() {
       label: 'Actions',
       render: (_, client) => (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/admin/clients/${client.id}`}>
-              <Eye className="w-4 h-4" />
-            </Link>
+          <Button variant="ghost" size="sm" onClick={() => onEdit(client)}>
+            <Edit3 className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/admin/clients/${client.id}/edit`}>
-              <Edit3 className="w-4 h-4" />
-            </Link>
+          <Button variant="ghost" size="sm" onClick={() => handleDeleteClient(client.id)}>
+            <Trash2 className="w-4 h-4 text-red-500" />
           </Button>
         </div>
       )
@@ -257,7 +318,7 @@ function ClientsListEmbedded() {
       <ListPage
         title="Client Management"
         subtitle="Manage your client relationships and data"
-        primaryAction={{ label: 'Add Client', onClick: () => (window.location.href = '/admin/clients/new'), icon: Users }}
+        primaryAction={{ label: 'Add Client', onClick: onAddClick, icon: Users }}
         secondaryActions={[]}
         onSearch={setSearch}
         searchPlaceholder="Search clients..."
@@ -268,6 +329,23 @@ function ClientsListEmbedded() {
         loading={loading}
         error={error || undefined}
       />
+    </div>
+  )
+}
+
+function TeamManagementEmbedded({ onEdit, onAddClick }: { onEdit: (member: any) => void; onAddClick: () => void }) {
+  return (
+    <div>
+      <div className="px-4 sm:px-6 lg:px-8 py-4 border-b border-gray-200 flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
+          <p className="text-sm text-gray-500 mt-1">Manage your team members and their assignments</p>
+        </div>
+        <Button onClick={onAddClick} variant="default">
+          Add Member
+        </Button>
+      </div>
+      <TeamManagement hideHeader onEdit={onEdit} onAddClick={onAddClick} />
     </div>
   )
 }
