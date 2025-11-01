@@ -41,6 +41,7 @@
 - Refactored EntitiesTab to use ClientService for list load
 - Refactored TeamManagement mutations (create/update/delete/toggle) to use TeamMemberService
 - Backward compatible; APIs unchanged
+- Added E2E tests: e2e/tests/admin-entities-tab.spec.ts for Entities sub-tabs
 
 ### Validation Update (2025-10-31)
 - Added E2E tests: e2e/tests/admin-unified-redirects.spec.ts
@@ -140,14 +141,14 @@ Create a **Unified RBAC & Entity Management Hub** at `/admin/users` that consoli
 │   ├── Role Management
 │   │   ├── Create/Edit/Delete roles
 │   │   ├── Assign permissions to roles
-│   ��   ├── Role templates
+│   │   ├── Role templates
 │   │   └── Preview role impact
 │   └── User Permissions
 │       ├── View user effective permissions
 │       ├── Inspect permission dependencies
 │       ├── Bulk permission assignment
 │       └── Permission audit trail
-├── Workflows Tab (Existing Phase 4b) ✅
+├─��� Workflows Tab (Existing Phase 4b) ✅
 │   ├── Workflow management
 │   ├── Step handlers
 │   └── Approval routing
@@ -613,7 +614,7 @@ TabContext: {
 □ Documentation                  (12 hours)
 □ Training & handoff             (6 hours)
 □ Final testing                  (6 hours)
-─────────────���───────────────────────────
+─────────────────────────────────────────
   Subtotal: 38 hours
 ```
 
@@ -903,7 +904,7 @@ src/app/admin/users/
 │   │   ├── AuditTab.tsx             (Phase 4d) ✅
 │   │   ├── SettingsTab.tsx          (Phase 4e) ✅
 │   │   └── index.ts
-│   ├── shared/                       (shared components)
+│   ���── shared/                       (shared components)
 │   │   ├── EntityListView.tsx
 │   │   ├── EntityForm.tsx
 │   │   ├── EntityActionMenu.tsx
@@ -1003,7 +1004,7 @@ Recommendations to avoid duplication:
 2. Replace inline form code in /admin/clients/new with the new UserForm to preserve existing create flow while enabling reuse.
 3. Implement a lightweight CreateUserModal that simply wraps UserForm and handles modal presentation; use the same modal component for dashboard quick-action and Entities tab create button.
 4. Reuse existing UserProfileDialog for editing users (it should consume the same UserForm component in edit mode or delegate to a dedicated EditUserForm wrapper).
-5. Keep UnifiedPermissionModal as the single source of truth for permission changes — do not create additional permission modal variants.
+5. Keep UnifiedPermissionModal as the single source of truth for permission changes �� do not create additional permission modal variants.
 6. Centralize permission and role saving logic in src/app/admin/users/hooks/useUserPermissions.ts and reuse it across UnifiedPermissionModal and any role/permission UI.
 7. Lazy-load heavy modal wrappers (CreateUserModal, UserProfileDialog, UnifiedPermissionModal) with dynamic imports and Suspense to avoid bundle inflation.
 8. Add migration and refactor tasks to Phase 2/3 to ensure changes are incremental and verified:
@@ -1040,7 +1041,7 @@ Workflows Tab (Phase 4b)
 Bulk Operations Tab (Phase 4c)
 ├── 5-step wizard ✅ ENHANCED
 │   ├─ User bulk ops
-│   ���─ Client bulk ops (NEW)
+│   ├─ Client bulk ops (NEW)
 │   └─ Team bulk ops (NEW)
 ├── Dry-run ✅ EXTENDED
 └── Rollback ✅ EXTENDED
@@ -1165,7 +1166,7 @@ Integration Tests (30% of total):
 └─ Modal workflows
 
 E2E Tests (30% of total):
-├─ Tab navigation
+├�� Tab navigation
 ├─ Entity CRUD operations
 ├─ Bulk operations
 ├─ RBAC workflows
