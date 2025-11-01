@@ -219,6 +219,48 @@ export default function UserManagementSettingsPage() {
               />
             )}
           </TabsContent>
+
+          {/* Client Entity Settings Tab */}
+          <TabsContent value="client-settings">
+            <ClientEntitySettings
+              isLoading={isLoading}
+              isSaving={isSaving}
+              onUpdate={async (updates) => {
+                try {
+                  const response = await fetch('/api/admin/client-settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates),
+                  })
+                  if (!response.ok) throw new Error('Failed to update client settings')
+                } catch (error) {
+                  console.error('Error updating client settings:', error)
+                  throw error
+                }
+              }}
+            />
+          </TabsContent>
+
+          {/* Team Entity Settings Tab */}
+          <TabsContent value="team-settings">
+            <TeamEntitySettings
+              isLoading={isLoading}
+              isSaving={isSaving}
+              onUpdate={async (updates) => {
+                try {
+                  const response = await fetch('/api/admin/team-settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates),
+                  })
+                  if (!response.ok) throw new Error('Failed to update team settings')
+                } catch (error) {
+                  console.error('Error updating team settings:', error)
+                  throw error
+                }
+              }}
+            />
+          </TabsContent>
         </Tabs>
 
         {/* Help Section */}
