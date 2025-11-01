@@ -12,6 +12,10 @@ export const GET = withTenantContext(async (req: Request, { params }: { params: 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (!ctx.tenantId) {
+      return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
+    }
+
     const client = await prisma.user.findFirst({
       where: {
         id: params.id,
