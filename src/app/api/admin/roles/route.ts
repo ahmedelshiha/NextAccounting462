@@ -50,6 +50,10 @@ export const POST = withTenantContext(async (req: Request) => {
       return NextResponse.json({ error: 'Tenant context missing' }, { status: 400 })
     }
 
+    if (!ctx.userId) {
+      return NextResponse.json({ error: 'User context missing' }, { status: 400 })
+    }
+
     const body = await req.json().catch(() => ({}))
     const { name, description, permissions } = body || {}
 
@@ -79,7 +83,7 @@ export const POST = withTenantContext(async (req: Request) => {
         description,
         permissions,
         tenantId: ctx.tenantId,
-        createdBy: ctx.userId ?? undefined,
+        createdBy: ctx.userId,
       },
       select: {
         id: true,
