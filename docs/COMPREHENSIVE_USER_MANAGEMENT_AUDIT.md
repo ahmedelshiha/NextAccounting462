@@ -63,7 +63,7 @@ The admin user management system consists of **three interconnected subsystems**
 ### Three-Tier User Management Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
+┌───────────────────────────────────────────────────���─┐
 │        USER MANAGEMENT SYSTEM (3 Subsystems)        │
 ├─────────────────────────────────────────────────────┤
 │                                                     │
@@ -71,7 +71,7 @@ The admin user management system consists of **three interconnected subsystems**
 │  │ 1. RBAC/PERMISSIONS MODAL SYSTEM              │  │
 │  │    (UnifiedPermissionModal + PermissionEngine)│  │
 │  │    Status: ✅ 90% Complete                     │  │
-│  └───────────────────────��──────────────────────┘  │
+│  └──────────────────────────────────────────────┘  │
 │                                                     │
 │  ┌──────────────────────────────────────────────┐  │
 │  │ 2. ADMIN USERS PAGE SYSTEM                   │  │
@@ -1735,7 +1735,7 @@ export function EnterpriseUsersPage() {
 
 ```
 REMOVE:
-├��� page-refactored.tsx (obsolete)
+├─ page-refactored.tsx (obsolete)
 ├─ page-phase4.tsx (unnecessary wrapper)
 
 KEEP & ENHANCE:
@@ -1744,7 +1744,7 @@ KEEP & ENHANCE:
 
 NEW STRUCTURE:
 page.tsx
-└─��� exports default function AdminUsersPage()
+└── exports default function AdminUsersPage()
     └── imports <EnterpriseUsersPage />
         └── Contains all tab logic
             ├─ DashboardTab / ExecutiveDashboardTab
@@ -2007,7 +2007,7 @@ export function PermissionHierarchy({ roles, permissions, conflicts }) {
 
 **Analysis:**
 - ✅ Different purposes (test vs visualize)
-- ��️ Both are debugging/admin tools
+- ⚠️ Both are debugging/admin tools
 - ⚠️ Could be combined into single "PermissionDebugger"
 - ✅ Actually complementary (one tests, one visualizes)
 
@@ -2252,17 +2252,27 @@ export function useEntitySettings<T extends Record<string, any>>(
 
 ---
 
-### 📊 DUPLICATION SUMMARY TABLE
+### 📊 COMPLETE DUPLICATION SUMMARY TABLE (ALL FINDINGS)
 
-| # | Type | Severity | Files | Lines | Effort | Savings |
-|---|------|----------|-------|-------|--------|---------|
-| 1 | Dashboard tabs | 🔴 CRITICAL | 2 | 300+ | 6-8h | 150 lines |
-| 2 | Permission modals | 🔴 CRITICAL | 2 | 400+ | 8-10h | 200 lines |
-| 3 | Entity settings | 🟡 HIGH | 2 | 450+ | 10-12h | 350 lines |
-| 4 | Roles/Perms mgmt | 🟡 HIGH | 4 | 800+ | 12-15h | 400 lines |
-| 5 | User lists | 🟡 MEDIUM | 3+ | 200+ | 4-6h | 100 lines |
-| 6 | Settings patterns | 🟡 MEDIUM | 5+ | 300+ | 4-6h | 200 lines |
-| **TOTAL** | | | **18 files** | **2,450+ lines** | **44-57 hours** | **1,400 lines** |
+**SYSTEM-WIDE DUPLICATIONS:**
+
+| # | Type | Location | Severity | Files | Lines | Effort | Savings |
+|---|------|----------|----------|-------|-------|--------|---------|
+| **SHARED COMPONENTS** |
+| 1 | Dashboard tabs | admin/users | 🔴 CRITICAL | 2 | 300+ | 6-8h | 150 lines |
+| 2 | Permission modals | permissions | 🔴 CRITICAL | 2 | 400+ | 8-10h | 200 lines |
+| 3 | Entity settings | settings | 🟡 HIGH | 2 | 450+ | 10-12h | 350 lines |
+| 4 | Roles/Perms mgmt | settings | 🟡 HIGH | 4 | 800+ | 12-15h | 400 lines |
+| 5 | User lists | dashboard | 🟡 MEDIUM | 3+ | 200+ | 4-6h | 100 lines |
+| 6 | Settings patterns | settings | 🟡 MEDIUM | 5+ | 300+ | 4-6h | 200 lines |
+| **ADMIN/USERS SPECIFIC** |
+| 7 | Page files | admin/users | 🔴 CRITICAL | 3 | 300+ | 3-4h | 300 lines |
+| 8 | Bulk operations | admin/users | 🟡 HIGH | 2 | 450+ | 6-8h | 250 lines |
+| 9 | Workflow builders | admin/users | 🟡 HIGH | 2 | 350+ | 3-6h | 180 lines |
+| 10 | Search/filter | admin/users | 🟡 MEDIUM | 2 | 480+ | 4-5h | 250 lines |
+| 11 | Permission components | admin/users | ✅ OK | 2 | 400+ | 0h | 0 lines |
+| 12 | Analytics components | admin/users | ✅ OK | 2 | 350+ | 0h | 0 lines |
+| **GRAND TOTAL** | | | | **31 files** | **5,380+ lines** | **60-78 hours** | **2,380 lines** |
 
 ---
 
@@ -2308,7 +2318,7 @@ export function useEntitySettings<T extends Record<string, any>>(
 2. ✅ **Consolidate modals** (improves UX + removes duplication) - 8-10h
 3. ✅ **Generic entity settings** (foundation for consolidation) - 10-12h
 4. ✅ Context refactoring (improves performance) - 10-12h
-5. ✅ Complete DryRun + audit logging (features) - 10-12h
+5. ��� Complete DryRun + audit logging (features) - 10-12h
 6. ✅ Tests (ensures quality) - 20-30h
 7. ✅ Mobile optimization (improves accessibility) - 8-10h
 8. ✅ Additional consolidation (clean up code) - 12-15h
