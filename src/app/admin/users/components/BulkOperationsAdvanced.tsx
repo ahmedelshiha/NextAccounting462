@@ -75,15 +75,24 @@ export function BulkOperationsAdvanced({
       await onExecute?.(request)
 
       // Mock execution result
+      const succeeded = request.userIds.length - 1
+      const failed = 1
       const result: BulkOperationResult = {
         id: request.id,
-        succeeded: request.userIds.length - 1,
-        failed: 1,
+        status: failed === 0 ? 'SUCCESS' : 'PARTIAL',
+        processedCount: request.userIds.length,
+        failedCount: failed,
+        succeeded,
+        failed,
         warnings: 0,
+        details: [
+          `✓ ${succeeded} users processed successfully`,
+          `✗ ${failed} user failed processing`
+        ],
         results: request.userIds.map((uid, idx) => ({
           userId: uid,
           status: idx === request.userIds.length - 1 ? 'FAILED' : 'SUCCESS',
-          message: 'Operation applied'
+          message: idx === request.userIds.length - 1 ? 'Operation failed' : 'Operation applied'
         })),
         timestamp: new Date()
       }
