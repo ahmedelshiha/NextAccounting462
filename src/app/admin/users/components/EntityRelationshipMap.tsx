@@ -382,13 +382,10 @@ function TreeVisualization({ nodes, edges }: { nodes: any[]; edges: any[] }) {
       <div className="mb-4">
         <div>📦 Organization</div>
         <div className="ml-4">
-          ├─ 👥 Users ({nodes.filter(n => n.type === 'USER').length})</div>
-          <div className="ml-4">
-            ├─ 🏢 Teams ({nodes.filter(n => n.type === 'TEAM').length})</div>
-          <div className="ml-4">
-            ├─ 🔑 Roles ({nodes.filter(n => n.type === 'ROLE').length})</div>
-          <div className="ml-4">
-            └─ 📋 Permissions ({nodes.filter(n => n.type === 'PERMISSION').length})</div>
+          <div>├─ 👥 Users ({nodes.filter(n => n.type === 'USER').length})</div>
+          <div>├─ 🏢 Teams ({nodes.filter(n => n.type === 'TEAM').length})</div>
+          <div>├─ 🔑 Roles ({nodes.filter(n => n.type === 'ROLE').length})</div>
+          <div>└─ 📋 Permissions ({nodes.filter(n => n.type === 'PERMISSION').length})</div>
         </div>
       </div>
       <div className="text-xs text-gray-600 mt-4">
