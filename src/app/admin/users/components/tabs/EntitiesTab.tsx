@@ -8,6 +8,8 @@ import { Calendar, DollarSign, Edit3, Eye, Building, Users } from 'lucide-react'
 import Link from 'next/link'
 import { apiFetch } from '@/lib/api'
 import type { Column } from '@/types/dashboard'
+import { useListState } from '@/hooks/admin/useListState'
+import { useListFilters } from '@/hooks/admin/useListFilters'
 
 interface ClientItem {
   id: string
