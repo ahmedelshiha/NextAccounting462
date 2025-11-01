@@ -37,14 +37,25 @@ export function BulkOperationsAdvanced({
     setIsLoading(true)
     try {
       // Mock dry-run - in real implementation, call API
+      const succeeded = request.userIds.length - 2
+      const failed = 2
+      const warnings = 1
       const result: BulkOperationResult = {
         id: request.id,
-        succeeded: request.userIds.length - 2,
-        failed: 2,
-        warnings: 1,
+        status: failed === 0 ? 'SUCCESS' : failed > 0 ? 'PARTIAL' : 'FAILED',
+        processedCount: request.userIds.length,
+        failedCount: failed,
+        succeeded,
+        failed,
+        warnings,
+        details: [
+          `✓ ${succeeded} users would be processed successfully`,
+          `✗ ${failed} users would fail processing`,
+          `⚠ ${warnings} users with warnings`
+        ],
         results: request.userIds.map((uid, idx) => ({
           userId: uid,
-          status: idx < 2 ? 'SUCCESS' : idx === request.userIds.length - 1 ? 'FAILED' : 'WARNING',
+          status: idx < succeeded ? 'SUCCESS' : idx < succeeded + failed ? 'FAILED' : 'WARNING',
           message: 'Preview message'
         })),
         timestamp: new Date()
