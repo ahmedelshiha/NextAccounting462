@@ -50,6 +50,7 @@ export const POST = withTenantContext(async (request: Request) => {
   const ctx = requireTenantContext()
   if (!ctx.userId) return respond.unauthorized()
   if (!hasPermission(ctx.role ?? '', PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
+  if (!ctx.tenantId) return respond.badRequest('Tenant context missing')
 
   try {
     const body = await request.json()
@@ -57,7 +58,7 @@ export const POST = withTenantContext(async (request: Request) => {
     if (!userId) return respond.badRequest('userId is required')
 
     const wf = await workflowBuilder.createWorkflowFromTemplate({
-      tenantId: ctx.tenantId!,
+      tenantId: ctx.tenantId,
       userId,
       templateId,
       type,
