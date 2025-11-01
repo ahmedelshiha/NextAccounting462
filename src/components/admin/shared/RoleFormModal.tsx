@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, memo } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { AlertCircle, Loader2, ChevronDown, ChevronRight } from 'lucide-react'
+import { AlertCircle, Loader2, ChevronDown, ChevronRight, Search } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface RoleFormData {
   name: string
