@@ -14,7 +14,9 @@ import {
   UserPolicies,
   RateLimiting,
   SessionManagement,
-  InvitationSettings
+  InvitationSettings,
+  ClientEntitySettings,
+  TeamEntitySettings
 } from './components'
 
 /**
