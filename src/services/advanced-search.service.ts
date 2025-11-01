@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { cache } from 'react'
 
 export interface SearchResult {
@@ -153,13 +153,14 @@ export class AdvancedSearchService {
    * Get popular searches
    */
   async getPopularSearches(limit = 5): Promise<SearchSuggestion[]> {
-    return [
+    const suggestions: SearchSuggestion[] = [
       { text: 'Active users', type: 'query' },
       { text: 'ADMIN role', type: 'query' },
       { text: 'Pending approvals', type: 'query' },
       { text: 'Team members', type: 'query' },
       { text: 'Client list', type: 'query' }
-    ].slice(0, limit)
+    ]
+    return suggestions.slice(0, limit)
   }
 
   /**
