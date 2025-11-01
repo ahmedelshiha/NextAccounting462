@@ -186,6 +186,15 @@ export function EnterpriseUsersPage() {
         {activeTab === 'admin' && <AdminTab />}
       </div>
 
+      {/* Create User Modal */}
+      <CreateUserModal
+        isOpen={isCreateUserModalOpen}
+        onClose={() => setIsCreateUserModalOpen(false)}
+        onSuccess={handleUserCreated}
+        mode="create"
+        showPasswordGeneration={true}
+      />
+
       {/* Error message display */}
       {context.errorMsg && (
         <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-3 rounded-lg">
