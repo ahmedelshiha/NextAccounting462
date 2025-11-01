@@ -20,8 +20,8 @@ export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
       )
     }
 
-    // Validate workflow first
-    const baseWorkflow = {
+    // Create initial workflow structure
+    const workflowData = {
       id: workflow.id,
       name: workflow.name,
       description: workflow.description || '',
@@ -35,7 +35,7 @@ export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
         cyclicDependencies: [],
         unreachableNodes: [],
         missingConfiguration: []
-      },
+      } as any,
       performance: {
         estimatedDuration: 0,
         parallelPaths: 0,
@@ -47,11 +47,9 @@ export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
       createdBy: workflow.createdBy || 'system'
     }
 
-    const validation = workflowDesignerService.validateWorkflow(baseWorkflow)
-    const workflowData = {
-      ...baseWorkflow,
-      validation
-    }
+    // Validate workflow
+    const validation = workflowDesignerService.validateWorkflow(workflowData)
+    ;(workflowData as any).validation = validation
 
     // Analyze performance
     const performance = workflowDesignerService.analyzePerformance(workflowData)
