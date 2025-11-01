@@ -227,6 +227,7 @@ model Tenant {
   userWorkflows         UserWorkflow[]
   workflowTemplates     WorkflowTemplate[]
   bulkOperations        BulkOperation[]
+  userManagementSettings UserManagementSettings?
 
   @@index([status])
 }
