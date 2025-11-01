@@ -224,7 +224,7 @@ function ExecutionStepItem({
   isExpanded,
   onToggle
 }: {
-  step: any
+  step: ExecutionStep
   index: number
   isExpanded: boolean
   onToggle: () => void
