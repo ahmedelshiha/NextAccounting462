@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { withAdminAuth } from '@/lib/auth-middleware'
-import { workflowDesignerService } from '@/services/workflow-designer.service'
+import { workflowDesignerService, type Workflow } from '@/services/workflow-designer.service'
 
 export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
   try {
@@ -20,8 +20,8 @@ export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
       )
     }
 
-    // Convert stored workflow data to service format
-    const workflowData = {
+    // Validate workflow first to get proper validation result
+    const dummyWorkflow: Workflow = {
       id: workflow.id,
       name: workflow.name,
       description: workflow.description || '',
@@ -47,9 +47,13 @@ export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
       createdBy: workflow.createdBy || 'system'
     }
 
-    // Validate workflow
-    const validation = workflowDesignerService.validateWorkflow(workflowData)
-    workflowData.validation = validation
+    const validation = workflowDesignerService.validateWorkflow(dummyWorkflow)
+
+    // Create final workflow with validated data
+    const workflowData: Workflow = {
+      ...dummyWorkflow,
+      validation
+    }
 
     // Analyze performance
     const performance = workflowDesignerService.analyzePerformance(workflowData)

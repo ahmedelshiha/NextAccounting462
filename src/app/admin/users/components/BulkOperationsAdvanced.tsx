@@ -37,14 +37,25 @@ export function BulkOperationsAdvanced({
     setIsLoading(true)
     try {
       // Mock dry-run - in real implementation, call API
+      const succeeded = request.userIds.length - 2
+      const failed = 2
+      const warnings = 1
       const result: BulkOperationResult = {
         id: request.id,
-        succeeded: request.userIds.length - 2,
-        failed: 2,
-        warnings: 1,
+        status: (failed as number) > 0 ? 'PARTIAL' : 'SUCCESS',
+        processedCount: request.userIds.length,
+        failedCount: failed,
+        succeeded,
+        failed,
+        warnings,
+        details: [
+          `✓ ${succeeded} users would be processed successfully`,
+          `✗ ${failed} users would fail processing`,
+          `⚠ ${warnings} users with warnings`
+        ],
         results: request.userIds.map((uid, idx) => ({
           userId: uid,
-          status: idx < 2 ? 'SUCCESS' : idx === request.userIds.length - 1 ? 'FAILED' : 'WARNING',
+          status: idx < succeeded ? 'SUCCESS' : idx < succeeded + failed ? 'FAILED' : 'WARNING',
           message: 'Preview message'
         })),
         timestamp: new Date()
@@ -64,15 +75,24 @@ export function BulkOperationsAdvanced({
       await onExecute?.(request)
 
       // Mock execution result
+      const succeeded = request.userIds.length - 1
+      const failed = 1
       const result: BulkOperationResult = {
         id: request.id,
-        succeeded: request.userIds.length - 1,
-        failed: 1,
+        status: (failed as number) > 0 ? 'PARTIAL' : 'SUCCESS',
+        processedCount: request.userIds.length,
+        failedCount: failed,
+        succeeded,
+        failed,
         warnings: 0,
+        details: [
+          `✓ ${succeeded} users processed successfully`,
+          `✗ ${failed} user failed processing`
+        ],
         results: request.userIds.map((uid, idx) => ({
           userId: uid,
           status: idx === request.userIds.length - 1 ? 'FAILED' : 'SUCCESS',
-          message: 'Operation applied'
+          message: idx === request.userIds.length - 1 ? 'Operation failed' : 'Operation applied'
         })),
         timestamp: new Date()
       }
@@ -319,15 +339,15 @@ function PreviewStep({
             <h4 className="font-semibold mb-2">Dry-Run Results</h4>
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-green-50 p-3 rounded">
-                <div className="text-2xl font-bold text-green-600">{dryRunResult.succeeded}</div>
+                <div className="text-2xl font-bold text-green-600">{dryRunResult.succeeded ?? 0}</div>
                 <div className="text-xs text-gray-600">Would Succeed</div>
               </div>
               <div className="bg-red-50 p-3 rounded">
-                <div className="text-2xl font-bold text-red-600">{dryRunResult.failed}</div>
+                <div className="text-2xl font-bold text-red-600">{dryRunResult.failed ?? 0}</div>
                 <div className="text-xs text-gray-600">Would Fail</div>
               </div>
               <div className="bg-yellow-50 p-3 rounded">
-                <div className="text-2xl font-bold text-yellow-600">{dryRunResult.warnings}</div>
+                <div className="text-2xl font-bold text-yellow-600">{dryRunResult.warnings ?? 0}</div>
                 <div className="text-xs text-gray-600">Warnings</div>
               </div>
             </div>
@@ -379,7 +399,10 @@ function ReviewStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const successRate = (dryRunResult.succeeded / (dryRunResult.succeeded + dryRunResult.failed)) * 100
+  const succeeded = dryRunResult.succeeded ?? 0
+  const failed = dryRunResult.failed ?? 0
+  const total = succeeded + failed || 1
+  const successRate = (succeeded / total) * 100
 
   return (
     <Card>
@@ -509,7 +532,10 @@ function CompletionStep({
   onRollback: () => Promise<void>
   onNewOperation: () => void
 }) {
-  const successRate = (result.succeeded / (result.succeeded + result.failed)) * 100
+  const succeeded = result.succeeded ?? 0
+  const failed = result.failed ?? 0
+  const total = succeeded + failed || 1
+  const successRate = (succeeded / total) * 100
 
   return (
     <Card>
@@ -522,17 +548,17 @@ function CompletionStep({
           <CheckCircle className="h-4 w-4" />
           <AlertTitle>Operation Completed</AlertTitle>
           <AlertDescription>
-            {result.succeeded} users updated successfully, {result.failed} failed
+            {succeeded} users updated successfully, {failed} failed
           </AlertDescription>
         </Alert>
 
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-green-50 p-3 rounded">
-            <div className="text-2xl font-bold text-green-600">{result.succeeded}</div>
+            <div className="text-2xl font-bold text-green-600">{succeeded}</div>
             <div className="text-xs text-gray-600">Succeeded</div>
           </div>
           <div className="bg-red-50 p-3 rounded">
-            <div className="text-2xl font-bold text-red-600">{result.failed}</div>
+            <div className="text-2xl font-bold text-red-600">{failed}</div>
             <div className="text-xs text-gray-600">Failed</div>
           </div>
           <div className="bg-blue-50 p-3 rounded">
