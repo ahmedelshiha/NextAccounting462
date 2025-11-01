@@ -248,8 +248,7 @@ function ClientsListEmbedded() {
   ]
 
   const onFilterChange = (key: string, value: string) => {
-    if (key === 'tier') setTier(value)
-    if (key === 'status') setStatus(value)
+    setFilter(key, value)
   }
 
   return (
