@@ -1,46 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
 import { prisma } from '@/lib/prisma'
-import { authConfig } from '@/auth.config'
+import { withAdminAuth, AuthenticatedRequest } from '@/lib/auth-middleware'
 import { UserManagementSettings } from '@/app/admin/settings/user-management/types'
 
 /**
  * GET /api/admin/settings/user-management
  * Fetch user management settings for the current tenant
  */
-export async function GET(request: NextRequest) {
+async function handleGET(request: AuthenticatedRequest) {
   try {
-    const session = await getServerSession(authConfig)
+    const { tenantId } = request
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get tenant ID from session or headers
-    const tenantId = session.user.tenantId || request.headers.get('x-tenant-id')
-
+    // Check tenant context
     if (!tenantId) {
       return NextResponse.json(
         { error: 'Tenant ID not found' },
         { status: 400 }
-      )
-    }
-
-    // Check admin authorization
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { role: true, tenantId: true },
-    })
-
-    if (!user || user.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(user.role)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
       )
     }
 
