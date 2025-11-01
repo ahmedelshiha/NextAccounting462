@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { withAdminAuth } from '@/lib/auth-middleware'
-import { workflowDesignerService } from '@/services/workflow-designer.service'
+import { workflowDesignerService, type Workflow } from '@/services/workflow-designer.service'
 
 export const POST = withAdminAuth(async (req: NextRequest, context: any) => {
   try {
