@@ -1,43 +1,67 @@
-import { useQuery } from '@tanstack/react-query'
+'use client'
+
+import useSWR from 'swr'
 import { DashboardMetrics } from '@/services/dashboard-metrics.service'
 import { Recommendation } from '@/services/recommendation-engine.service'
 
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
 export function useDashboardMetrics() {
-  return useQuery({
-    queryKey: ['dashboard-metrics'],
-    queryFn: async () => {
-      const response = await fetch('/api/admin/dashboard/metrics')
-      if (!response.ok) throw new Error('Failed to fetch metrics')
-      return response.json()
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 5 * 60 * 1000 // Auto-refetch every 5 minutes
-  })
+  const { data, error, isLoading, mutate } = useSWR(
+    '/api/admin/dashboard/metrics',
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000, // 1 minute
+      focusThrottleInterval: 300000 // 5 minutes
+    }
+  )
+
+  return {
+    data,
+    isLoading,
+    error,
+    mutate
+  }
 }
 
 export function useDashboardRecommendations() {
-  return useQuery({
-    queryKey: ['dashboard-recommendations'],
-    queryFn: async () => {
-      const response = await fetch('/api/admin/dashboard/recommendations')
-      if (!response.ok) throw new Error('Failed to fetch recommendations')
-      const data = await response.json()
-      return data.recommendations as Recommendation[]
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    refetchInterval: 10 * 60 * 1000 // Auto-refetch every 10 minutes
-  })
+  const { data, error, isLoading, mutate } = useSWR(
+    '/api/admin/dashboard/recommendations',
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 600000, // 10 minutes
+      focusThrottleInterval: 600000 // 10 minutes
+    }
+  )
+
+  return {
+    data: data?.recommendations as Recommendation[] | undefined,
+    isLoading,
+    error,
+    mutate
+  }
 }
 
 export function useDashboardAnalytics() {
-  return useQuery({
-    queryKey: ['dashboard-analytics'],
-    queryFn: async () => {
-      const response = await fetch('/api/admin/dashboard/analytics')
-      if (!response.ok) throw new Error('Failed to fetch analytics')
-      return response.json()
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    refetchInterval: 10 * 60 * 1000 // Auto-refetch every 10 minutes
-  })
+  const { data, error, isLoading, mutate } = useSWR(
+    '/api/admin/dashboard/analytics',
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 600000, // 10 minutes
+      focusThrottleInterval: 600000 // 10 minutes
+    }
+  )
+
+  return {
+    data: data?.analytics,
+    isLoading,
+    error,
+    mutate
+  }
 }
