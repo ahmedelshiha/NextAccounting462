@@ -70,12 +70,10 @@ export function EntitiesTab() {
 }
 
 function ClientsListEmbedded() {
-  const [loading, setLoading] = useState(true)
-  const [clients, setClients] = useState<ClientItem[]>([])
-  const [search, setSearch] = useState('')
-  const [tier, setTier] = useState('all')
-  const [status, setStatus] = useState('all')
-  const [error, setError] = useState<string | null>(null)
+  const { rows, loading, error, setRows, setLoading, setError } = useListState<ClientItem>([])
+  const { search, setSearch, values, setFilter } = useListFilters({ tier: 'all', status: 'all' })
+  const tier = values.tier
+  const status = values.status
 
   const load = async () => {
     try {
@@ -85,7 +83,7 @@ function ClientsListEmbedded() {
       const res = await apiFetch(`/api/admin/users?${params.toString()}&role=CLIENT`)
       if (!res.ok) throw new Error(`API ${res.status}`)
       const data = await res.json()
-      setClients(Array.isArray(data?.users) ? data.users : [])
+      setRows(Array.isArray(data?.users) ? data.users : [])
     } catch (e) {
       setError('Failed to load clients')
       // eslint-disable-next-line no-console
@@ -101,11 +99,11 @@ function ClientsListEmbedded() {
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
-    return clients
+    return rows
       .filter((c) => (!term ? true : (c.name || '').toLowerCase().includes(term) || c.email.toLowerCase().includes(term) || (c.company || '').toLowerCase().includes(term)))
       .filter((c) => (tier === 'all' ? true : (c.tier || '').toLowerCase() === tier))
       .filter((c) => (status === 'all' ? true : (c.status || '').toLowerCase() === status))
-  }, [clients, search, tier, status])
+  }, [rows, search, tier, status])
 
   const columns: Column<ClientItem>[] = [
     {
