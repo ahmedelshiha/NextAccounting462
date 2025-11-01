@@ -73,36 +73,54 @@ export default function UserManagementSettingsPage() {
 
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 gap-2 mb-6 h-auto">
-            <TabsTrigger value="roles" className="flex items-center gap-1">
-              <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Roles</span>
-            </TabsTrigger>
-            <TabsTrigger value="permissions" className="flex items-center gap-1">
-              <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Templates</span>
-            </TabsTrigger>
-            <TabsTrigger value="onboarding" className="flex items-center gap-1">
-              <Workflow className="h-4 w-4" />
-              <span className="hidden sm:inline">Onboarding</span>
-            </TabsTrigger>
-            <TabsTrigger value="policies" className="flex items-center gap-1">
-              <AlertCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">Policies</span>
-            </TabsTrigger>
-            <TabsTrigger value="rate-limits" className="flex items-center gap-1">
-              <Zap className="h-4 w-4" />
-              <span className="hidden sm:inline">Limits</span>
-            </TabsTrigger>
-            <TabsTrigger value="sessions" className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">Sessions</span>
-            </TabsTrigger>
-            <TabsTrigger value="invitations" className="flex items-center gap-1">
-              <Mail className="h-4 w-4" />
-              <span className="hidden sm:inline">Invites</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="mb-6">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">User System Settings</h3>
+              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 gap-2 h-auto">
+                <TabsTrigger value="roles" className="flex items-center gap-1">
+                  <Shield className="h-4 w-4" />
+                  <span className="hidden sm:inline">Roles</span>
+                </TabsTrigger>
+                <TabsTrigger value="permissions" className="flex items-center gap-1">
+                  <Shield className="h-4 w-4" />
+                  <span className="hidden sm:inline">Templates</span>
+                </TabsTrigger>
+                <TabsTrigger value="onboarding" className="flex items-center gap-1">
+                  <Workflow className="h-4 w-4" />
+                  <span className="hidden sm:inline">Onboarding</span>
+                </TabsTrigger>
+                <TabsTrigger value="policies" className="flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="hidden sm:inline">Policies</span>
+                </TabsTrigger>
+                <TabsTrigger value="rate-limits" className="flex items-center gap-1">
+                  <Zap className="h-4 w-4" />
+                  <span className="hidden sm:inline">Limits</span>
+                </TabsTrigger>
+                <TabsTrigger value="sessions" className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sessions</span>
+                </TabsTrigger>
+                <TabsTrigger value="invitations" className="flex items-center gap-1">
+                  <Mail className="h-4 w-4" />
+                  <span className="hidden sm:inline">Invites</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <div className="border-t pt-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Entity Settings</h3>
+              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3 gap-2 h-auto">
+                <TabsTrigger value="client-settings" className="flex items-center gap-1">
+                  <span>🏢</span>
+                  <span className="hidden sm:inline">Clients</span>
+                </TabsTrigger>
+                <TabsTrigger value="team-settings" className="flex items-center gap-1">
+                  <span>👥</span>
+                  <span className="hidden sm:inline">Teams</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
 
           {/* Role Management Tab */}
           <TabsContent value="roles">
