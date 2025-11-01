@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { useSWR } from 'swr'
+import useSWR from 'swr'
 import type { SearchResult, SearchSuggestion } from '@/services/advanced-search.service'
 
 interface UseAdvancedSearchOptions {
