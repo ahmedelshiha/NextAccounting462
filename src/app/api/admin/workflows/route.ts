@@ -13,6 +13,7 @@ export const GET = withTenantContext(async (request: Request) => {
   const ctx = requireTenantContext()
   if (!ctx.userId) return respond.unauthorized()
   if (!hasPermission(ctx.role ?? '', PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
+  if (!ctx.tenantId) return respond.badRequest('Tenant context missing')
 
   try {
     const { searchParams } = new URL(request.url)
