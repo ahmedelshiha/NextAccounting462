@@ -112,7 +112,7 @@ export const POST = withTenantContext(async (req: Request) => {
         notes,
       } as any
     })
-    return NextResponse.json({ id: created.id, ...created }, { status: 201 })
+    return NextResponse.json(created, { status: 201 })
   } catch (err) {
     console.error('POST /api/admin/team-members error', err)
     return NextResponse.json({ error: 'Failed to create team member' }, { status: 500 })
